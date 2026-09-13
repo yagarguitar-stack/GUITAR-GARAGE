@@ -122,6 +122,11 @@ body{font-family:"Avenir Next","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu G
 @media (prefers-reduced-motion: reduce){.float.snapback,.float.swept{transition:none;}}
 .glass h3{font-size:14px;color:var(--brass-light);letter-spacing:1px;margin-bottom:7px;}
 .glass p{font-size:12.5px;color:var(--paper-dim);line-height:1.6;}
+.gd-sec{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--brass-light);margin:14px 0 7px;}
+.gd-sec:first-of-type{margin-top:4px;}
+.gd-row{display:flex;flex-direction:column;gap:2px;padding:7px 10px;margin-bottom:6px;border-radius:8px;background:rgba(0,0,0,.22);border:1px solid rgba(232,196,104,.16);}
+.gd-row b{font-size:12.5px;color:var(--paper);}
+.gd-row span{font-size:11px;color:var(--steel);line-height:1.5;}
 .tools-glass{max-height:78vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .tool-intro{font-size:12px;color:var(--paper-dim);line-height:1.6;margin:2px 2px 13px;}
 .tag-rail{border-top:2px solid rgba(0,0,0,.5);box-shadow:0 1px 0 rgba(232,196,104,.15);padding-top:16px;}
@@ -493,11 +498,13 @@ body{font-family:"Avenir Next","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu G
     <!-- markers -->
     <button class="marker" data-z="shelf" style="left:48%;top:12%"><span class="m-dot"></span><span class="m-lbl">🎸 愛器</span></button>
     <button class="marker" data-z="gear" style="left:37%;top:53%"><span class="m-dot"></span><span class="m-lbl">🎛️ 機材</span></button>
+    <button class="marker" data-z="pedals" style="left:35.7%;top:44%"><span class="m-dot"></span><span class="m-lbl">🎚️ エフェクター</span></button>
     <button class="marker" data-z="repertoire" style="left:17%;top:40%"><span class="m-dot"></span><span class="m-lbl">🎵 ジュークボックス</span></button>
     <button class="marker" data-z="practice" style="left:16%;top:66%"><span class="m-dot"></span><span class="m-lbl">⏱️ 練習</span></button>
     <button class="marker" data-z="memo" style="left:46%;top:79%"><span class="m-dot"></span><span class="m-lbl">📓 メモ</span></button>
     <button class="marker" data-z="bench" style="left:79%;top:50%"><span class="m-dot"></span><span class="m-lbl">🛠️ 整備台</span></button>
     <button class="marker" data-z="tools" style="left:50%;top:55%"><span class="m-dot"></span><span class="m-lbl">🧰 道具箱</span></button>
+    <button class="marker" data-z="guide" style="left:69.4%;top:30.3%"><span class="m-dot"></span><span class="m-lbl">🗺️ 案内</span></button>
     <button class="marker" data-z="books" style="left:64%;top:56%"><span class="m-dot"></span><span class="m-lbl">📚 本棚</span></button>
     <button class="marker link-marker" data-url="https://yagarguitar-stack.github.io/kotori-nome/" style="left:53%;top:74%"><span class="m-dot"></span><span class="m-lbl">🎼 ことりノーム</span></button>
   </div>
@@ -507,12 +514,14 @@ body{font-family:"Avenir Next","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu G
   <!-- zone floats -->
   <div class="float" id="float-shelf"><div class="glass" style="text-align:center"><p>フックの愛器をタップ → 個体カルテ ／ ＋ で新しい一本を掛ける</p></div></div>
   <div class="float" id="float-gear"></div>
+  <div class="float" id="float-pedals"></div>
   <div class="float" id="float-repertoire"></div>
   <div class="float" id="float-practice"></div>
   <div class="float" id="float-memo"></div>
   <div class="float" id="float-bench"></div>
   <div class="float" id="float-tools"></div>
   <div class="float" id="float-books"></div>
+  <div class="float" id="float-guide"></div>
 </div>
 
 <!-- detail overlay -->
@@ -547,7 +556,7 @@ var STR_TYPES=[{id:'normal',name:'通常弦（アンコート）',days:30},{id:'
 function strTypeOf(id){for(var i=0;i<STR_TYPES.length;i++){if(STR_TYPES[i].id===id)return STR_TYPES[i];}return STR_TYPES[0];}
 function strCycle(g){return (g&&g.strLife&&g.strLife>0)?g.strLife:30;}
 var HOOK_X=[31.2,39.6,48.3,56.6,65.0];var HOOK_Y=20;var HANG_Y=16.2;
-var TF={shelf:'translate(-26.8%,-1.2%) scale(1.6)',gear:'translate(-24%,-54%) scale(2)',repertoire:'translate(0%,-35.1%) scale(1.85)',practice:'translate(0%,-72.4%) scale(1.8)',memo:'translate(-36.4%,-79.6%) scale(1.8)',bench:'translate(-100%,-50%) scale(2)',tools:'translate(-48.8%,-56.4%) scale(1.9)',books:'translate(-75%,-52%) scale(1.9)'};
+var TF={shelf:'translate(-26.8%,-1.2%) scale(1.6)',gear:'translate(-24%,-54%) scale(2)',repertoire:'translate(0%,-35.1%) scale(1.85)',practice:'translate(0%,-72.4%) scale(1.8)',memo:'translate(-36.4%,-79.6%) scale(1.8)',bench:'translate(-100%,-50%) scale(2)',tools:'translate(-48.8%,-56.4%) scale(1.9)',books:'translate(-75%,-52%) scale(1.9)',pedals:'translate(-21.5%,-45%) scale(2.1)',guide:'translate(-84%,-23%) scale(1.9)'};
 var HOME='translate(-1%,-1%) scale(1.02)';
 var currentZone=null,wallPage=0;
 
@@ -558,12 +567,68 @@ function maintStatus(g,m){var last=(g.maint&&g.maint[m.key])||null;var d=daysSin
 function stringStatus(g){return maintStatus(g,MAINT[0]);}
 function worstStatus(g){var w='ok',rank={ok:0,warn:1,bad:2,none:-1};MAINT.forEach(function(m){var s=maintStatus(g,m);if(rank[s.state]>rank[w])w=s.state;});return w;}
 
+/* ===== guide (案内) ===== */
+var GUIDE_MAP=[
+  ['愛器','持っているギターを登録する'],
+  ['機材','機材を登録し、つなぎ方を確かめる'],
+  ['ジュークボックス','弾ける曲と練習中の曲を記録する'],
+  ['練習','練習時間を測り、週の目標を決める'],
+  ['メモ','思いついたことを書き留める'],
+  ['整備台','弦交換の時期を管理し、手順を読む'],
+  ['道具箱','練習に使う道具を開く'],
+  ['本棚','音楽の知識を読む'],
+  ['エフェクター','エフェクターを試聴する'],
+  ['ことりノーム','メトロノーム、リズムゲーム']
+];
+var GUIDE_WHEN=[
+  ['チューニングを合わせたい','CanaryTune'],
+  ['テンポを取りたい','ことりノーム'],
+  ['耳コピができるようになりたい','Mockingbird'],
+  ['リズムを身につけたい','Woodpecker で学び、リズトレで鍛える'],
+  ['指板の音を覚えたい','フレットボードトレーナー'],
+  ['TAB譜を作りたい','ScoreLineTab'],
+  ['コード譜を作りたい','ScoreLineLead'],
+  ['理論を学びたい','ハーモニーツリー'],
+  ['好きなギタリストを見つけたい','ギタリスト図鑑'],
+  ['エフェクターの順番に迷う','SOUND SHAPES']
+];
+function renderGuideMap(){
+  var el=document.getElementById('float-guide'),h='';
+  h+='<div class="gd-sec">工房の見取り図</div>';
+  for(var i=0;i<GUIDE_MAP.length;i++){
+    h+='<div class="gd-row"><b>'+esc(GUIDE_MAP[i][0])+'</b><span>'+esc(GUIDE_MAP[i][1])+'</span></div>';
+  }
+  h+='<div class="gd-sec">こんなときは</div>';
+  for(var j=0;j<GUIDE_WHEN.length;j++){
+    h+='<div class="gd-row"><b>'+esc(GUIDE_WHEN[j][0])+'</b><span>'+esc(GUIDE_WHEN[j][1])+'</span></div>';
+  }
+  el.innerHTML='<div class="glass tools-glass"><h3>\ud83d\uddfa\ufe0f 案内 — Guide</h3>'+h+'</div>';
+}
+
+/* ===== pedals (エフェクター) ===== */
+var PEDAL_TAGS=[
+  {name:'SOUND SHAPES',note:'エフェクターの図鑑',url:'https://yagarguitar-stack.github.io/SOUNDSHAPES/'}
+];
+function renderPedals(){
+  var el=document.getElementById('float-pedals'),tags='';
+  for(var i=0;i<PEDAL_TAGS.length;i++){var t=PEDAL_TAGS[i];
+    tags+='<button class="tag" data-i="'+i+'"><b>'+esc(t.name)+'</b><small>'+esc(t.note||'')+'</small></button>';
+  }
+  el.innerHTML='<div class="glass tools-glass"><h3>\ud83c\udf9a\ufe0f エフェクター — Pedals</h3><div class="tag-rail"><div class="tag-wrap">'+tags+'</div></div></div>';
+  el.querySelectorAll('.tag').forEach(function(b){b.addEventListener('click',function(){
+    var t=PEDAL_TAGS[+b.dataset.i];
+    if(t.url){window.open(t.url,'_blank');}else{toast('\ud83d\udd17 リンク未設定でございます');}
+  });});
+}
+
 /* ===== tools (道具箱) ===== */
 var TOOLS=[
-  {name:'コードプログレッションジェネレーター',note:'タップで起動',url:'https://yagarguitar-stack.github.io/chord-progression-generator-/chord_progression_generator.html'},
-  {name:'CanaryTune',note:'タップで起動',url:'https://yagarguitar-stack.github.io/Canary-Tune/'},
-  {name:'ScoreLineTab',note:'タップで起動',url:'https://yagarguitar-stack.github.io/ScoreLineTab/'},
-  {name:'リズトレ',note:'タップで起動',url:'https://yagarguitar-stack.github.io/rhythm-trainer/'}
+  {name:'CanaryTune',note:'チューナー',url:'https://yagarguitar-stack.github.io/Canary-Tune/'},
+  {name:'ScoreLineTab',note:'TAB譜エディタ',url:'https://yagarguitar-stack.github.io/ScoreLineTab/'},
+  {name:'ScoreLineLead',note:'コード譜エディタ',url:'https://yagarguitar-stack.github.io/ScoreLineLead/'},
+  {name:'リズトレ',note:'リズムの練習',url:'https://yagarguitar-stack.github.io/rhyththre/'},
+  {name:'Mockingbird',note:'音感の精度向上',url:'https://yagarguitar-stack.github.io/Mockingbird/'},
+  {name:'フレットボードトレーナー',note:'指板ガイド、スケール、ウォームアップ',url:'https://yagarguitar-stack.github.io/fretboard-trainer/'}
 ];
 function renderTools(){
   var el=document.getElementById('float-tools');
@@ -579,7 +644,9 @@ function renderTools(){
 }
 /* ===== books (本棚) ===== */
 var BOOKS=[
-  {name:'ギタリスト図鑑',note:'タップで開く',url:'https://yagarguitar-stack.github.io/guitarist-zukan/'}
+  {name:'ギタリスト図鑑',note:'ギタリストとの出会い',url:'https://yagarguitar-stack.github.io/guitarist-zukan/'},
+  {name:'ハーモニーツリー',note:'音楽理論の教本',url:'https://yagarguitar-stack.github.io/HarmonyTree/'},
+  {name:'Woodpecker',note:'リズムの教本',url:'https://yagarguitar-stack.github.io/Woodpecker/'}
 ];
 function renderBooks(){
   var el=document.getElementById('float-books');
@@ -604,6 +671,8 @@ function goZone(id){
   if(id==='shelf')renderWall();
   if(id==='bench')renderBench();
   if(id==='gear')renderGear();
+  if(id==='pedals')renderPedals();
+  if(id==='guide')renderGuideMap();
   if(id==='repertoire')renderRep();
   if(id==='tools')renderTools();
   if(id==='books')renderBooks();
@@ -701,6 +770,31 @@ function renderGear(){
     el.querySelectorAll('.gear-row').forEach(function(r){r.addEventListener('click',function(){openGearForm(db.gear.find(function(x){return x.id===r.dataset.id;}));});});
   }
 }
+function gearOrderHtml(){
+  var chain=[
+    {ic:'🎸',n:'ギター',io:'out',d:'信号の出発点。ケーブルで1台目の INPUT へ。'},
+    {ic:'🎵',n:'チューナー',io:'both',d:'いちばん前に。正確な基準音を拾え、ミュートにも使えます。'},
+    {ic:'🌊',n:'ワウ／フィルター',io:'both',d:'（使う場合）歪みより前だと、かかり方が自然になりやすい。'},
+    {ic:'📊',n:'コンプレッサー',io:'both',d:'音の粒をそろえる。歪みの前に置くのが一般的。'},
+    {ic:'🔥',n:'歪み系',io:'both',d:'オーバードライブ→ディストーション→ファズの順が定番。軽い歪みを前に。'},
+    {ic:'🌀',n:'モジュレーション',io:'both',d:'コーラス・フランジャー・フェイザーなど。歪みの後ろに。'},
+    {ic:'💧',n:'空間系',io:'both',d:'ディレイ→リバーブの順で、いちばん後ろ。残響が自然に伸びます。'},
+    {ic:'🔊',n:'アンプ',io:'in',d:'最後の OUTPUT を、アンプの INPUT へ。'}
+  ];
+  function io(t){
+    if(t==='out')return '<span class="cs-io"><span class="io-pill io-out">OUT 出力</span></span>';
+    if(t==='in')return '<span class="cs-io"><span class="io-pill io-in">IN 入力</span></span>';
+    return '<span class="cs-io"><span class="io-pill io-in">IN 入力</span><span class="io-arrow">→</span><span class="io-pill io-out">OUT 出力</span></span>';
+  }
+  var items=chain.map(function(c,i){return '<div class="chain-step"><span class="cs-ic">'+c.ic+'</span><span class="cs-body"><b>'+c.n+'</b>'+io(c.io)+'<span class="cs-d">'+c.d+'</span></span></div>'+(i<chain.length-1?'<div class="chain-arr">↓</div>':'');}).join('');
+  return '<h3 style="margin-bottom:6px">つなぐ順番（一般的な目安）</h3><p style="margin:0 2px 12px">エフェクターをつなぐ順番の基本です。ギターからアンプへ、信号はこの順で流すのが定番。</p>'+
+    '<div class="callout tip"><span class="co-ic">🔌</span><span><b>ケーブルのつなぎ方：</b>ギターを1台目のエフェクターの <b>INPUT（入力）</b> へ。そのエフェクターの <b>OUTPUT（出力）</b> を次のエフェクターの <b>INPUT</b> へ……と数珠つなぎにし、最後のエフェクターの <b>OUTPUT</b> を <b>アンプの INPUT</b> へつなぎます。</span></div>'+
+    '<div class="chain">'+items+'</div>'+
+    '<div class="callout tip"><span class="co-ic">💡</span><span><b>あくまで目安：</b>これは一般的な並びで、絶対ではありません。狙う音によって自由に変えてOK。空間系は、アンプの<b>センド／リターン（エフェクトループ）</b>に入れる方法もあります。</span></div>';
+}
+
+/* ===== repertoire (レパートリー) ===== */
+var SONG_STATES=[{id:'wish',name:'弾きたい',ic:'⭐',cls:'st-wish'},{id:'learning',name:'練習中',ic:'🔥',cls:'st-learning'},{id:'done',name:'弾ける',ic:'✅',cls:'st-done'}];
 function gearRowHtml(g){var t=gearType(g.type);return '<div class="gear-row'+(g.want?' want':'')+'" data-id="'+g.id+'"><span class="gr-ic">'+t.ic+'</span><span class="gr-body"><b>'+esc(g.name)+'</b><span class="gr-sub">'+t.name+(g.memo?' ／ '+esc(g.memo):'')+'</span></span><span class="gc-arr">›</span></div>';}
 function gearListHtml(){
   var owned=db.gear.filter(function(g){return !g.want;}).sort(function(a,b){return gearOrderIdx(a.type)-gearOrderIdx(b.type);});
@@ -733,28 +827,6 @@ function openGearForm(g){
     else{db.gear.push({id:uid(),name:name,type:type,memo:memo,want:want});}
     save();closeModal();gearTab='list';renderGear();toast(isEdit?'保存しました':'追加しました');
   });
-}
-function gearOrderHtml(){
-  var chain=[
-    {ic:'🎸',n:'ギター',io:'out',d:'信号の出発点。ケーブルで1台目の INPUT へ。'},
-    {ic:'🎵',n:'チューナー',io:'both',d:'いちばん前に。正確な基準音を拾え、ミュートにも使えます。'},
-    {ic:'🌊',n:'ワウ／フィルター',io:'both',d:'（使う場合）歪みより前だと、かかり方が自然になりやすい。'},
-    {ic:'📊',n:'コンプレッサー',io:'both',d:'音の粒をそろえる。歪みの前に置くのが一般的。'},
-    {ic:'🔥',n:'歪み系',io:'both',d:'オーバードライブ→ディストーション→ファズの順が定番。軽い歪みを前に。'},
-    {ic:'🌀',n:'モジュレーション',io:'both',d:'コーラス・フランジャー・フェイザーなど。歪みの後ろに。'},
-    {ic:'💧',n:'空間系',io:'both',d:'ディレイ→リバーブの順で、いちばん後ろ。残響が自然に伸びます。'},
-    {ic:'🔊',n:'アンプ',io:'in',d:'最後の OUTPUT を、アンプの INPUT へ。'}
-  ];
-  function io(t){
-    if(t==='out')return '<span class="cs-io"><span class="io-pill io-out">OUT 出力</span></span>';
-    if(t==='in')return '<span class="cs-io"><span class="io-pill io-in">IN 入力</span></span>';
-    return '<span class="cs-io"><span class="io-pill io-in">IN 入力</span><span class="io-arrow">→</span><span class="io-pill io-out">OUT 出力</span></span>';
-  }
-  var items=chain.map(function(c,i){return '<div class="chain-step"><span class="cs-ic">'+c.ic+'</span><span class="cs-body"><b>'+c.n+'</b>'+io(c.io)+'<span class="cs-d">'+c.d+'</span></span></div>'+(i<chain.length-1?'<div class="chain-arr">↓</div>':'');}).join('');
-  return '<h3 style="margin-bottom:6px">つなぐ順番（一般的な目安）</h3><p style="margin:0 2px 12px">エフェクターをつなぐ順番の基本です。ギターからアンプへ、信号はこの順で流すのが定番。</p>'+
-    '<div class="callout tip"><span class="co-ic">🔌</span><span><b>ケーブルのつなぎ方：</b>ギターを1台目のエフェクターの <b>INPUT（入力）</b> へ。そのエフェクターの <b>OUTPUT（出力）</b> を次のエフェクターの <b>INPUT</b> へ……と数珠つなぎにし、最後のエフェクターの <b>OUTPUT</b> を <b>アンプの INPUT</b> へつなぎます。</span></div>'+
-    '<div class="chain">'+items+'</div>'+
-    '<div class="callout tip"><span class="co-ic">💡</span><span><b>あくまで目安：</b>これは一般的な並びで、絶対ではありません。狙う音によって自由に変えてOK。空間系は、アンプの<b>センド／リターン（エフェクトループ）</b>に入れる方法もあります。</span></div>';
 }
 
 /* ===== repertoire (レパートリー) ===== */
@@ -836,9 +908,9 @@ function dayKey(off){var d=new Date(today()+'T00:00:00');d.setDate(d.getDate()+o
 function dayMin(k){return db.practice[k]||0;}
 function addMinutes(min){var k=today();db.practice[k]=(db.practice[k]||0)+min;save();}
 function startTimer(){prRunning=true;prStartTs=Date.now();if(prTick)clearInterval(prTick);prTick=setInterval(function(){var el=document.getElementById('prClock');if(el)el.textContent=fmtClock(Date.now()-prStartTs);},500);bgmDuck();renderPractice();}
-function stopTimer(){if(!prRunning)return;var ms=Date.now()-prStartTs;prRunning=false;if(prTick){clearInterval(prTick);prTick=null;}var min=Math.round(ms/60000);if(min>0){addMinutes(min);toast(min+'分を記録しました');}else{toast('1分未満は記録されません');}bgmUnduck();renderPractice();}
-function stopTimerOnLeave(){if(!prRunning)return;var ms=Date.now()-prStartTs;prRunning=false;if(prTick){clearInterval(prTick);prTick=null;}var min=Math.round(ms/60000);if(min>0){addMinutes(min);toast('練習タイマーを止めて '+min+'分を記録しました');}else{toast('練習タイマーを止めました（1分未満は記録されません）');}bgmUnduck();}
-function stopTimerSilently(){if(prRunning){var ms=Date.now()-prStartTs;prRunning=false;if(prTick){clearInterval(prTick);prTick=null;}var min=Math.round(ms/60000);if(min>0)addMinutes(min);bgmUnduck();}}
+function stopTimer(){if(!prRunning)return;var ms=Date.now()-prStartTs;prRunning=false;if(prTick){clearInterval(prTick);prTick=null;}var min=Math.floor(ms/60000);if(min>0){addMinutes(min);toast(min+'分を記録しました');}else{toast('1分未満は記録されません');}bgmUnduck();renderPractice();}
+function stopTimerOnLeave(){if(!prRunning)return;var ms=Date.now()-prStartTs;prRunning=false;if(prTick){clearInterval(prTick);prTick=null;}var min=Math.floor(ms/60000);if(min>0){addMinutes(min);toast('練習タイマーを止めて '+min+'分を記録しました');}else{toast('練習タイマーを止めました（1分未満は記録されません）');}bgmUnduck();}
+function stopTimerSilently(){if(prRunning){var ms=Date.now()-prStartTs;prRunning=false;if(prTick){clearInterval(prTick);prTick=null;}var min=Math.floor(ms/60000);if(min>0)addMinutes(min);bgmUnduck();}}
 function mondayOffset(){var wd=new Date(today()+'T00:00:00').getDay();return (wd+6)%7;}
 function renderPractice(animate){
   var el=document.getElementById('float-practice');var tkey=today(),todayMin=dayMin(tkey);
@@ -1333,7 +1405,7 @@ function openForm(g){
     }else{
       var ng={id:uid(),name:name,model:document.getElementById('fModel').value.trim(),year:parseInt(document.getElementById('fYear').value,10)||null,gauge:document.getElementById('fGauge').value.trim(),brand:document.getElementById('fBrand').value.trim(),photo:pendingPhoto,ar:pendingAr,maint:{},stringHistory:[],repairs:[],strType:stType,strLife:stLife};
       if(newStr){ng.maint.strings=newStr;ng.stringHistory.push({date:newStr,brand:ng.brand,gauge:ng.gauge,note:''});}
-      db.guitars.push(ng);save();wallPage=Math.floor((db.guitars.length-1)/6);closeModal();enterAdjust(ng.id);toast('壁に掛けました。位置を整えてください');
+      db.guitars.push(ng);save();wallPage=Math.floor((db.guitars.length-1)/5);closeModal();enterAdjust(ng.id);toast('壁に掛けました。位置を整えてください');
     }
   });
 }
