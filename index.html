@@ -752,6 +752,10 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 @keyframes zFlick{0%{filter:brightness(.05);}18%{filter:brightness(.8);}26%{filter:brightness(.2);}40%{filter:brightness(.95);}48%{filter:brightness(.55);}100%{filter:brightness(1);}}
 .closeview.flick{animation:zFlick .9s linear both;}
 @media (prefers-reduced-motion: reduce){.closeview.flick{animation:none;}.closeview.fading{transition:none;}}
+/* 練習：入ったときは部屋だけ見せ、押したら開く */
+.viewport.practice-on:not(.pr-open) #float-practice{display:none!important;}
+.pr-openbtn{position:absolute;right:12px;top:12px;z-index:8;display:none;align-items:center;gap:6px;background:linear-gradient(180deg,var(--brass-light),var(--brass));color:#3a2807;border:none;border-radius:var(--r-pill);padding:var(--sp-2) var(--sp-4);font-family:inherit;font-size:var(--fs-sm);font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5);}
+.viewport.practice-on:not(.pr-open) .pr-openbtn{display:inline-flex;}
 #hookLayer{display:none;}
 .viewport.shelf-on #hookLayer,.viewport.gear-on #hookLayer{display:block;}
 .viewport.gear-on #hookLayer .empty-hook{display:none;}
@@ -790,6 +794,7 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
   </div>
   <div class="closeview" id="closeView"><img class="cz" id="closeImg" alt=""><div class="lighting"></div><div id="hookLayer"></div></div>
   <div class="zveil" id="zVeil"></div>
+  <button class="pr-openbtn" id="prOpenBtn"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg> 練習を開く</button>
   <button class="backbtn" id="backBtn">‹ 工房全体へ</button>
   <div class="wallpager" id="wallPager"></div>
   <div class="adjustbar" id="adjustBar"></div>
@@ -1047,7 +1052,7 @@ var canHover=matchMedia('(hover:hover) and (pointer:fine)').matches;
 setTimeout(function(){['guitars','workbench','tools','library','practice','loft'].forEach(function(n){var i=new Image();i.src='img/'+n+'.webp';});},1500);
 function openZone(id){
   currentZone=id;vp.classList.add('zoomed');
-  vp.classList.toggle('shelf-on',id==='shelf');vp.classList.toggle('gear-on',id==='gear');
+  vp.classList.toggle('shelf-on',id==='shelf');vp.classList.toggle('gear-on',id==='gear');vp.classList.toggle('practice-on',id==='practice');vp.classList.remove('pr-open');
   document.querySelectorAll('.float').forEach(function(f){f.classList.toggle('show',f.id==='float-'+id);});
   var tf=document.getElementById('float-'+id);if(tf){tf.classList.remove('show');void tf.offsetWidth;tf.classList.add('show');}
   if(id==='shelf'||id==='gear')renderWall();
@@ -1085,9 +1090,9 @@ function goZone(id){
 function goHome(){
   stopTimerOnLeave();currentZone=null;
   document.querySelectorAll('.float.show').forEach(function(f){f.classList.add('leaving');setTimeout(function(){f.classList.remove('show','leaving');},320);});
-  if(reduceMo){vp.classList.remove('zoomed','shelf-on','gear-on');return;}
+  if(reduceMo){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','pr-open');return;}
   closeView.classList.add('fading');
-  homeTimer=setTimeout(function(){vp.classList.remove('zoomed','shelf-on','gear-on');closeView.classList.remove('fading');},500);
+  homeTimer=setTimeout(function(){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','pr-open');closeView.classList.remove('fading');},500);
 }
 /* 場所の枠：パソコンは押せばすぐ、スマホは1回目で枠を出し2回目で入る */
 var armedZone=null;
@@ -1100,12 +1105,13 @@ document.querySelectorAll('.zone').forEach(function(m){m.addEventListener('click
 });});
 document.addEventListener('click',function(e){if(armedZone&&!e.target.closest('.zone'))disarmZone();},true);
 back.addEventListener('click',goHome);
+document.getElementById('prOpenBtn').addEventListener('click',function(e){e.stopPropagation();vp.classList.add('pr-open');var f=document.getElementById('float-practice');if(f){f.classList.remove('show');void f.offsetWidth;f.classList.add('show');}});
 /* パネルの外なら画面のどこをタップしても工房全体へ戻る */
 function tapCanClose(t){
   if(!vp.classList.contains('zoomed'))return false;
   if(vp.classList.contains('adjusting'))return false;
   if(document.querySelector('.overlay.show,.modal-bg.show'))return false;
-  if(t&&t.closest('.float,.topbar,.zone,.hung,.empty-hook,.backbtn,.wallpager,.adjustbar,.overlay,.modal-bg,.toast,button,a,input,textarea,select,label'))return false;
+  if(t&&t.closest('.pr-openbtn,.float,.topbar,.zone,.hung,.empty-hook,.backbtn,.wallpager,.adjustbar,.overlay,.modal-bg,.toast,button,a,input,textarea,select,label'))return false;
   return true;
 }
 document.addEventListener('click',function(e){if(tapCanClose(e.target))goHome();});
