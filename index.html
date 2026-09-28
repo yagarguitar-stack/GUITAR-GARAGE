@@ -752,6 +752,12 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 @keyframes zFlick{0%{filter:brightness(.05);}18%{filter:brightness(.8);}26%{filter:brightness(.2);}40%{filter:brightness(.95);}48%{filter:brightness(.55);}100%{filter:brightness(1);}}
 .closeview.flick{animation:zFlick .9s linear both;}
 @media (prefers-reduced-motion: reduce){.closeview.flick{animation:none;}.closeview.fading{transition:none;}}
+#hookLayer{display:none;}
+.viewport.shelf-on #hookLayer,.viewport.gear-on #hookLayer{display:block;}
+.viewport.gear-on #hookLayer .empty-hook{display:none;}
+.pr-cal-fold{background:none;border:none;padding:0;font:inherit;color:inherit;letter-spacing:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.pr-cal-fold .arr{color:var(--brass);transition:transform .2s;display:inline-block;}
+.pr-cal-fold[aria-expanded="true"] .arr{transform:rotate(90deg);}
 #closeView .hung .g-plate{font-size:min(1.36vw,15px);}
 #closeView .empty-hook{width:5.8%;height:14.4%;font-size:min(1.76vw,20px);}
 </style>
@@ -1041,10 +1047,10 @@ var canHover=matchMedia('(hover:hover) and (pointer:fine)').matches;
 setTimeout(function(){['guitars','workbench','tools','library','practice','loft'].forEach(function(n){var i=new Image();i.src='img/'+n+'.webp';});},1500);
 function openZone(id){
   currentZone=id;vp.classList.add('zoomed');
-  vp.classList.toggle('shelf-on',id==='shelf');
+  vp.classList.toggle('shelf-on',id==='shelf');vp.classList.toggle('gear-on',id==='gear');
   document.querySelectorAll('.float').forEach(function(f){f.classList.toggle('show',f.id==='float-'+id);});
   var tf=document.getElementById('float-'+id);if(tf){tf.classList.remove('show');void tf.offsetWidth;tf.classList.add('show');}
-  if(id==='shelf')renderWall();
+  if(id==='shelf'||id==='gear')renderWall();
   if(id==='bench')renderBench();
   if(id==='gear')renderGear();
   if(id==='pedals')renderPedals();
@@ -1052,7 +1058,7 @@ function openZone(id){
   if(id==='repertoire')renderRep();
   if(id==='tools')renderTools();
   if(id==='books')renderBooks();
-  if(id==='practice'){calY=null;var _pg=document.querySelector('#float-practice .pr-glass');if(_pg)_pg.scrollTop=0;renderPractice(true);} else stopTimerOnLeave();
+  if(id==='practice'){calY=null;prCalOpen=false;var _pg=document.querySelector('#float-practice .pr-glass');if(_pg)_pg.scrollTop=0;renderPractice(true);} else stopTimerOnLeave();
   if(id==='memo')renderMemo();
 }
 /* 入るとき：暗くなってから、明かりが点くように寄り画像が現れる */
@@ -1079,9 +1085,9 @@ function goZone(id){
 function goHome(){
   stopTimerOnLeave();currentZone=null;
   document.querySelectorAll('.float.show').forEach(function(f){f.classList.add('leaving');setTimeout(function(){f.classList.remove('show','leaving');},320);});
-  if(reduceMo){vp.classList.remove('zoomed','shelf-on');return;}
+  if(reduceMo){vp.classList.remove('zoomed','shelf-on','gear-on');return;}
   closeView.classList.add('fading');
-  homeTimer=setTimeout(function(){vp.classList.remove('zoomed','shelf-on');closeView.classList.remove('fading');},500);
+  homeTimer=setTimeout(function(){vp.classList.remove('zoomed','shelf-on','gear-on');closeView.classList.remove('fading');},500);
 }
 /* 場所の枠：パソコンは押せばすぐ、スマホは1回目で枠を出し2回目で入る */
 var armedZone=null;
@@ -1357,13 +1363,14 @@ function renderPractice(animate){
     '<div class="pr-stats"><div class="pr-stat"><span class="pr-stat-num '+(todayMin>0?'lit':(streak>0?'cold':''))+'"><svg class="ic" aria-hidden="true"><use href="#i-fire"/></svg><span class="count-up" data-to="'+streak+'">0</span></span><span class="pr-stat-lbl">連続日数'+(todayMin>0?' · 継続中':'')+'</span></div><div class="pr-stat"><span class="pr-stat-num">'+fmtMin(weekSum)+'</span><span class="pr-stat-lbl">今週（月〜日）</span></div></div>'+
     (streak>0&&todayMin===0?'<div class="pr-streak-nudge">火を絶やさない — 今日でつなごう</div>':'')+'<div class="pr-goal">'+goalHtml+'</div>'+
     '<div class="pr-week-title">今週（月〜日）<span class="pr-hint-tap">日をタップで修正・削除</span></div><div class="pr-week">'+bars+'</div>'+
-    '<div class="pr-grid-title"><span>練習カレンダー</span><button class="pr-goal-edit" id="prGoalEdit">'+(goal>0?'目標を変更':'目標を設定')+'</button></div>'+
-    monthCalHtml()+
+    '<div class="pr-grid-title"><button class="pr-cal-fold" id="prCalFold" aria-expanded="'+prCalOpen+'"><span class="arr">›</span>練習カレンダー</button><button class="pr-goal-edit" id="prGoalEdit">'+(goal>0?'目標を変更':'目標を設定')+'</button></div>'+
+    (prCalOpen?monthCalHtml()+
     '<div class="pr-cal-hint">日をタップで、練習時間と「発見・気になったこと」を記録（●印はメモあり）</div>'+
-    journalListHtml()+
+    journalListHtml():'')+
     '</div>';
   var newGlass=el.querySelector('.pr-glass');if(newGlass)newGlass.scrollTop=keepScroll;
   document.getElementById('prToggle').addEventListener('click',function(){if(prRunning)stopTimer();else startTimer();});
+  var pcf=document.getElementById('prCalFold');if(pcf)pcf.addEventListener('click',function(){prCalOpen=!prCalOpen;renderPractice();});
   el.querySelectorAll('.pr-chips button').forEach(function(b){b.addEventListener('click',function(){if(b.dataset.add==='custom')openManualModal();else{addMinutes(parseInt(b.dataset.add,10));toast(b.dataset.add+'分を追加しました');renderPractice();}});});
   el.querySelectorAll('.pr-bar').forEach(function(b){b.addEventListener('click',function(){openDayEdit(b.dataset.day);});});
   el.querySelectorAll('.cal-cell[data-day]').forEach(function(c){if(!c.classList.contains('future'))c.addEventListener('click',function(){openDayEdit(c.dataset.day);});});
@@ -1373,7 +1380,7 @@ function renderPractice(animate){
   document.getElementById('prGoalEdit').addEventListener('click',openGoalModal);
   if(animate)runCountUps(el);
 }
-var calY=null,calM=null;
+var calY=null,calM=null,prCalOpen=false;
 function monthCalHtml(){
   var t=new Date(today()+'T00:00:00');
   if(calY===null){calY=t.getFullYear();calM=t.getMonth();}
