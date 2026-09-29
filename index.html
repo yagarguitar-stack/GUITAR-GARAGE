@@ -757,7 +757,7 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .pr-openbtn{position:absolute;right:12px;top:12px;z-index:8;display:none;align-items:center;gap:6px;background:linear-gradient(180deg,var(--brass-light),var(--brass));color:#3a2807;border:none;border-radius:var(--r-pill);padding:var(--sp-2) var(--sp-4);font-family:inherit;font-size:var(--fs-sm);font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5);}
 .viewport.defer-on:not(.pr-open) .pr-openbtn{display:inline-flex;}
 .viewport.zoomed .closeview .czone{visibility:visible;pointer-events:auto;}
-.viewport:not(.practice-on) .czone[data-z="pedals"]{display:none;}
+.viewport:not(.practice-on) .czone[data-z="gear"],.viewport:not(.books-on) .czone[data-z="memo"]{display:none;}
 .viewport.adjusting .czone{display:none;}
 /* ===== BGM ===== */
 .bgm-box{margin:var(--sp-2) 0 var(--sp-3);padding:var(--sp-3);border:1px solid rgba(232,196,104,.24);border-radius:var(--r-md);background:rgba(0,0,0,.22);}
@@ -784,7 +784,7 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .bgm-btn.on ~ .menu-btn{margin-left:var(--sp-2);}
 @media (prefers-reduced-motion: reduce){.bgm-eq i{animation:none;height:70%;}}
 #hookLayer{display:none;}
-.viewport.shelf-on #hookLayer,.viewport.gear-on #hookLayer{display:block;}
+.viewport.shelf-on #hookLayer{display:block;}
 .viewport.gear-on #hookLayer .empty-hook{display:none;}
 .pr-cal-fold{background:none;border:none;padding:0;font:inherit;color:inherit;letter-spacing:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
 .pr-cal-fold .arr{color:var(--brass);transition:transform .2s;display:inline-block;}
@@ -809,17 +809,15 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
     <div class="lighting" id="lighting"></div>
     <!-- 場所の枠（パソコン：合わせると出る／スマホ：1回目で出て2回目で入る） -->
     <button class="zone" data-z="shelf" data-lbl="t" style="left:1.43%;top:25.59%;width:14.19%;height:17.87%" aria-label="愛器"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-guitar"/></svg> 愛器</span></button>
-    <button class="zone" data-z="gear" data-lbl="b" style="left:18.88%;top:50.29%;width:7.49%;height:13.18%" aria-label="機材"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-speaker-hifi"/></svg> 機材</span></button>
     <button class="zone" data-z="repertoire" data-lbl="t" style="left:35.48%;top:14.45%;width:5.99%;height:15.04%" aria-label="ジュークボックス"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-vinyl-record"/></svg> ジュークボックス</span></button>
     <button class="zone" data-z="guide" data-lbl="t" style="left:43.49%;top:9.57%;width:23.70%;height:13.48%" aria-label="案内"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-map-trifold"/></svg> 案内</span></button>
     <button class="zone" data-z="bench" data-lbl="t" style="left:27.99%;top:38.87%;width:14.97%;height:25.59%" aria-label="整備台"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg> 整備台</span></button>
     <button class="zone" data-z="tools" data-lbl="t" style="left:56.12%;top:39.26%;width:8.01%;height:24.41%" aria-label="道具箱"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-toolbox"/></svg> 道具箱</span></button>
     <button class="zone" data-z="books" data-lbl="t" style="left:77.15%;top:38.09%;width:11.39%;height:16.80%" aria-label="本棚"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-books"/></svg> 本棚</span></button>
-    <button class="zone" data-z="memo" data-lbl="b" style="left:77.15%;top:55.27%;width:11.39%;height:10.35%" aria-label="メモ"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-note-pencil"/></svg> メモ</span></button>
     <button class="zone" data-z="practice" data-lbl="tr" style="left:91.28%;top:41.02%;width:8.72%;height:34.18%" aria-label="練習"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg> 練習</span></button>
     <button class="zone" data-url="https://yagarguitar-stack.github.io/kotori-nome/" data-lbl="t" style="left:29.43%;top:65.62%;width:3.12%;height:7.81%" aria-label="ことりノーム"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-metronome"/></svg> ことりノーム</span></button>
   </div>
-  <div class="closeview" id="closeView"><img class="cz" id="closeImg" alt=""><div class="lighting"></div><div id="hookLayer"></div><button class="zone czone" data-z="pedals" data-lbl="t" style="left:67.71%;top:74.22%;width:16.93%;height:11.23%" aria-label="エフェクター"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-pedal"/></svg> エフェクター</span></button></div>
+  <div class="closeview" id="closeView"><img class="cz" id="closeImg" alt=""><div class="lighting"></div><div id="hookLayer"></div><button class="zone czone" data-z="memo" data-lbl="t" style="left:37.76%;top:55.66%;width:9.24%;height:4.10%" aria-label="メモ"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-note-pencil"/></svg> メモ</span></button><button class="zone czone" data-z="gear" data-lbl="t" style="left:67.71%;top:74.22%;width:16.93%;height:11.23%" aria-label="機材・エフェクター"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-pedal"/></svg> 機材・エフェクター</span></button></div>
   <div class="zveil" id="zVeil"></div>
   <button class="pr-openbtn" id="prOpenBtn"><svg class="ic" aria-hidden="true"><use id="prOpenIc" href="#i-timer"/></svg> <span id="prOpenTx">練習を開く</span></button>
   <button class="backbtn" id="backBtn">‹ 工房全体へ</button>
@@ -945,14 +943,13 @@ function worstStatus(g){var w='ok',rank={ok:0,warn:1,bad:2,none:-1};MAINT.forEac
 /* ===== guide (案内) ===== */
 var GUIDE_MAP=[
   ['愛器','持っているギターを登録する'],
-  ['機材','機材を登録し、つなぎ方を確かめる'],
+  ['機材・エフェクター','機材の登録、つなぐ順番、エフェクターのツール'],
   ['ジュークボックス','弾ける曲と練習中の曲を記録する'],
   ['練習','練習時間を測り、週の目標を決める'],
   ['メモ','思いついたことを書き留める'],
   ['整備台','弦交換の時期を管理し、手順を読む'],
   ['道具箱','練習に使う道具を開く'],
   ['本棚','音楽の知識を読む'],
-  ['エフェクター','エフェクターを試聴する'],
   ['ことりノーム','メトロノーム、リズムゲーム']
 ];
 var GUIDE_WHEN=[
@@ -1070,8 +1067,8 @@ function renderBooks(){
 /* ===== camera / navigation ===== */
 var vp=document.getElementById('viewport'),sc=document.getElementById('scene'),back=document.getElementById('backBtn');
 /* 入ったときは部屋だけ見せ、ボタンで画面を開く場所 */
-var DEFER={practice:['練習を開く','timer'],repertoire:['ジュークボックスを開く','vinyl-record']};
-var ZIMG={shelf:'guitars',gear:'guitars',bench:'workbench',tools:'tools',books:'library',memo:'library',practice:'practice',pedals:'practice',repertoire:'loft',guide:'loft'};
+var DEFER={practice:['練習を開く','timer'],repertoire:['ジュークボックスを開く','vinyl-record'],guide:['案内を開く','map-trifold'],gear:['機材・エフェクターを開く','pedal']};
+var ZIMG={shelf:'guitars',gear:'practice',bench:'workbench',tools:'tools',books:'library',memo:'library',practice:'practice',pedals:'practice',repertoire:'loft',guide:'loft'};
 var closeView=document.getElementById('closeView'),closeImg=document.getElementById('closeImg'),zVeil=document.getElementById('zVeil');
 var reduceMo=matchMedia('(prefers-reduced-motion: reduce)').matches,zBusy=false,homeTimer=null;
 var canHover=matchMedia('(hover:hover) and (pointer:fine)').matches;
@@ -1080,11 +1077,11 @@ var canHover=matchMedia('(hover:hover) and (pointer:fine)').matches;
 setTimeout(function(){['guitars','workbench','tools','library','practice','loft'].forEach(function(n){var i=new Image();i.src='img/'+n+'.webp';});},1500);
 function openZone(id){
   currentZone=id;vp.classList.add('zoomed');
-  vp.classList.toggle('shelf-on',id==='shelf');vp.classList.toggle('gear-on',id==='gear');vp.classList.toggle('practice-on',id==='practice');vp.classList.remove('pr-open');
+  vp.classList.toggle('shelf-on',id==='shelf');vp.classList.toggle('gear-on',id==='gear');vp.classList.toggle('practice-on',id==='practice');vp.classList.toggle('books-on',id==='books');vp.classList.remove('pr-open');
   var dfr=DEFER[id];vp.classList.toggle('defer-on',!!dfr);if(dfr){document.getElementById('prOpenTx').textContent=dfr[0];document.getElementById('prOpenIc').setAttribute('href','#i-'+dfr[1]);}
   document.querySelectorAll('.float').forEach(function(f){f.classList.toggle('show',f.id==='float-'+id);});
   var tf=document.getElementById('float-'+id);if(tf){tf.classList.remove('show');void tf.offsetWidth;tf.classList.add('show');}
-  if(id==='shelf'||id==='gear')renderWall();
+  if(id==='shelf')renderWall();
   if(id==='bench')renderBench();
   if(id==='gear')renderGear();
   if(id==='pedals')renderPedals();
@@ -1119,9 +1116,9 @@ function goZone(id){
 function goHome(){
   stopTimerOnLeave();currentZone=null;
   document.querySelectorAll('.float.show').forEach(function(f){f.classList.add('leaving');setTimeout(function(){f.classList.remove('show','leaving');},320);});
-  if(reduceMo){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','defer-on','pr-open');return;}
+  if(reduceMo){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','books-on','defer-on','pr-open');return;}
   closeView.classList.add('fading');
-  homeTimer=setTimeout(function(){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','defer-on','pr-open');closeView.classList.remove('fading');},500);
+  homeTimer=setTimeout(function(){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','books-on','defer-on','pr-open');closeView.classList.remove('fading');},500);
 }
 /* 場所の枠：パソコンは押せばすぐ、スマホは1回目で枠を出し2回目で入る */
 var armedZone=null;
@@ -1215,8 +1212,10 @@ function gearOrderIdx(id){for(var i=0;i<GEAR_TYPES.length;i++){if(GEAR_TYPES[i].
 var gearTab='list';
 function renderGear(){
   var el=document.getElementById('float-gear');
-  var seg='<div class="bench-seg"><button class="'+(gearTab==='list'?'on':'')+'" data-gt="list">機材リスト</button><button class="'+(gearTab==='order'?'on':'')+'" data-gt="order">つなぐ順番</button></div>';
-  el.innerHTML='<div class="glass gear-glass">'+seg+(gearTab==='list'?gearListHtml():gearOrderHtml())+'</div>';
+  var seg='<div class="bench-seg"><button class="'+(gearTab==='list'?'on':'')+'" data-gt="list">機材リスト</button><button class="'+(gearTab==='order'?'on':'')+'" data-gt="order">つなぐ順番</button><button class="'+(gearTab==='pedals'?'on':'')+'" data-gt="pedals">エフェクターのツール</button></div>';
+  var body=gearTab==='list'?gearListHtml():gearTab==='order'?gearOrderHtml():('<div class="tag-rail"><div class="tag-wrap">'+PEDAL_TAGS.map(function(p,i){return '<button class="tag" data-pi="'+i+'"><b>'+esc(p.name)+'</b><small>'+esc(p.note||'')+'</small></button>';}).join('')+'</div></div>');
+  el.innerHTML='<div class="glass gear-glass">'+seg+body+'</div>';
+  el.querySelectorAll('.tag[data-pi]').forEach(function(b){b.addEventListener('click',function(){var p=PEDAL_TAGS[+b.dataset.pi];if(p.url){DS.open(b,p.url);}else{toast('リンク未設定でございます');}});});
   el.querySelectorAll('.bench-seg button').forEach(function(b){b.addEventListener('click',function(){gearTab=b.dataset.gt;renderGear();});});
   if(gearTab==='list'){
     var add=document.getElementById('gearAdd');if(add)add.addEventListener('click',function(){openGearForm(null);});
