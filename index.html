@@ -753,9 +753,36 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .closeview.flick{animation:zFlick .9s linear both;}
 @media (prefers-reduced-motion: reduce){.closeview.flick{animation:none;}.closeview.fading{transition:none;}}
 /* 練習：入ったときは部屋だけ見せ、押したら開く */
-.viewport.practice-on:not(.pr-open) #float-practice{display:none!important;}
+.viewport.defer-on:not(.pr-open) .float{display:none!important;}
 .pr-openbtn{position:absolute;right:12px;top:12px;z-index:8;display:none;align-items:center;gap:6px;background:linear-gradient(180deg,var(--brass-light),var(--brass));color:#3a2807;border:none;border-radius:var(--r-pill);padding:var(--sp-2) var(--sp-4);font-family:inherit;font-size:var(--fs-sm);font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5);}
-.viewport.practice-on:not(.pr-open) .pr-openbtn{display:inline-flex;}
+.viewport.defer-on:not(.pr-open) .pr-openbtn{display:inline-flex;}
+.viewport.zoomed .closeview .czone{visibility:visible;pointer-events:auto;}
+.viewport:not(.practice-on) .czone[data-z="pedals"]{display:none;}
+.viewport.adjusting .czone{display:none;}
+/* ===== BGM ===== */
+.bgm-box{margin:var(--sp-2) 0 var(--sp-3);padding:var(--sp-3);border:1px solid rgba(232,196,104,.24);border-radius:var(--r-md);background:rgba(0,0,0,.22);}
+.bgm-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);margin-bottom:var(--sp-2);}
+.bgm-lbl{font-size:var(--fs-md);color:var(--brass-light);font-weight:700;display:flex;align-items:center;gap:6px;}
+.bgm-stop{background:none;border:1px solid var(--wood-light);color:var(--paper-dim);border-radius:var(--r-md);padding:4px 12px;font-family:inherit;font-size:var(--fs-sm);cursor:pointer;}
+.bgm-stop:disabled{opacity:.35;cursor:default;}
+.bgm-list{display:flex;flex-direction:column;gap:var(--sp-1);}
+.bgm-row{display:flex;align-items:center;gap:var(--sp-3);width:100%;text-align:left;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-3);color:var(--paper);font-family:inherit;font-size:var(--fs-md);cursor:pointer;}
+@media (hover:hover){.bgm-row:hover{background:rgba(232,196,104,.07);}}
+.bgm-row.cur{border-color:rgba(232,196,104,.55);background:rgba(232,196,104,.1);}
+.bgm-row .bgm-no{width:22px;height:22px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:var(--brass-light);font-size:var(--fs-sm);}
+.bgm-row .bgm-t{flex:1;min-width:0;}
+.bgm-row .bgm-len{color:var(--steel);font-size:var(--fs-sm);font-variant-numeric:tabular-nums;}
+.bgm-eq{display:inline-flex;align-items:flex-end;gap:2px;height:14px;}
+.bgm-eq i{width:3px;height:40%;background:var(--brass-light);border-radius:1px;animation:bgmEq 1s ease-in-out infinite;}
+.bgm-eq i:nth-child(2){animation-delay:-.35s;}.bgm-eq i:nth-child(3){animation-delay:-.7s;}
+@keyframes bgmEq{0%,100%{height:30%;}50%{height:100%;}}
+.bgm-vol{display:flex;align-items:center;gap:var(--sp-2);margin-top:var(--sp-3);font-size:var(--fs-sm);color:var(--steel);}
+.bgm-vol input{flex:1;accent-color:var(--brass);}
+.bgm-note{margin-top:var(--sp-2);font-size:var(--fs-xs);color:var(--steel);line-height:1.6;}
+.bgm-btn{display:none;margin-left:auto;background:rgba(0,0,0,.4);border:1px solid var(--wood-light);color:var(--brass-light);width:38px;height:38px;border-radius:var(--r-md);cursor:pointer;align-items:center;justify-content:center;}
+.bgm-btn.on{display:inline-flex;}
+.bgm-btn.on ~ .menu-btn{margin-left:var(--sp-2);}
+@media (prefers-reduced-motion: reduce){.bgm-eq i{animation:none;height:70%;}}
 #hookLayer{display:none;}
 .viewport.shelf-on #hookLayer,.viewport.gear-on #hookLayer{display:block;}
 .viewport.gear-on #hookLayer .empty-hook{display:none;}
@@ -771,6 +798,7 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 
 <div class="topbar">
   <div class="plate">GUITAR&nbsp;GARAGE<small>THE&nbsp;GARAGE</small></div>
+  <button class="bgm-btn" id="bgmBtn" aria-label="BGMを一時停止"></button>
   <button class="menu-btn" id="menuBtn"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></button>
 </div>
 
@@ -788,13 +816,12 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
     <button class="zone" data-z="tools" data-lbl="t" style="left:56.12%;top:39.26%;width:8.01%;height:24.41%" aria-label="道具箱"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-toolbox"/></svg> 道具箱</span></button>
     <button class="zone" data-z="books" data-lbl="t" style="left:77.15%;top:38.09%;width:11.39%;height:16.80%" aria-label="本棚"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-books"/></svg> 本棚</span></button>
     <button class="zone" data-z="memo" data-lbl="b" style="left:77.15%;top:55.27%;width:11.39%;height:10.35%" aria-label="メモ"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-note-pencil"/></svg> メモ</span></button>
-    <button class="zone" data-z="pedals" data-lbl="tr" style="left:85.61%;top:70.12%;width:14.39%;height:7.03%" aria-label="エフェクター"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-pedal"/></svg> エフェクター</span></button>
-    <button class="zone" data-z="practice" data-lbl="tr" style="left:91.28%;top:41.02%;width:8.72%;height:28.81%" aria-label="練習"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg> 練習</span></button>
+    <button class="zone" data-z="practice" data-lbl="tr" style="left:91.28%;top:41.02%;width:8.72%;height:34.18%" aria-label="練習"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg> 練習</span></button>
     <button class="zone" data-url="https://yagarguitar-stack.github.io/kotori-nome/" data-lbl="t" style="left:29.43%;top:65.62%;width:3.12%;height:7.81%" aria-label="ことりノーム"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-metronome"/></svg> ことりノーム</span></button>
   </div>
-  <div class="closeview" id="closeView"><img class="cz" id="closeImg" alt=""><div class="lighting"></div><div id="hookLayer"></div></div>
+  <div class="closeview" id="closeView"><img class="cz" id="closeImg" alt=""><div class="lighting"></div><div id="hookLayer"></div><button class="zone czone" data-z="pedals" data-lbl="t" style="left:67.71%;top:74.22%;width:16.93%;height:11.23%" aria-label="エフェクター"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-pedal"/></svg> エフェクター</span></button></div>
   <div class="zveil" id="zVeil"></div>
-  <button class="pr-openbtn" id="prOpenBtn"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg> 練習を開く</button>
+  <button class="pr-openbtn" id="prOpenBtn"><svg class="ic" aria-hidden="true"><use id="prOpenIc" href="#i-timer"/></svg> <span id="prOpenTx">練習を開く</span></button>
   <button class="backbtn" id="backBtn">‹ 工房全体へ</button>
   <div class="wallpager" id="wallPager"></div>
   <div class="adjustbar" id="adjustBar"></div>
@@ -821,7 +848,6 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
   <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> データを書き出す</h4><p>すべての愛器・記録を1つのファイルに保存します。機種変更やバックアップに。</p><button class="btn btn-brass btn-block" id="btnExport">バックアップを書き出す</button></div>
   <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-download-simple"/></svg> データを読み込む</h4><p>書き出したファイルから復元します。現在のデータは置き換わります。</p><button class="btn btn-ghost btn-block" id="btnImport">ファイルを選んで読み込む</button><input type="file" id="importFile" accept="application/json,.json" class="hidden-input"></div>
   <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> すべて消去</h4><p>登録した愛器と記録をすべて削除します。この操作は戻せません。</p><button class="btn btn-danger btn-block" id="btnWipe">全データを消去する</button></div>
-  <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-music-notes"/></svg> BGM（工房のアンビエント）</h4><p>静かな環境音をその場で生成して流します。音源を持たないのでファイルは重くなりません。練習タイマー作動中は自動で止まります。最初の画面タップで鳴り始めます。</p><label class="ds-lamp"><input type="checkbox" id="bgmToggle"><span class="ds-led"></span><span class="sw-lbl" id="bgmLbl">オフ</span></label></div>
   <div class="set-row"><h4>照明プレビュー</h4><p>今だけ時間帯を切り替えて確認できます（アプリを開き直すと自動に戻ります）</p><div class="btn-row" id="litPreview"><button class="btn btn-ghost" data-lit="morning">朝</button><button class="btn btn-ghost" data-lit="day">昼</button><button class="btn btn-ghost" data-lit="evening">夕</button><button class="btn btn-ghost" data-lit="night">夜</button><button class="btn btn-brass" data-lit="auto">自動</button></div></div>
   <div class="set-ver">GUITAR GARAGE — THE GARAGE ／ バージョン 2026.9.3<br>（パネルの外をタップ・パネルを下へ払って工房全体へ戻れるように／本棚の見出し・愛器の並べ替え・連続日数の数え方 修正）</div>
   <p style="text-align:center;color:var(--steel);font-size:var(--fs-xs);margin-top:20px;letter-spacing:1px;">GUITAR GARAGE — THE GARAGE · 愛器ゾーンver.</p>
@@ -1043,6 +1069,8 @@ function renderBooks(){
 }
 /* ===== camera / navigation ===== */
 var vp=document.getElementById('viewport'),sc=document.getElementById('scene'),back=document.getElementById('backBtn');
+/* 入ったときは部屋だけ見せ、ボタンで画面を開く場所 */
+var DEFER={practice:['練習を開く','timer'],repertoire:['ジュークボックスを開く','vinyl-record']};
 var ZIMG={shelf:'guitars',gear:'guitars',bench:'workbench',tools:'tools',books:'library',memo:'library',practice:'practice',pedals:'practice',repertoire:'loft',guide:'loft'};
 var closeView=document.getElementById('closeView'),closeImg=document.getElementById('closeImg'),zVeil=document.getElementById('zVeil');
 var reduceMo=matchMedia('(prefers-reduced-motion: reduce)').matches,zBusy=false,homeTimer=null;
@@ -1053,6 +1081,7 @@ setTimeout(function(){['guitars','workbench','tools','library','practice','loft'
 function openZone(id){
   currentZone=id;vp.classList.add('zoomed');
   vp.classList.toggle('shelf-on',id==='shelf');vp.classList.toggle('gear-on',id==='gear');vp.classList.toggle('practice-on',id==='practice');vp.classList.remove('pr-open');
+  var dfr=DEFER[id];vp.classList.toggle('defer-on',!!dfr);if(dfr){document.getElementById('prOpenTx').textContent=dfr[0];document.getElementById('prOpenIc').setAttribute('href','#i-'+dfr[1]);}
   document.querySelectorAll('.float').forEach(function(f){f.classList.toggle('show',f.id==='float-'+id);});
   var tf=document.getElementById('float-'+id);if(tf){tf.classList.remove('show');void tf.offsetWidth;tf.classList.add('show');}
   if(id==='shelf'||id==='gear')renderWall();
@@ -1090,9 +1119,9 @@ function goZone(id){
 function goHome(){
   stopTimerOnLeave();currentZone=null;
   document.querySelectorAll('.float.show').forEach(function(f){f.classList.add('leaving');setTimeout(function(){f.classList.remove('show','leaving');},320);});
-  if(reduceMo){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','pr-open');return;}
+  if(reduceMo){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','defer-on','pr-open');return;}
   closeView.classList.add('fading');
-  homeTimer=setTimeout(function(){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','pr-open');closeView.classList.remove('fading');},500);
+  homeTimer=setTimeout(function(){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','defer-on','pr-open');closeView.classList.remove('fading');},500);
 }
 /* 場所の枠：パソコンは押せばすぐ、スマホは1回目で枠を出し2回目で入る */
 var armedZone=null;
@@ -1105,7 +1134,7 @@ document.querySelectorAll('.zone').forEach(function(m){m.addEventListener('click
 });});
 document.addEventListener('click',function(e){if(armedZone&&!e.target.closest('.zone'))disarmZone();},true);
 back.addEventListener('click',goHome);
-document.getElementById('prOpenBtn').addEventListener('click',function(e){e.stopPropagation();vp.classList.add('pr-open');var f=document.getElementById('float-practice');if(f){f.classList.remove('show');void f.offsetWidth;f.classList.add('show');}});
+document.getElementById('prOpenBtn').addEventListener('click',function(e){e.stopPropagation();vp.classList.add('pr-open');var f=document.getElementById('float-'+currentZone);if(f){f.classList.remove('show');void f.offsetWidth;f.classList.add('show');}});
 /* パネルの外なら画面のどこをタップしても工房全体へ戻る */
 function tapCanClose(t){
   if(!vp.classList.contains('zoomed'))return false;
@@ -1285,7 +1314,8 @@ function renderRep(){
   var counts={wish:0,learning:0,done:0};db.songs.forEach(function(s){if(counts[s.state]!==undefined)counts[s.state]++;});
   var seg='<div class="rep-seg"><button class="'+(repFilter==='all'?'on':'')+'" data-rf="all">すべて<span class="rf-n">'+db.songs.length+'</span></button>'+
     SONG_STATES.map(function(s){return '<button class="'+(repFilter===s.id?'on':'')+'" data-rf="'+s.id+'">'+s.ic+' '+s.name+'<span class="rf-n">'+counts[s.id]+'</span></button>';}).join('')+'</div>';
-  el.innerHTML='<div class="glass rep-glass jukebox"><div class="jb-top"><div class="jb-arch"></div><div class="jb-title">JUKEBOX</div></div>'+hookedHtml()+'<div class="jb-sub">レパートリー</div>'+seg+repListHtml()+'<button class="btn btn-brass btn-block" id="songAdd" style="margin-top:10px">＋ 曲を追加</button></div>';
+  el.innerHTML='<div class="glass rep-glass jukebox"><div class="jb-top"><div class="jb-arch"></div><div class="jb-title">JUKEBOX</div></div><div class="bgm-box" id="bgmBox"></div>'+hookedHtml()+'<div class="jb-sub">レパートリー</div>'+seg+repListHtml()+'<button class="btn btn-brass btn-block" id="songAdd" style="margin-top:10px">＋ 曲を追加</button></div>';
+  renderBgm();
   var ha=document.getElementById('hookedAdd');if(ha)ha.addEventListener('click',function(){openHookedModal(null);});
   el.querySelectorAll('.hooked-row').forEach(function(r){r.addEventListener('click',function(){openHookedModal(r.dataset.id);});});
   el.querySelectorAll('.rep-seg button').forEach(function(b){b.addEventListener('click',function(){repFilter=b.dataset.rf;renderRep();});});
@@ -2048,30 +2078,58 @@ var toastTimer;function toast(msg){var t=document.getElementById('toast');t.text
 })();
 
 /* ===== boot ===== */
-/* ===== BGM: 工房のアンビエント（Web Audio・音源なし生成） ===== */
-var bgmCtx=null,bgmNodes=null,bgmPref=false;
-try{bgmPref=localStorage.getItem('aiki_carte_bgm')==='1';}catch(e){}
-function bgmBuild(){
-  var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-  var ctx=new AC();bgmCtx=ctx;
-  var master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
-  var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=560;lp.Q.value=0.5;lp.connect(master);
-  var freqs=[130.81,196.00,261.63,392.00],oscs=[];
-  freqs.forEach(function(f,i){var o=ctx.createOscillator();o.type=(i%2)?'sine':'triangle';o.frequency.value=f;o.detune.value=(i-1.5)*4;var g=ctx.createGain();g.gain.value=0.15/(i+1);o.connect(g);g.connect(lp);o.start();oscs.push(o);});
-  var lfo=ctx.createOscillator();lfo.frequency.value=0.06;var lfoG=ctx.createGain();lfoG.gain.value=0.018;lfo.connect(lfoG);lfoG.connect(master.gain);lfo.start();
-  var flfo=ctx.createOscillator();flfo.frequency.value=0.024;var flfoG=ctx.createGain();flfoG.gain.value=170;flfo.connect(flfoG);flfoG.connect(lp.frequency);flfo.start();
-  bgmNodes={master:master,oscs:oscs,extra:[lfo,flfo]};
-  master.gain.setTargetAtTime(0.055,ctx.currentTime,1.6);
+/* ===== BGM（ジュークボックスで選ぶ。1曲終わると次の曲へ、最後まで行ったら最初へ。練習タイマー中は止まる） ===== */
+var BGM=[
+  {title:'映画で見た町',src:'audio/eiga-de-mita-machi.mp3',len:'1:37'},
+  {title:'踊る理髪師',src:'audio/odoru-rihatsushi.mp3',len:'1:35'}
+];
+var BGM_PLAY='<svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/></svg>',BGM_PAUSE='<svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M216,48V208a16,16,0,0,1-16,16H160a16,16,0,0,1-16-16V48a16,16,0,0,1,16-16h40A16,16,0,0,1,216,48ZM96,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16H96a16,16,0,0,0,16-16V48A16,16,0,0,0,96,32Z"/></svg>';
+var bgmAudio=new Audio(),bgmIdx=-1,bgmFadeT=null,bgmDucked=false;
+bgmAudio.preload='none';
+function bgmVol(){var v=(db&&typeof db.bgmVol==='number')?db.bgmVol:0.5;return Math.max(0,Math.min(1,v));}
+function bgmFade(to,ms,done){
+  clearInterval(bgmFadeT);var from=bgmAudio.volume,steps=Math.max(1,Math.round(ms/40)),i=0;
+  bgmFadeT=setInterval(function(){i++;bgmAudio.volume=Math.max(0,Math.min(1,from+(to-from)*i/steps));if(i>=steps){clearInterval(bgmFadeT);if(done)done();}},40);
 }
-function bgmStartActual(){if(bgmCtx){if(bgmCtx.state==='suspended')bgmCtx.resume();return;}bgmBuild();}
-function bgmStopActual(){if(!bgmCtx)return;var ctx=bgmCtx,nd=bgmNodes;try{nd.master.gain.setTargetAtTime(0,ctx.currentTime,0.4);}catch(e){}setTimeout(function(){try{nd.oscs.forEach(function(o){o.stop();});nd.extra.forEach(function(o){o.stop();});ctx.close();}catch(e){}},700);bgmCtx=null;bgmNodes=null;}
-function bgmDuck(){if(bgmCtx&&bgmCtx.state==='running')bgmCtx.suspend();}
-function bgmUnduck(){if(bgmPref&&bgmCtx&&bgmCtx.state==='suspended')bgmCtx.resume();}
-function bgmUpdateUI(){var t=document.getElementById('bgmToggle');if(t){t.checked=bgmPref;document.getElementById('bgmLbl').textContent=bgmPref?'オン':'オフ';}}
-function bgmSetPref(on){bgmPref=on;try{localStorage.setItem('aiki_carte_bgm',on?'1':'0');}catch(e){}bgmUpdateUI();if(on){bgmStartActual();if(prRunning)bgmDuck();}else{bgmStopActual();}}
-document.getElementById('bgmToggle').addEventListener('change',function(){bgmSetPref(this.checked);});
-if(bgmPref){var bgmOnce=function(){document.removeEventListener('pointerdown',bgmOnce);if(bgmPref){bgmStartActual();if(prRunning)bgmDuck();}};document.addEventListener('pointerdown',bgmOnce);}
-bgmUpdateUI();
+function bgmGo(){bgmAudio.volume=0;var pr=bgmAudio.play();if(pr&&pr.catch)pr.catch(function(){bgmSync();});}
+function bgmStart(i){bgmIdx=i;bgmAudio.src=BGM[i].src;bgmGo();bgmFade(bgmVol(),800);bgmSync();}
+function bgmPlay(i){
+  bgmDucked=false;
+  if(i===bgmIdx){if(bgmAudio.paused)bgmResume();return;}
+  if(bgmIdx>=0&&!bgmAudio.paused){bgmFade(0,700,function(){bgmStart(i);});}else bgmStart(i);
+}
+function bgmPause(){bgmFade(0,400,function(){bgmAudio.pause();bgmSync();});}
+function bgmResume(){bgmDucked=false;bgmGo();bgmFade(bgmVol(),500);bgmSync();}
+function bgmStop(){bgmDucked=false;bgmFade(0,500,function(){bgmAudio.pause();bgmIdx=-1;bgmAudio.removeAttribute('src');bgmAudio.load();bgmSync();});}
+/* 練習タイマーの間は止め、終わったら戻す */
+function bgmDuck(){if(bgmIdx>=0&&!bgmAudio.paused){bgmDucked=true;bgmPause();}}
+function bgmUnduck(){if(bgmDucked&&bgmIdx>=0){bgmResume();}}
+bgmAudio.addEventListener('ended',function(){bgmStart((bgmIdx+1)%BGM.length);});
+bgmAudio.addEventListener('play',bgmSync);bgmAudio.addEventListener('pause',bgmSync);
+function bgmSync(){
+  var b=document.getElementById('bgmBtn');
+  if(b){var on=bgmIdx>=0;b.classList.toggle('on',on);b.innerHTML=bgmAudio.paused?BGM_PLAY:BGM_PAUSE;b.setAttribute('aria-label',bgmAudio.paused?'BGMを流す':'BGMを一時停止');b.title=on?BGM[bgmIdx].title:'';}
+  renderBgm();
+}
+function renderBgm(){
+  var el=document.getElementById('bgmBox');if(!el)return;
+  var rows=BGM.map(function(s,i){
+    var cur=i===bgmIdx,pz=cur&&bgmAudio.paused;
+    var mark=cur?(pz?BGM_PAUSE:'<span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></span>'):(i+1);
+    return '<button class="bgm-row'+(cur?' cur':'')+'" data-i="'+i+'"><span class="bgm-no">'+mark+'</span><span class="bgm-t">'+esc(s.title)+'</span><span class="bgm-len">'+s.len+'</span></button>';
+  }).join('');
+  var v=Math.round(bgmVol()*100);
+  el.innerHTML='<div class="bgm-head"><span class="bgm-lbl"><svg class="ic" aria-hidden="true"><use href="#i-music-notes"/></svg> BGM</span><button class="bgm-stop" id="bgmStop"'+(bgmIdx<0?' disabled':'')+'>止める</button></div>'+
+    '<div class="bgm-list">'+rows+'</div>'+
+    '<label class="bgm-vol">音量<input type="range" id="bgmVolIn" min="0" max="100" value="'+v+'"></label>'+
+    '<div class="bgm-note">曲を押すと流れ、終わると次の曲へ進みます。練習タイマーの間は止まります。<br>音楽：BGMer https://bgmer.net</div>';
+  el.querySelectorAll('.bgm-row').forEach(function(r){r.addEventListener('click',function(){
+    var i=+r.dataset.i;if(i===bgmIdx&&!bgmAudio.paused)bgmPause();else bgmPlay(i);
+  });});
+  var st=document.getElementById('bgmStop');if(st)st.addEventListener('click',bgmStop);
+  var vi=document.getElementById('bgmVolIn');if(vi)vi.addEventListener('input',function(){db.bgmVol=vi.value/100;clearInterval(bgmFadeT);if(!bgmAudio.paused)bgmAudio.volume=db.bgmVol;save();});
+}
+document.getElementById('bgmBtn').addEventListener('click',function(e){e.stopPropagation();if(bgmIdx<0)return;if(bgmAudio.paused)bgmResume();else bgmPause();});
 
 function lightingPhase(h){if(h>=6&&h<9)return 'morning';if(h>=9&&h<17)return 'day';if(h>=17&&h<21)return 'evening';return 'night';}
 var lightingOverride=null;
