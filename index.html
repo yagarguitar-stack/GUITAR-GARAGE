@@ -798,7 +798,8 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .zplate span{font-size:var(--fs-sm);font-weight:700;color:var(--paper);}
 .closeview{transition:transform .45s cubic-bezier(.33,0,.2,1);}
 .czone{z-index:3;}
-#hookLayer{position:relative;z-index:4;}
+#hookLayer{position:absolute;inset:0;z-index:4;pointer-events:none;}
+#hookLayer>*{pointer-events:auto;}
 #zcards{position:absolute;inset:0;z-index:5;pointer-events:none;}
 .viewport.panel-on #zcards,.viewport.panel-on .zplate{visibility:hidden;}
 .viewport:not(.zoomed) #zcards{display:none;}
