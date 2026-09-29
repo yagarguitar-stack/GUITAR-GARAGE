@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>GUITAR GARAGE — THE GARAGE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rye&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Syuku&family=Rye&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@700&display=swap">
 <!-- 共通デザイン v1：design-system/v1 の4ファイルと同じ中身。共有を始めたら各ブロックを共通ファイルの読み込みに置き換える -->
 <style id="ds-fonts">
 :root{
@@ -197,8 +197,8 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 /* ---- boot / intro ---- */
 #boot{position:fixed;inset:0;background:#0a0705;z-index:300;pointer-events:none;animation:bootFade .8s ease .55s forwards;}
 @keyframes bootFade{from{opacity:1;}to{opacity:0;visibility:hidden;}}
-@keyframes bootZoom{0%{opacity:.3;transform:scale(1.05);}100%{opacity:1;transform:scale(1);}}
-#viewport{animation:bootZoom 1.15s cubic-bezier(.3,.7,.25,1) .2s both;}
+@keyframes bootZoom{0%{opacity:.3;transform:scale(1.05);}100%{opacity:1;transform:none;}}
+#viewport{animation:bootZoom 1.15s cubic-bezier(.3,.7,.25,1) .2s backwards;}
 @keyframes plateIn{0%{opacity:0;transform:translateY(-9px);}100%{opacity:1;transform:translateY(0);}}
 .plate{animation:plateIn .7s ease .95s both;}
 @keyframes hintIn{from{opacity:0;}to{opacity:1;}}
@@ -783,6 +783,113 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .bgm-btn.on{display:inline-flex;}
 .bgm-btn.on ~ .menu-btn{margin-left:var(--sp-2);}
 @media (prefers-reduced-motion: reduce){.bgm-eq i{animation:none;height:70%;}}
+/* ===== 2026-09 改：場所の名前・枠・札・説明・画面 ===== */
+.zplate{position:absolute;left:12px;top:56px;z-index:8;display:none;flex-direction:column;background:rgba(10,6,3,.78);border:1px solid rgba(234,223,196,.35);border-radius:var(--r-sm);padding:5px 12px 6px;line-height:1.25;pointer-events:none;}
+.viewport.zoomed:not(.adjusting) .zplate{display:flex;}
+.zplate b{font-family:var(--font-sign);font-weight:400;font-size:var(--fs-md);letter-spacing:1px;color:var(--paper);}
+.zplate span{font-size:var(--fs-sm);font-weight:700;color:var(--paper);}
+.closeview{transition:transform .45s cubic-bezier(.33,0,.2,1);}
+.czone{z-index:3;}
+#hookLayer{position:relative;z-index:4;}
+#zcards{position:absolute;inset:0;z-index:5;pointer-events:none;}
+.viewport.panel-on #zcards,.viewport.panel-on .zplate{visibility:hidden;}
+.viewport:not(.zoomed) #zcards{display:none;}
+.zone[data-lbl="in"] .m-lbl{bottom:auto;top:8px;left:8px;}
+@keyframes zHint{0%{opacity:0}20%{opacity:.9}60%{opacity:.9}100%{opacity:0}}
+.hinting .zone .z-fr,.hinting .zone .m-lbl{animation:zHint 2.6s ease-in-out both;}
+.hinting .zone:hover .z-fr,.hinting .zone:hover .m-lbl{animation:none;opacity:1;}
+/* 札（見た目は道具箱の札のまま、少し小さく） */
+.tag.zc{position:absolute;translate:-50% -50%;width:108px;min-height:0;padding:12px 6px 8px;pointer-events:auto;cursor:pointer;}
+.tag.zc b{font-size:var(--fs-xs);}
+.tag.zc small{font-size:10px;margin-top:2px;}
+.tag.zc:hover{filter:brightness(1.15);}
+.tag.zc.soon{opacity:.55;}
+/* こんなことができます */
+.xbox{position:absolute;left:50%;bottom:18px;z-index:9;translate:-50% 16px;opacity:0;pointer-events:none;transition:opacity .22s,translate .28s cubic-bezier(.33,0,.2,1);width:min(560px,calc(100% - 32px));}
+.xbox.on{opacity:1;translate:-50% 0;pointer-events:auto;}
+.xb-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 auto 6px;width:max-content;max-width:100%;padding:3px 6px 3px 14px;background:rgba(10,6,3,.85);border:1px solid rgba(200,150,46,.6);border-radius:var(--r-sm);font-size:var(--fs-sm);font-weight:700;color:var(--brass-light);}
+.xb-x{background:none;border:none;color:var(--paper-dim);font-size:18px;line-height:1;cursor:pointer;padding:0 4px;}
+.xb-b{padding:14px 16px 10px;border-radius:var(--r-sm);background:linear-gradient(180deg,rgba(40,26,14,.94),rgba(24,15,8,.96));border-bottom:8px solid #5c3d22;box-shadow:0 10px 24px rgba(0,0,0,.65);}
+.xb-in{margin:0 0 8px;font-size:var(--fs-sm);color:var(--paper);}
+.xb-row{display:flex;gap:12px;padding:7px 0;border-top:1px solid rgba(200,150,46,.2);font-size:var(--fs-sm);line-height:1.6;}
+.xb-row b{flex:0 0 150px;color:var(--brass-light);}
+.xb-row span{color:var(--paper-dim);}
+@media (max-width:560px){.xb-row{flex-direction:column;gap:2px;}.xb-row b{flex:none;}}
+/* 下の画面：中身の量に合わせた高さ */
+.viewport .float.show,.viewport .float.leaving{display:flex!important;flex-direction:column;}
+.viewport .float>.glass{min-height:0;overflow:auto;}
+@media (min-width:701px){.viewport .float{position:absolute;max-height:88%;}}
+@media (max-width:700px){
+  .viewport .float{max-height:calc(100vh - var(--vpb,300px) + 40px);}
+  .viewport .pclose{position:fixed;}
+  /* 札と説明は、絵の下の空いた所に並べる */
+  #zcards{position:fixed;left:0;right:0;top:calc(var(--vpb,300px) + 12px);bottom:auto;inset-inline:0;display:flex;flex-wrap:wrap;justify-content:center;gap:12px 10px;padding:6px 12px;}
+  .tag.zc{position:relative;left:auto!important;top:auto!important;translate:none;width:31%;max-width:130px;}
+  .xbox{position:fixed;top:calc(var(--vpb,300px) + 8px);bottom:auto;}
+  .zplate{top:52px;}
+}
+.pclose{position:absolute;right:16px;z-index:8;display:none;font-family:inherit;font-size:var(--fs-sm);color:var(--paper);background:rgba(20,12,6,.9);border:1px solid var(--brass);border-radius:var(--r-pill);padding:4px 14px;cursor:pointer;}
+.viewport.panel-on .pclose{display:block;}
+/* ジュークボックスの操作盤 */
+.jbplayer{position:absolute;left:50%;bottom:16px;translate:-50% 0;z-index:7;display:none;align-items:center;gap:14px;padding:12px 18px;border-radius:40px 40px 14px 14px;background:linear-gradient(180deg,#7a1410,#4a0906 60%,#2a0503);border:3px solid #d9d4c8;box-shadow:0 0 0 1px #000,inset 0 2px 0 rgba(255,255,255,.25),inset 0 -3px 6px rgba(0,0,0,.5),0 10px 26px rgba(0,0,0,.7),0 0 40px rgba(255,160,60,.28);}
+.viewport.jb-on .jbplayer{display:flex;}
+.pl-card{min-width:170px;padding:6px 14px 7px;text-align:center;border-radius:4px;background:linear-gradient(180deg,#fbf3dc,#efe0b8);border:2px solid #b3261e;box-shadow:0 0 0 2px #e8e2d4,inset 0 0 8px rgba(120,60,20,.25),0 0 14px rgba(255,200,120,.35);color:#3a1a0c;}
+.pl-no{font-family:var(--font-sign);font-size:11px;color:#b3261e;letter-spacing:1px;}
+.pl-t{font-family:"Zen Old Mincho",serif;font-weight:700;font-size:16px;line-height:1.3;border-top:1px solid #b3261e;border-bottom:1px solid #b3261e;margin:2px 0;padding:1px 0;}
+.pl-sub{font-family:var(--font-sign);font-size:10px;letter-spacing:2px;color:#7a4a2a;}
+.pl-sub.off{color:#a09080;}
+.pl-key{display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font:inherit;color:#f3e6c4;}
+.pl-key small,.pl-vol small{font-size:11px;letter-spacing:1px;}
+.pl-cap{width:50px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;letter-spacing:-1px;color:#5a1a0c;background:linear-gradient(180deg,#fffaf0,#e9dfc8 60%,#cbbd9e);border:2px solid #c9c2b4;box-shadow:0 0 0 1px #000,0 4px 0 #8a7f6a,0 6px 8px rgba(0,0,0,.5),inset 0 1px 0 #fff;transition:transform .08s,box-shadow .08s;}
+.pl-key:hover .pl-cap{filter:brightness(1.05);}
+.pl-key:active .pl-cap{transform:translateY(3px);box-shadow:0 0 0 1px #000,0 1px 0 #8a7f6a,0 2px 4px rgba(0,0,0,.5),inset 0 1px 0 #fff;}
+.pl-vol{display:flex;flex-direction:column;align-items:center;gap:5px;color:#f3e6c4;}
+.knob{width:40px;height:40px;border-radius:50%;position:relative;cursor:ns-resize;touch-action:none;background:radial-gradient(circle at 35% 30%,#6a4a34,#2a1a10 70%);border:3px solid #d9d4c8;box-shadow:0 0 0 1px #000,0 4px 8px rgba(0,0,0,.6),inset 0 1px 2px rgba(255,255,255,.3);}
+.knob .kn-dot{position:absolute;left:50%;top:4px;width:4px;height:10px;margin-left:-2px;border-radius:2px;background:#f0cf7a;box-shadow:0 0 6px #f0cf7a;transform-origin:2px 16px;}
+.pl-key:focus-visible,.knob:focus-visible,.pclose:focus-visible,.xb-x:focus-visible,.tag.zc:focus-visible{outline:2px solid var(--brass-light);outline-offset:3px;}
+@media (max-width:560px){.jbplayer{gap:8px;padding:10px 10px;}.pl-card{min-width:120px;}.pl-t{font-size:14px;}}
+/* 曲の記録：黒板 */
+#float-repertoire .chalkboard{position:relative;padding:18px 20px 40px;border:10px solid #6b4a2c;border-radius:4px;font-family:"Yuji Syuku",serif;color:#eef0e8;background:radial-gradient(ellipse at 20% 30%,rgba(255,255,255,.06),transparent 45%),radial-gradient(ellipse at 80% 70%,rgba(255,255,255,.05),transparent 40%),linear-gradient(160deg,#27352c,#1c2620);box-shadow:inset 0 0 30px rgba(0,0,0,.55),0 8px 20px rgba(0,0,0,.5);text-shadow:0 0 1px rgba(255,255,255,.55),0 0 3px rgba(255,255,255,.12);}
+#float-repertoire .chalkboard::before{display:none;}
+#float-repertoire .chalkboard *{font-family:"Yuji Syuku",serif;}
+#float-repertoire .ck-title,#float-repertoire .hooked-lbl,#float-repertoire .jb-sub,#float-repertoire .hk-body b,#float-repertoire .sr-body b{display:inline-block;transform:skewX(-7deg);}
+#float-repertoire .ck-title{font-size:20px;color:#fff6c8;margin-bottom:10px;border-bottom:2px dashed rgba(255,246,200,.6);}
+#float-repertoire .hooked-wrap{background:none;border:none;padding:0;}
+#float-repertoire .hooked-lbl{color:#fff6c8;font-size:17px;}
+#float-repertoire .hooked-lbl .ic{color:#ffe08a;}
+#float-repertoire .hooked-add{background:none;border:2px dashed rgba(238,240,232,.6);color:#eef0e8;}
+#float-repertoire .hooked-row,#float-repertoire .song-row{background:none;border:none;border-top:1px dashed rgba(238,240,232,.18);color:#eef0e8;}
+#float-repertoire .hooked-row small,#float-repertoire .sr-body small,#float-repertoire .sr-body span{color:#bcd6c6;}
+#float-repertoire .hooked-empty,#float-repertoire p{color:#cfdcd2;}
+#float-repertoire .jb-sub{color:#fff6c8;font-size:17px;letter-spacing:1px;border-top:none;border-bottom:2px dashed rgba(255,246,200,.6);padding-top:0;margin-top:16px;}
+#float-repertoire .rep-seg button{background:none;border:2px solid transparent;color:#eef0e8;}
+#float-repertoire .rep-seg button.on{border-color:#f7c6c6;border-radius:50% 45% 55% 48%/60% 50% 55% 45%;color:#ffd9d9;}
+#float-repertoire .rep-seg .rf-n{color:#ffe08a;}
+#float-repertoire .song-state{background:none;border:1px dashed rgba(238,240,232,.5);color:#ffe08a;}
+#float-repertoire #songAdd{background:none;border:2px dashed rgba(238,240,232,.6);color:#eef0e8;box-shadow:none;font-weight:400;}
+#float-repertoire #songAdd:hover{border-style:solid;}
+#float-repertoire .ck-tray{position:absolute;left:0;right:0;bottom:0;height:20px;background:linear-gradient(180deg,#6b4a2c,#3e2814);box-shadow:inset 0 3px 4px rgba(0,0,0,.5);}
+#float-repertoire .ck-tray i{position:absolute;bottom:6px;height:6px;width:34px;border-radius:3px;}
+#float-repertoire .ck-tray .c1{left:18%;background:#f4f1e6;}#float-repertoire .ck-tray .c2{left:24%;width:22px;background:#f5d67a;}#float-repertoire .ck-tray .c3{left:28%;width:26px;background:#f2a8a8;}
+#float-repertoire .ck-tray b{position:absolute;right:16%;bottom:4px;width:56px;height:12px;border-radius:2px;background:linear-gradient(180deg,#8a6a44 40%,#dcd6c8 40%);}
+/* 案内：館内の案内板 */
+#float-guide .lboard{border:8px solid #8a6238;border-radius:4px;background:repeating-linear-gradient(180deg,#141414 0 5px,#0b0b0b 5px 6px);box-shadow:inset 0 0 20px rgba(0,0,0,.8),0 8px 20px rgba(0,0,0,.5);}
+#float-guide .lboard::before{display:none;}
+#float-guide .lboard>h3{display:none;}
+#float-guide .lb-top{text-align:center;margin-bottom:6px;padding:4px 0 10px;border-bottom:1px solid #333;}
+#float-guide .lb-top span{display:block;font-family:var(--font-sign);font-size:22px;letter-spacing:3px;color:#f2eee4;}
+#float-guide .lb-top small{font-size:12px;letter-spacing:6px;color:#bdb6a6;}
+#float-guide .gd-sec{color:#bdb6a6;letter-spacing:4px;text-align:center;}
+#float-guide .gd-row{background:none;border:none;border-radius:0;margin:0;color:#f2eee4;}
+#float-guide .gd-place{flex-direction:row;align-items:baseline;gap:8px;padding:6px 4px;}
+#float-guide .gd-place .gd-t{flex:0 1 auto;}
+#float-guide .gd-t b{color:#f2eee4;letter-spacing:2px;}
+#float-guide .gd-t span{color:#bdb6a6;}
+#float-guide .gd-dots{flex:1;border-bottom:2px dotted #6d685e;transform:translateY(-4px);min-width:20px;}
+#float-guide .gd-where{font-size:var(--fs-sm);color:#d8d2c2;white-space:nowrap;}
+#float-guide .gd-ar{color:var(--brass-light);}
+#float-guide .gd-when:not(.gd-place){border-top:1px solid #2a2a2a;}
+#float-guide .gd-chip{background:#1d1d1d;border-color:#555;color:#f2eee4;}
 #hookLayer{display:none;}
 .viewport.shelf-on #hookLayer{display:block;}
 .viewport.gear-on #hookLayer .empty-hook{display:none;}
@@ -809,7 +916,7 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
     <div class="lighting" id="lighting"></div>
     <!-- 場所の枠（パソコン：合わせると出る／スマホ：1回目で出て2回目で入る） -->
     <button class="zone" data-z="shelf" data-lbl="t" style="left:1.43%;top:25.59%;width:14.19%;height:17.87%" aria-label="愛器"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-guitar"/></svg> 愛器</span></button>
-    <button class="zone" data-z="repertoire" data-lbl="t" style="left:35.48%;top:14.45%;width:5.99%;height:15.04%" aria-label="ジュークボックス"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-vinyl-record"/></svg> ジュークボックス</span></button>
+    <button class="zone" data-z="jukebox" data-lbl="t" style="left:35.48%;top:14.45%;width:5.99%;height:15.04%" aria-label="ジュークボックス"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-vinyl-record"/></svg> ジュークボックス</span></button>
     <button class="zone" data-z="guide" data-lbl="t" style="left:43.49%;top:9.57%;width:23.70%;height:13.48%" aria-label="案内"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-map-trifold"/></svg> 案内</span></button>
     <button class="zone" data-z="bench" data-lbl="t" style="left:27.99%;top:38.87%;width:14.97%;height:25.59%" aria-label="整備台"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg> 整備台</span></button>
     <button class="zone" data-z="tools" data-lbl="t" style="left:56.12%;top:39.26%;width:8.01%;height:24.41%" aria-label="道具箱"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-toolbox"/></svg> 道具箱</span></button>
@@ -817,9 +924,17 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
     <button class="zone" data-z="practice" data-lbl="tr" style="left:91.28%;top:41.02%;width:8.72%;height:34.18%" aria-label="練習"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg> 練習</span></button>
     <button class="zone" data-url="https://yagarguitar-stack.github.io/kotori-nome/" data-lbl="t" style="left:29.43%;top:65.62%;width:3.12%;height:7.81%" aria-label="ことりノーム"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-metronome"/></svg> ことりノーム</span></button>
   </div>
-  <div class="closeview" id="closeView"><img class="cz" id="closeImg" alt=""><div class="lighting"></div><div id="hookLayer"></div><button class="zone czone" data-z="memo" data-lbl="t" style="left:37.76%;top:55.66%;width:9.24%;height:4.10%" aria-label="メモ"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-note-pencil"/></svg> メモ</span></button><button class="zone czone" data-z="gear" data-lbl="t" style="left:67.71%;top:74.22%;width:16.93%;height:11.23%" aria-label="機材・エフェクター"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-pedal"/></svg> 機材・エフェクター</span></button></div>
+  <div class="closeview" id="closeView"><img class="cz" id="closeImg" alt=""><div class="lighting"></div><div id="czones"></div><div id="hookLayer"></div><div id="zcards"></div></div>
   <div class="zveil" id="zVeil"></div>
-  <button class="pr-openbtn" id="prOpenBtn"><svg class="ic" aria-hidden="true"><use id="prOpenIc" href="#i-timer"/></svg> <span id="prOpenTx">練習を開く</span></button>
+  <div class="zplate" id="zPlate"><b id="zpEn"></b><span id="zpJa"></span></div>
+  <button class="pclose" id="pClose">閉じる</button>
+  <div class="xbox" id="xBox" role="dialog" aria-labelledby="xbT"><div class="xb-h"><span id="xbT"></span><button class="xb-x" id="xbX" aria-label="閉じる">×</button></div><div class="xb-b" id="xbB"></div></div>
+  <div class="jbplayer" id="jbPlayer" aria-label="BGM の操作">
+    <div class="pl-card"><div class="pl-no" id="plN">A-1</div><div class="pl-t" id="plT"></div><div class="pl-sub" id="plS">STOPPED</div></div>
+    <button class="pl-key" id="plPlay"><span class="pl-cap" id="plIc">▶</span><small id="plLbl">流す</small></button>
+    <button class="pl-key" id="plNext"><span class="pl-cap">▶▶</span><small>次の曲</small></button>
+    <div class="pl-vol"><div class="knob" id="plKnob" role="slider" tabindex="0" aria-label="音量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><span class="kn-dot"></span></div><small>音量</small></div>
+  </div>
   <button class="backbtn" id="backBtn">‹ 工房全体へ</button>
   <div class="wallpager" id="wallPager"></div>
   <div class="adjustbar" id="adjustBar"></div>
@@ -942,15 +1057,16 @@ function worstStatus(g){var w='ok',rank={ok:0,warn:1,bad:2,none:-1};MAINT.forEac
 
 /* ===== guide (案内) ===== */
 var GUIDE_MAP=[
-  ['愛器','持っているギターを登録する'],
-  ['機材・エフェクター','機材の登録、つなぐ順番、エフェクターのツール'],
-  ['ジュークボックス','弾ける曲と練習中の曲を記録する'],
-  ['練習','練習時間を測り、週の目標を決める'],
-  ['メモ','思いついたことを書き留める'],
-  ['整備台','弦交換の時期を管理し、手順を読む'],
-  ['道具箱','練習に使う道具を開く'],
-  ['本棚','音楽の知識を読む'],
-  ['ことりノーム','メトロノーム、リズムゲーム']
+  ['愛器','持っているギターを登録する','1F 左の壁'],
+  ['整備台','弦交換の時期を管理し、手順を読む','1F 左奥'],
+  ['道具箱','練習に使う道具を開く','1F 中央奥'],
+  ['本棚','音楽理論の本・ギタリスト図鑑','1F 右奥'],
+  ['メモ','思いついたことを書き留める','本棚の机'],
+  ['練習','練習時間を測り、週の目標を決める','練習場所の椅子'],
+  ['機材・エフェクター','機材の登録、SOUND SHAPES','練習場所の足元'],
+  ['曲の記録','いまハマってる曲とレパートリー','2F 黒板'],
+  ['ジュークボックス','BGM を流す','2F 左'],
+  ['ことりノーム','メトロノーム、リズムゲーム','手前のテーブル']
 ];
 var GUIDE_WHEN=[
   ['チューニングを合わせたい','CanaryTune'],
@@ -966,9 +1082,9 @@ var GUIDE_WHEN=[
 ];
 function renderGuideMap(){
   var el=document.getElementById('float-guide'),h='';
-  h+='<div class="gd-sec">工房の見取り図</div>';
+  h+='<div class="lb-top"><span>GUITAR GARAGE</span><small>工房のご案内</small></div><div class="gd-sec">工房の見取り図</div>';
   for(var i=0;i<GUIDE_MAP.length;i++){
-    h+='<div class="gd-row gd-when gd-place" role="button" tabindex="0" data-place="'+attr(GUIDE_MAP[i][0])+'"><span class="gd-t"><b>'+esc(GUIDE_MAP[i][0])+'</b><span>'+esc(GUIDE_MAP[i][1])+'</span></span><span class="gd-ar">›</span></div>';
+    h+='<div class="gd-row gd-when gd-place" role="button" tabindex="0" data-place="'+attr(GUIDE_MAP[i][0])+'"><span class="gd-t"><b>'+esc(GUIDE_MAP[i][0])+'</b><span>'+esc(GUIDE_MAP[i][1])+'</span></span><span class="gd-dots"></span><span class="gd-where">'+esc(GUIDE_MAP[i][2]||'')+'</span><span class="gd-ar">›</span></div>';
   }
   h+='<div class="gd-sec">こんなときは</div>';
   for(var j=0;j<GUIDE_WHEN.length;j++){
@@ -981,7 +1097,7 @@ function renderGuideMap(){
       h+='<div class="gd-row gd-when'+(u?' gd-tap" role="button" tabindex="0" data-url="'+attr(u)+'"':'"')+'><span class="gd-t"><b>'+esc(w[0])+'</b><span>'+esc(w[1])+'</span></span>'+(u?'<span class="gd-ar">›</span>':'')+'</div>';
     }
   }
-  el.innerHTML='<div class="glass tools-glass"><h3><svg class="ic" aria-hidden="true"><use href="#i-map-trifold"/></svg> 案内 — Guide</h3>'+h+'</div>';
+  el.innerHTML='<div class="glass lboard tools-glass"><h3><svg class="ic" aria-hidden="true"><use href="#i-map-trifold"/></svg> 案内 — Guide</h3>'+h+'</div>';
   el.querySelectorAll('.gd-tap').forEach(function(r){
     r.addEventListener('click',function(){DS.open(r,r.dataset.url);});
     r.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();DS.open(r,r.dataset.url);}});
@@ -994,18 +1110,20 @@ function renderGuideMap(){
   });
 }
 /* 見取り図の名前から、その場所へ移る（ことりノームは別ツールを開く） */
+var NOME_URL='https://yagarguitar-stack.github.io/kotori-nome/';
+var PLACE_GO={'愛器':['shelf'],'整備台':['bench'],'道具箱':['tools'],'本棚':['books'],'メモ':['books','memo'],'練習':['practice','practice'],'機材・エフェクター':['practice'],'曲の記録':['guide','repertoire'],'ジュークボックス':['jukebox']};
 function goPlace(name){
-  var mk=[].slice.call(document.querySelectorAll('.zone')).find(function(m){return m.querySelector('.m-lbl').textContent.trim()===name;});
-  if(!mk)return;
-  if(mk.dataset.url){window.open(mk.dataset.url,'_blank');return;}
-  goZone(mk.dataset.z);
+  if(name==='ことりノーム'){window.open(NOME_URL,'_blank');return;}
+  var g=PLACE_GO[name];if(!g)return;
+  closePanel();
+  if(currentZone===g[0]){if(g[1])openPanel(g[1]);return;}
+  pendingPanel=g[1]||null;goZone(g[0]);
 }
 /* ツール名からURLを探す（道具箱・本棚・エフェクター・ことりノーム） */
 function toolUrl(name){
   var all=[].concat(TOOLS,BOOKS,PEDAL_TAGS);
   for(var i=0;i<all.length;i++){if(all[i].name===name)return all[i].url;}
-  var mk=document.querySelector('.link-marker');
-  if(name==='ことりノーム'&&mk)return mk.dataset.url;
+  if(name==='ことりノーム')return NOME_URL;
   return null;
 }
 
@@ -1066,39 +1184,168 @@ function renderBooks(){
 }
 /* ===== camera / navigation ===== */
 var vp=document.getElementById('viewport'),sc=document.getElementById('scene'),back=document.getElementById('backBtn');
-/* 入ったときは部屋だけ見せ、ボタンで画面を開く場所 */
-var DEFER={practice:['練習を開く','timer'],repertoire:['ジュークボックスを開く','vinyl-record'],guide:['案内を開く','map-trifold'],gear:['機材・エフェクターを開く','pedal']};
-var ZIMG={shelf:'guitars',gear:'practice',bench:'workbench',tools:'tools',books:'library',memo:'library',practice:'practice',pedals:'practice',repertoire:'loft',guide:'loft'};
+/* ===== 場所と絵の中の枠（2026-09 改） ===== */
+var ZONES={
+  shelf:{img:'guitars',en:'GUITARS',ja:'愛器',fy:.33},
+  bench:{img:'workbench',en:'WORKBENCH',ja:'整備台',fy:.55},
+  tools:{img:'tools',en:'TOOLS',ja:'道具箱',fy:.4},
+  books:{img:'library',en:'LIBRARY',ja:'本棚',fy:.5},
+  practice:{img:'practice',en:'PRACTICE',ja:'練習',fy:.6},
+  jukebox:{img:'jukebox',en:'JUKEBOX',ja:'ジュークボックス',player:1},
+  guide:{img:'loft',en:'LOUNGE',ja:'2階のラウンジ',fy:.25}
+};
+/* 絵の中の枠（元画像 1536×1024 の座標）。panel：画面を開く／group：説明を出す／link：別のタブで開く／go：別の場所へ */
+var CZ={
+  shelf:[{n:'愛器の壁',r:[455,225,625,335],panel:'shelf',ic:'guitar'},{n:'ことりノーム',r:[635,700,70,115],link:'ことりノーム',ic:'metronome'}],
+  bench:[{n:'弦交換・手入れ',r:[460,470,700,180],panel:'bench',ic:'wrench'}],
+  tools:[{n:'道具（ツール）',r:[240,165,610,550],group:'tools',ic:'toolbox'}],
+  books:[{n:'音楽理論の本',r:[378,168,527,310],group:'theory',ic:'books'},{n:'ギタリスト図鑑',r:[905,95,80,510],link:'ギタリスト図鑑',ic:'books'},{n:'メモ',r:[580,570,142,42],panel:'memo',ic:'note-pencil'}],
+  practice:[{n:'練習開始',r:[785,600,210,300],panel:'practice',ic:'timer'},{n:'ScoreLine シリーズ',r:[895,395,262,130],group:'scoreline',ic:'music-notes'},{n:'エフェクター',r:[1040,760,260,115],group:'pedals',ic:'pedal'}],
+  guide:[{n:'案内',r:[705,38,495,184],panel:'guide',ic:'map-trifold'},{n:'曲の記録',r:[800,226,570,170],panel:'repertoire',ic:'vinyl-record'},{n:'ジュークボックスへ',r:[310,225,195,340],go:'jukebox',ic:'vinyl-record'}]
+};
+/* 札：場所に着いたら最初から出す（位置は元画像の座標、札の中心） */
+var GROUPS={
+  tools:{t:'道具箱',intro:'練習の前後に手に取る、小さな道具たちです。',zone:'tools',items:[['CanaryTune',405,770],['リズトレ',705,770],['Mockingbird',405,852],['フレットボードトレーナー',705,852]]},
+  theory:{t:'音楽理論の本',intro:'読み物として、順に学べる教本です。',zone:'books',items:[['ハーモニーツリー',545,466],['Woodpecker',745,466]]},
+  scoreline:{t:'ScoreLine シリーズ',intro:'譜面を書いて、曲を形にするための道具です。',zone:'practice',items:[['ScoreLineTab',866,322],['ScoreLineLead',1026,322],['ScoreLineCompass',1186,322]]},
+  pedals:{t:'エフェクター',intro:'足元のボードから、エフェクターの世界へ。',zone:'practice',items:[['SOUND SHAPES',1165,852],['機材リスト',790,552,'gear']]}
+};
+var DESC={
+  'CanaryTune':'音程を合わせ、チョーキングで狙った音まで上がっているかを確かめられます。',
+  'リズトレ':'音符の長さを聞いて・叩いて覚えられます。',
+  'Mockingbird':'聞こえた音を当てる練習で、耳コピの力を鍛えられます。',
+  'フレットボードトレーナー':'指板の音の位置やスケールを覚え、ウォームアップにも使えます。',
+  'ハーモニーツリー':'ポピュラー音楽の理論を、順番に学べます。',
+  'Woodpecker':'リズムの基礎を、順番に学べます。',
+  'ScoreLineTab':'TAB譜を書いて、再生して確かめられます。',
+  'ScoreLineLead':'コード進行を書き、進行の助言を受けられます。',
+  'ScoreLineCompass':'曲づくりを助けます（準備中）。',
+  'SOUND SHAPES':'エフェクターの種類と音の変わり方を、図鑑のように調べられます。',
+  '機材リスト':'持っている機材を登録し、つなぐ順番を決められます。'
+};
+var NOTE_EXTRA={'ScoreLineCompass':'作曲支援','機材リスト':'持っている機材'};
+function findTool(name){var all=[].concat(TOOLS,BOOKS,PEDAL_TAGS);for(var i=0;i<all.length;i++){if(all[i].name===name)return all[i];}return null;}
 var closeView=document.getElementById('closeView'),closeImg=document.getElementById('closeImg'),zVeil=document.getElementById('zVeil');
-var reduceMo=matchMedia('(prefers-reduced-motion: reduce)').matches,zBusy=false,homeTimer=null;
+var czBox=document.getElementById('czones'),cardBox=document.getElementById('zcards'),xBox=document.getElementById('xBox'),pClose=document.getElementById('pClose');
+var reduceMo=matchMedia('(prefers-reduced-motion: reduce)').matches,zBusy=false,homeTimer=null,pendingPanel=null,openPid=null;
 var canHover=matchMedia('(hover:hover) and (pointer:fine)').matches;
 (function(){var ht=document.getElementById('topHintTx');if(ht)ht.textContent=canHover?'場所にカーソルを合わせて押すと、工房の各所へ':'場所を押すと枠が出て、もう一度押すと入れます';})();
 /* 寄り画像は先に読み込んでおく */
-setTimeout(function(){['guitars','workbench','tools','library','practice','loft'].forEach(function(n){var i=new Image();i.src='img/'+n+'.webp';});},1500);
+setTimeout(function(){['guitars','workbench','tools','library','practice','loft','jukebox'].forEach(function(n){var i=new Image();i.src='img/'+n+'.webp';});},1500);
+
+/* 押せる所を一度だけ光らせる */
+function hintOnce(box){if(!box||reduceMo)return;box.classList.remove('hinting');void box.offsetWidth;box.classList.add('hinting');setTimeout(function(){box.classList.remove('hinting');},2800);}
+
+/* 枠：パソコンは押せばすぐ、スマホは1回目で枠を出し2回目で動く */
+var armedZone=null;
+function disarmZone(){if(armedZone)armedZone.classList.remove('armed');armedZone=null;}
+function zoneTap(m,fn){m.addEventListener('click',function(e){
+  e.stopPropagation();
+  if(!canHover&&armedZone!==m){disarmZone();armedZone=m;m.classList.add('armed');return;}
+  disarmZone();fn();
+});}
+document.querySelectorAll('#scene .zone').forEach(function(m){zoneTap(m,function(){if(m.dataset.url){window.open(m.dataset.url,'_blank');}else{goZone(m.dataset.z);}});});
+document.addEventListener('click',function(e){if(armedZone&&!e.target.closest('.zone'))disarmZone();},true);
+
+function pct(v,base){return (v/base*100).toFixed(2)+'%';}
+function drawCz(id){
+  czBox.innerHTML='';
+  (CZ[id]||[]).forEach(function(c){
+    var b=document.createElement('button');b.className='zone czone';b.setAttribute('aria-label',c.n);
+    b.style.left=pct(c.r[0],1536);b.style.top=pct(c.r[1],1024);b.style.width=pct(c.r[2],1536);b.style.height=pct(c.r[3],1024);
+    if(c.r[1]<90)b.dataset.lbl='in';
+    b.innerHTML='<span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-'+c.ic+'"/></svg> '+esc(c.n)+'</span>';
+    zoneTap(b,function(){
+      if(c.panel)openPanel(c.panel);
+      else if(c.group)explain(c.group);
+      else if(c.go){closePanel();goZone(c.go);}
+      else if(c.link){var u=toolUrl(c.link);if(u)DS.open(b,u);else toast('リンク未設定でございます');}
+    });
+    czBox.appendChild(b);
+  });
+}
+function drawCards(id){
+  cardBox.innerHTML='';
+  Object.keys(GROUPS).forEach(function(k){var g=GROUPS[k];if(g.zone!==id)return;
+    g.items.forEach(function(it){
+      var tool=findTool(it[0]),panel=it[3],soon=!tool&&!panel;
+      var b=document.createElement('button');b.className='tag zc'+(soon?' soon':'');
+      b.style.left=pct(it[1],1536);b.style.top=pct(it[2],1024);
+      b.innerHTML='<b>'+esc(it[0])+'</b><small>'+esc(tool?(tool.note||''):(NOTE_EXTRA[it[0]]||''))+'</small>';
+      b.addEventListener('click',function(e){e.stopPropagation();
+        if(panel){openPanel(panel);return;}
+        if(soon){toast(it[0]+' は準備中でございます');return;}
+        if(tool.url)DS.open(b,tool.url);else toast('リンク未設定でございます');
+      });
+      cardBox.appendChild(b);
+    });
+  });
+}
+/* 枠を押すと「こんなことができます」 */
+function explain(k){
+  var g=GROUPS[k];closePanel();
+  document.getElementById('xbT').textContent=g.t+' ― こんなことができます';
+  document.getElementById('xbB').innerHTML='<p class="xb-in">'+esc(g.intro)+'</p>'+g.items.map(function(it){return '<div class="xb-row"><b>'+esc(it[0])+'</b><span>'+esc(DESC[it[0]]||'')+'</span></div>';}).join('');
+  xBox.classList.remove('on');void xBox.offsetWidth;xBox.classList.add('on');
+}
+function closeExplain(){xBox.classList.remove('on');}
+document.getElementById('xbX').addEventListener('click',function(e){e.stopPropagation();closeExplain();});
+
+/* 下の画面：中身の量に合わせた高さで開き、上の絵は見せたい所が残るよう滑らせる */
+var PANEL_RENDER={shelf:function(){},bench:function(){renderBench();},gear:function(){renderGear();},guide:function(){renderGuideMap();},repertoire:function(){renderRep();},practice:function(){calY=null;prCalOpen=false;var _pg=document.querySelector('#float-practice .pr-glass');if(_pg)_pg.scrollTop=0;renderPractice(true);},memo:function(){renderMemo();}};
+function openPanel(pid){
+  closeExplain();
+  var f=document.getElementById('float-'+pid);if(!f)return;
+  (PANEL_RENDER[pid]||function(){})();
+  document.querySelectorAll('.float.show').forEach(function(x){if(x!==f)x.classList.remove('show','leaving');});
+  f.classList.remove('show','leaving');void f.offsetWidth;f.classList.add('show');
+  openPid=pid;vp.classList.add('panel-on');
+  requestAnimationFrame(layoutPanel);
+}
+function mobileVars(){var r=vp.getBoundingClientRect();document.documentElement.style.setProperty('--vpb',Math.round(r.bottom)+'px');}
+window.addEventListener('resize',mobileVars);window.addEventListener('scroll',mobileVars,{passive:true});setTimeout(mobileVars,300);
+function layoutPanel(){
+  if(!openPid){closeView.style.transform='';pClose.style.bottom='';return;}
+  var f=document.getElementById('float-'+openPid);if(!f)return;
+  if(getComputedStyle(f).position==='fixed'){closeView.style.transform='';pClose.style.bottom=(f.offsetHeight+6)+'px';return;}
+  var H=vp.clientHeight,ph=f.offsetHeight,z=ZONES[currentZone]||{},fy=z.fy||.5;
+  var shift=Math.max(0,Math.min(ph,fy*H-(H-ph)/2));
+  closeView.style.transform='translateY('+(-shift)+'px)';
+  pClose.style.bottom=(ph+6)+'px';
+}
+if(window.ResizeObserver){var _ro=new ResizeObserver(function(){if(openPid)layoutPanel();});document.querySelectorAll('.float').forEach(function(f){_ro.observe(f);});}
+window.addEventListener('resize',function(){if(openPid)layoutPanel();});
+function closePanel(){
+  if(!openPid)return;
+  var f=document.getElementById('float-'+openPid);openPid=null;vp.classList.remove('panel-on');
+  if(f&&f.classList.contains('show')){f.classList.add('leaving');setTimeout(function(){f.classList.remove('show','leaving');},320);}
+  closeView.style.transform='';pClose.style.bottom='';
+}
+pClose.addEventListener('click',function(e){e.stopPropagation();closePanel();});
+document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;if(xBox.classList.contains('on'))closeExplain();else if(openPid)closePanel();});
+
 function openZone(id){
-  currentZone=id;vp.classList.add('zoomed');
-  vp.classList.toggle('shelf-on',id==='shelf');vp.classList.toggle('gear-on',id==='gear');vp.classList.toggle('practice-on',id==='practice');vp.classList.toggle('books-on',id==='books');vp.classList.remove('pr-open');
-  var dfr=DEFER[id];vp.classList.toggle('defer-on',!!dfr);if(dfr){document.getElementById('prOpenTx').textContent=dfr[0];document.getElementById('prOpenIc').setAttribute('href','#i-'+dfr[1]);}
-  document.querySelectorAll('.float').forEach(function(f){f.classList.toggle('show',f.id==='float-'+id);});
-  var tf=document.getElementById('float-'+id);if(tf){tf.classList.remove('show');void tf.offsetWidth;tf.classList.add('show');}
+  mobileVars();
+  var z=ZONES[id];currentZone=id;vp.classList.add('zoomed');
+  vp.classList.toggle('shelf-on',id==='shelf');vp.classList.toggle('jb-on',!!z.player);
+  document.getElementById('zpEn').textContent=z.en;document.getElementById('zpJa').textContent=z.ja;
+  drawCz(id);drawCards(id);
   if(id==='shelf')renderWall();
-  if(id==='bench')renderBench();
-  if(id==='gear')renderGear();
-  if(id==='pedals')renderPedals();
-  if(id==='guide')renderGuideMap();
-  if(id==='repertoire')renderRep();
-  if(id==='tools')renderTools();
-  if(id==='books')renderBooks();
-  if(id==='practice'){calY=null;prCalOpen=false;var _pg=document.querySelector('#float-practice .pr-glass');if(_pg)_pg.scrollTop=0;renderPractice(true);} else stopTimerOnLeave();
-  if(id==='memo')renderMemo();
+  if(id!=='practice')stopTimerOnLeave();
+  if(z.player)plSync();
+}
+function arrived(){
+  hintOnce(czBox);
+  if(pendingPanel){var p=pendingPanel;pendingPanel=null;openPanel(p);}
 }
 /* 入るとき：暗くなってから、明かりが点くように寄り画像が現れる */
 function goZone(id){
-  disarmZone();
+  if(!ZONES[id])return;
+  disarmZone();closeExplain();closePanel();
   clearTimeout(homeTimer);closeView.classList.remove('fading');
-  var src='img/'+ZIMG[id]+'.webp';
-  var same=vp.classList.contains('zoomed')&&currentZone&&ZIMG[currentZone]===ZIMG[id];
-  if(same||reduceMo){closeImg.src=src;openZone(id);return;}
+  var src='img/'+ZONES[id].img+'.webp';
+  var same=vp.classList.contains('zoomed')&&currentZone&&ZONES[currentZone].img===ZONES[id].img;
+  if(same||reduceMo){closeImg.src=src;openZone(id);arrived();return;}
   if(zBusy)return;zBusy=true;
   zVeil.style.transition='opacity .26s ease';zVeil.style.opacity=1;
   setTimeout(function(){
@@ -1108,39 +1355,57 @@ function goZone(id){
       openZone(id);
       zVeil.style.transition='none';zVeil.style.opacity=0;
       closeView.classList.remove('flick');void closeView.offsetWidth;closeView.classList.add('flick');
-      setTimeout(function(){closeView.classList.remove('flick');zBusy=false;},900);
+      setTimeout(function(){closeView.classList.remove('flick');zBusy=false;arrived();},900);
     });
   },260);
 }
 /* 戻るとき：寄り画像が溶けて全体図に戻る */
 function goHome(){
-  stopTimerOnLeave();currentZone=null;
-  document.querySelectorAll('.float.show').forEach(function(f){f.classList.add('leaving');setTimeout(function(){f.classList.remove('show','leaving');},320);});
-  if(reduceMo){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','books-on','defer-on','pr-open');return;}
+  closeExplain();closePanel();stopTimerOnLeave();currentZone=null;pendingPanel=null;
+  var done=function(){vp.classList.remove('zoomed','shelf-on','jb-on');closeView.classList.remove('fading');czBox.innerHTML='';cardBox.innerHTML='';hintOnce(document.getElementById('scene'));};
+  if(reduceMo){done();return;}
   closeView.classList.add('fading');
-  homeTimer=setTimeout(function(){vp.classList.remove('zoomed','shelf-on','gear-on','practice-on','books-on','defer-on','pr-open');closeView.classList.remove('fading');},500);
+  homeTimer=setTimeout(done,500);
 }
-/* 場所の枠：パソコンは押せばすぐ、スマホは1回目で枠を出し2回目で入る */
-var armedZone=null;
-function disarmZone(){if(armedZone)armedZone.classList.remove('armed');armedZone=null;}
-document.querySelectorAll('.zone').forEach(function(m){m.addEventListener('click',function(e){
-  e.stopPropagation();
-  if(!canHover&&armedZone!==m){disarmZone();armedZone=m;m.classList.add('armed');return;}
-  disarmZone();
-  if(m.dataset.url){window.open(m.dataset.url,'_blank');}else{goZone(m.dataset.z);}
-});});
-document.addEventListener('click',function(e){if(armedZone&&!e.target.closest('.zone'))disarmZone();},true);
+setTimeout(function(){hintOnce(document.getElementById('scene'));},1600);
+
+/* ===== ジュークボックスの操作盤 ===== */
+function plSync(){
+  if(typeof BGM==='undefined')return;
+  var i=bgmIdx<0?0:bgmIdx,playing=bgmIdx>=0&&!bgmAudio.paused;
+  document.getElementById('plT').textContent=BGM[i].title;
+  document.getElementById('plN').textContent='A-'+(i+1);
+  var s=document.getElementById('plS');s.textContent=playing?'NOW PLAYING':'STOPPED';s.classList.toggle('off',!playing);
+  document.getElementById('plIc').textContent=playing?'■':'▶';
+  document.getElementById('plLbl').textContent=playing?'止める':'流す';
+  var v=Math.round(bgmVol()*100),k=document.getElementById('plKnob');
+  k.querySelector('.kn-dot').style.transform='rotate('+(-135+v*2.7)+'deg)';k.setAttribute('aria-valuenow',v);k.title='音量 '+v;
+}
+document.getElementById('plPlay').addEventListener('click',function(e){e.stopPropagation();
+  if(bgmIdx<0)bgmStart(0);else if(bgmAudio.paused)bgmResume();else bgmPause();});
+document.getElementById('plNext').addEventListener('click',function(e){e.stopPropagation();
+  bgmPlay(bgmIdx<0?0:(bgmIdx+1)%BGM.length);});
+(function(){
+  var k=document.getElementById('plKnob'),y0=null,v0=0;
+  function setV(v){v=Math.max(0,Math.min(100,Math.round(v)));db.bgmVol=v/100;clearInterval(bgmFadeT);if(!bgmAudio.paused)bgmAudio.volume=db.bgmVol;plSync();}
+  k.addEventListener('pointerdown',function(e){e.stopPropagation();y0=e.clientY;v0=bgmVol()*100;k.setPointerCapture(e.pointerId);});
+  k.addEventListener('pointermove',function(e){if(y0===null)return;setV(v0+(y0-e.clientY)*0.8);});
+  function end(){if(y0===null)return;y0=null;save();}
+  k.addEventListener('pointerup',end);k.addEventListener('pointercancel',end);
+  k.addEventListener('click',function(e){e.stopPropagation();});
+  k.addEventListener('wheel',function(e){e.preventDefault();setV(bgmVol()*100-Math.sign(e.deltaY)*5);save();},{passive:false});
+  k.addEventListener('keydown',function(e){var d=(e.key==='ArrowUp'||e.key==='ArrowRight')?5:(e.key==='ArrowDown'||e.key==='ArrowLeft')?-5:0;if(d){e.preventDefault();setV(bgmVol()*100+d);save();}});
+})();
 back.addEventListener('click',goHome);
-document.getElementById('prOpenBtn').addEventListener('click',function(e){e.stopPropagation();vp.classList.add('pr-open');var f=document.getElementById('float-'+currentZone);if(f){f.classList.remove('show');void f.offsetWidth;f.classList.add('show');}});
 /* パネルの外なら画面のどこをタップしても工房全体へ戻る */
 function tapCanClose(t){
   if(!vp.classList.contains('zoomed'))return false;
   if(vp.classList.contains('adjusting'))return false;
   if(document.querySelector('.overlay.show,.modal-bg.show'))return false;
-  if(t&&t.closest('.pr-openbtn,.float,.topbar,.zone,.hung,.empty-hook,.backbtn,.wallpager,.adjustbar,.overlay,.modal-bg,.toast,button,a,input,textarea,select,label'))return false;
+  if(t&&t.closest('.xbox,.pclose,.jbplayer,.tag,.float,.topbar,.zone,.hung,.empty-hook,.backbtn,.wallpager,.adjustbar,.overlay,.modal-bg,.toast,button,a,input,textarea,select,label'))return false;
   return true;
 }
-document.addEventListener('click',function(e){if(tapCanClose(e.target))goHome();});
+document.addEventListener('click',function(e){if(!tapCanClose(e.target))return;if(xBox.classList.contains('on')){closeExplain();return;}if(vp.classList.contains('panel-on')){closePanel();return;}goHome();});
 
 /* ===== bench (整備台) ===== */
 var benchTab='todo';
@@ -1211,8 +1476,9 @@ function gearType(id){for(var i=0;i<GEAR_TYPES.length;i++){if(GEAR_TYPES[i].id==
 function gearOrderIdx(id){for(var i=0;i<GEAR_TYPES.length;i++){if(GEAR_TYPES[i].id===id)return i;}return 99;}
 var gearTab='list';
 function renderGear(){
+  if(gearTab==='pedals')gearTab='list';
   var el=document.getElementById('float-gear');
-  var seg='<div class="bench-seg"><button class="'+(gearTab==='list'?'on':'')+'" data-gt="list">機材リスト</button><button class="'+(gearTab==='order'?'on':'')+'" data-gt="order">つなぐ順番</button><button class="'+(gearTab==='pedals'?'on':'')+'" data-gt="pedals">エフェクターのツール</button></div>';
+  var seg='<div class="bench-seg"><button class="'+(gearTab==='list'?'on':'')+'" data-gt="list">機材リスト</button><button class="'+(gearTab==='order'?'on':'')+'" data-gt="order">つなぐ順番</button></div>';
   var body=gearTab==='list'?gearListHtml():gearTab==='order'?gearOrderHtml():('<div class="tag-rail"><div class="tag-wrap">'+PEDAL_TAGS.map(function(p,i){return '<button class="tag" data-pi="'+i+'"><b>'+esc(p.name)+'</b><small>'+esc(p.note||'')+'</small></button>';}).join('')+'</div></div>');
   el.innerHTML='<div class="glass gear-glass">'+seg+body+'</div>';
   el.querySelectorAll('.tag[data-pi]').forEach(function(b){b.addEventListener('click',function(){var p=PEDAL_TAGS[+b.dataset.pi];if(p.url){DS.open(b,p.url);}else{toast('リンク未設定でございます');}});});
@@ -1313,7 +1579,7 @@ function renderRep(){
   var counts={wish:0,learning:0,done:0};db.songs.forEach(function(s){if(counts[s.state]!==undefined)counts[s.state]++;});
   var seg='<div class="rep-seg"><button class="'+(repFilter==='all'?'on':'')+'" data-rf="all">すべて<span class="rf-n">'+db.songs.length+'</span></button>'+
     SONG_STATES.map(function(s){return '<button class="'+(repFilter===s.id?'on':'')+'" data-rf="'+s.id+'">'+s.ic+' '+s.name+'<span class="rf-n">'+counts[s.id]+'</span></button>';}).join('')+'</div>';
-  el.innerHTML='<div class="glass rep-glass jukebox"><div class="jb-top"><div class="jb-arch"></div><div class="jb-title">JUKEBOX</div></div><div class="bgm-box" id="bgmBox"></div>'+hookedHtml()+'<div class="jb-sub">レパートリー</div>'+seg+repListHtml()+'<button class="btn btn-brass btn-block" id="songAdd" style="margin-top:10px">＋ 曲を追加</button></div>';
+  el.innerHTML='<div class="glass rep-glass chalkboard"><div class="ck-title">曲の記録</div>'+hookedHtml()+'<div class="jb-sub">レパートリー</div>'+seg+repListHtml()+'<button class="btn btn-brass btn-block" id="songAdd" style="margin-top:10px">＋ 曲を書き足す</button><div class="ck-tray" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><b></b></div></div>';
   renderBgm();
   var ha=document.getElementById('hookedAdd');if(ha)ha.addEventListener('click',function(){openHookedModal(null);});
   el.querySelectorAll('.hooked-row').forEach(function(r){r.addEventListener('click',function(){openHookedModal(r.dataset.id);});});
@@ -2061,7 +2327,7 @@ var toastTimer;function toast(msg){var t=document.getElementById('toast');t.text
       target.classList.add('swept');
       target.style.transform='';target.style.opacity='';
       el=null;dy=0;active=false;scroller=null;
-      goHome();
+      closePanel();
       setTimeout(function(){target.classList.remove('swept');},360);
       return;
     }
@@ -2106,6 +2372,7 @@ function bgmUnduck(){if(bgmDucked&&bgmIdx>=0){bgmResume();}}
 bgmAudio.addEventListener('ended',function(){bgmStart((bgmIdx+1)%BGM.length);});
 bgmAudio.addEventListener('play',bgmSync);bgmAudio.addEventListener('pause',bgmSync);
 function bgmSync(){
+  if(typeof plSync==='function')plSync();
   var b=document.getElementById('bgmBtn');
   if(b){var on=bgmIdx>=0;b.classList.toggle('on',on);b.innerHTML=bgmAudio.paused?BGM_PLAY:BGM_PAUSE;b.setAttribute('aria-label',bgmAudio.paused?'BGMを流す':'BGMを一時停止');b.title=on?BGM[bgmIdx].title:'';}
   renderBgm();
@@ -2129,6 +2396,15 @@ function renderBgm(){
   var vi=document.getElementById('bgmVolIn');if(vi)vi.addEventListener('input',function(){db.bgmVol=vi.value/100;clearInterval(bgmFadeT);if(!bgmAudio.paused)bgmAudio.volume=db.bgmVol;save();});
 }
 document.getElementById('bgmBtn').addEventListener('click',function(e){e.stopPropagation();if(bgmIdx<0)return;if(bgmAudio.paused)bgmResume();else bgmPause();});
+/* 開いたら1曲目から流す。ブラウザが音の自動再生を止めるため、止められたときは最初の操作で流し始める */
+(function(){
+  var started=false;
+  function kick(e){if(started)return;if(e&&e.target&&e.target.closest&&e.target.closest('#bgmBtn,.bgm-row,.bgm-stop,.jbplayer'))return;started=true;['pointerdown','keydown','touchstart'].forEach(function(ev){document.removeEventListener(ev,kick,true);});if(bgmIdx<0)bgmStart(0);else if(bgmAudio.paused&&!bgmDucked)bgmResume();}
+  ['pointerdown','keydown','touchstart'].forEach(function(ev){document.addEventListener(ev,kick,true);});
+  bgmIdx=0;bgmAudio.src=BGM[0].src;bgmAudio.volume=0;
+  var pr=bgmAudio.play();
+  if(pr&&pr.then)pr.then(function(){started=true;['pointerdown','keydown','touchstart'].forEach(function(ev){document.removeEventListener(ev,kick,true);});bgmFade(bgmVol(),1200);bgmSync();}).catch(function(){bgmSync();});
+})();
 
 function lightingPhase(h){if(h>=6&&h<9)return 'morning';if(h>=9&&h<17)return 'day';if(h>=17&&h<21)return 'evening';return 'night';}
 var lightingOverride=null;
