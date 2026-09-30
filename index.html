@@ -1572,9 +1572,9 @@ function plSync(){
   k.querySelector('.kn-dot').style.transform='rotate('+(-135+v*2.7)+'deg)';k.setAttribute('aria-valuenow',v);k.title='音量 '+v;
 }
 document.getElementById('plPlay').addEventListener('click',function(e){e.stopPropagation();
-  if(bgmIdx<0)bgmStart(0);else if(bgmAudio.paused)bgmResume();else bgmPause();});
+  if(bgmIdx<0)bgmStart(bgmFirst());else if(bgmAudio.paused)bgmResume();else bgmPause();});
 document.getElementById('plNext').addEventListener('click',function(e){e.stopPropagation();
-  bgmPlay(bgmIdx<0?0:(bgmIdx+1)%BGM.length);});
+  bgmPlay(bgmIdx<0?bgmFirst():bgmNextOf(bgmIdx));});
 (function(){
   var k=document.getElementById('plKnob'),y0=null,v0=0;
   function setV(v){v=Math.max(0,Math.min(100,Math.round(v)));db.bgmVol=v/100;clearInterval(bgmFadeT);if(!bgmAudio.paused)bgmAudio.volume=db.bgmVol;plSync();}
@@ -2670,10 +2670,19 @@ var toastTimer;function toast(msg){var t=document.getElementById('toast');t.text
 /* ===== BGM（ジュークボックスで選ぶ。1曲終わると次の曲へ、最後まで行ったら最初へ。練習タイマー中は止まる） ===== */
 var BGM=[
   {title:'映画で見た町',src:'audio/eiga-de-mita-machi.mp3',len:'1:37'},
-  {title:'踊る理髪師',src:'audio/odoru-rihatsushi.mp3',len:'1:35'}
+  {title:'踊る理髪師',src:'audio/odoru-rihatsushi.mp3',len:'1:35'},
+  {title:'陽気な理髪店',src:'audio/youki-na-rihatsuten.mp3',len:'0:59'},
+  {title:'遠くの景色',src:'audio/tooku-no-keshiki.mp3',len:'1:47'},
+  {title:'受け継がれゆく心',src:'audio/uketsugare-yuku-kokoro.mp3',len:'1:40'},
+  {title:'すこしの安息と',src:'audio/sukoshi-no-ansoku-to.mp3',len:'1:55'}
 ];
 var BGM_PLAY='<svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/></svg>',BGM_PAUSE='<svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M216,48V208a16,16,0,0,1-16,16H160a16,16,0,0,1-16-16V48a16,16,0,0,1,16-16h40A16,16,0,0,1,216,48ZM96,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16H96a16,16,0,0,0,16-16V48A16,16,0,0,0,96,32Z"/></svg>';
 var bgmAudio=new Audio(),bgmIdx=-1,bgmFadeT=null,bgmDucked=false;
+/* 曲順は開くたびにくじ引きで並べ替える */
+var BGM_ORDER=BGM.map(function(_,i){return i;});
+for(var bi=BGM_ORDER.length-1;bi>0;bi--){var bj=Math.floor(Math.random()*(bi+1)),bt=BGM_ORDER[bi];BGM_ORDER[bi]=BGM_ORDER[bj];BGM_ORDER[bj]=bt;}
+function bgmFirst(){return BGM_ORDER[0];}
+function bgmNextOf(i){var p=BGM_ORDER.indexOf(i);return BGM_ORDER[(p+1)%BGM_ORDER.length];}
 bgmAudio.preload='none';
 function bgmVol(){var v=(db&&typeof db.bgmVol==='number')?db.bgmVol:0.5;return Math.max(0,Math.min(1,v));}
 function bgmFade(to,ms,done){
@@ -2693,7 +2702,7 @@ function bgmStop(){bgmDucked=false;bgmFade(0,500,function(){bgmAudio.pause();bgm
 /* 練習タイマーの間は止め、終わったら戻す */
 function bgmDuck(){if(bgmIdx>=0&&!bgmAudio.paused){bgmDucked=true;bgmPause();}}
 function bgmUnduck(){if(bgmDucked&&bgmIdx>=0){bgmResume();}}
-bgmAudio.addEventListener('ended',function(){bgmStart((bgmIdx+1)%BGM.length);});
+bgmAudio.addEventListener('ended',function(){bgmStart(bgmNextOf(bgmIdx));});
 bgmAudio.addEventListener('play',bgmSync);bgmAudio.addEventListener('pause',bgmSync);
 function bgmSync(){
   if(typeof plSync==='function')plSync();
@@ -2722,11 +2731,11 @@ function renderBgm(){
 document.getElementById('bgmBtn').addEventListener('click',function(e){e.stopPropagation();if(bgmIdx<0)return;if(bgmAudio.paused)bgmResume();else bgmPause();});
 /* 開いたら1曲目から流す。ブラウザが音の自動再生を止めるため、止められたときは最初の操作で流し始める */
 (function(){
-  if(window.GG_ENTRANCE){bgmIdx=0;bgmAudio.src=BGM[0].src;return;} /* 入口で扉や手紙を押したときに流し始める */
+  if(window.GG_ENTRANCE){bgmIdx=bgmFirst();bgmAudio.src=BGM[bgmIdx].src;return;} /* 入口で扉や手紙を押したときに流し始める */
   var started=false;
-  function kick(e){if(started)return;if(e&&e.target&&e.target.closest&&e.target.closest('#bgmBtn,.bgm-row,.bgm-stop,.jbplayer'))return;started=true;['pointerdown','keydown','touchstart'].forEach(function(ev){document.removeEventListener(ev,kick,true);});if(bgmIdx<0)bgmStart(0);else if(bgmAudio.paused&&!bgmDucked)bgmResume();}
+  function kick(e){if(started)return;if(e&&e.target&&e.target.closest&&e.target.closest('#bgmBtn,.bgm-row,.bgm-stop,.jbplayer'))return;started=true;['pointerdown','keydown','touchstart'].forEach(function(ev){document.removeEventListener(ev,kick,true);});if(bgmIdx<0)bgmStart(bgmFirst());else if(bgmAudio.paused&&!bgmDucked)bgmResume();}
   ['pointerdown','keydown','touchstart'].forEach(function(ev){document.addEventListener(ev,kick,true);});
-  bgmIdx=0;bgmAudio.src=BGM[0].src;bgmAudio.volume=0;
+  bgmIdx=bgmFirst();bgmAudio.src=BGM[bgmIdx].src;bgmAudio.volume=0;
   var pr=bgmAudio.play();
   if(pr&&pr.then)pr.then(function(){started=true;['pointerdown','keydown','touchstart'].forEach(function(ev){document.removeEventListener(ev,kick,true);});bgmFade(bgmVol(),1200);bgmSync();}).catch(function(){bgmSync();});
 })();
@@ -2829,15 +2838,15 @@ var ENTR_TEXT={
   addEventListener('resize',function(){if(state!=='in')fit();});fit();
 
   /* ---- BGM：手紙を読む間はこもった音、扉が開くと澄む ---- */
-  var ac=null,lp=null;
+  var ac=null,lp=null,gn=null;
   function route(){
     if(ac)return true;if(location.protocol!=='https:')return false;
-    try{var C=window.AudioContext||window.webkitAudioContext;ac=new C();var src=ac.createMediaElementSource(bgmAudio);lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=20000;lp.Q.value=.4;src.connect(lp);lp.connect(ac.destination);}
-    catch(e){ac=null;lp=null;return false;}
+    try{var C=window.AudioContext||window.webkitAudioContext;ac=new C();var src=ac.createMediaElementSource(bgmAudio);lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=20000;lp.Q.value=.4;gn=ac.createGain();gn.gain.value=1;src.connect(lp);lp.connect(gn);gn.connect(ac.destination);}
+    catch(e){ac=null;lp=null;gn=null;return false;}
     document.addEventListener('visibilitychange',function(){if(!document.hidden&&ac&&ac.state==='suspended')ac.resume();});
     document.addEventListener('pointerdown',function(){if(ac&&ac.state==='suspended')ac.resume();},true);
     return true;}
-  function bgmOn(){if(ac&&ac.state==='suspended')ac.resume();if(bgmAudio.paused){if(!bgmAudio.getAttribute('src')||bgmIdx<0)bgmStart(0);else bgmResume();}}
+  function bgmOn(){if(ac&&ac.state==='suspended')ac.resume();if(bgmAudio.paused){if(!bgmAudio.getAttribute('src')||bgmIdx<0)bgmStart(bgmFirst());else bgmResume();}}
   function muffle(){var ok=route();if(ok){lp.frequency.cancelScheduledValues(ac.currentTime);lp.frequency.setValueAtTime(420,ac.currentTime);}
     bgmOn();if(!ok)setTimeout(function(){bgmFade(bgmVol()*.35,300);},850);}
   function clear(){if(lp){var t=ac.currentTime;lp.frequency.cancelScheduledValues(t);lp.frequency.setValueAtTime(lp.frequency.value,t);lp.frequency.exponentialRampToValueAtTime(20000,t+.6);}
@@ -2883,7 +2892,13 @@ var ENTR_TEXT={
   door.addEventListener('click',function(){if(state!=='idle')return;dest='';enter();});
   function enter(){
     if(state==='opening'||state==='in')return;state='opening';
-    env.hidden=true;hint.style.opacity='0';clear();
+    env.hidden=true;hint.style.opacity='0';
+    var quiet=bgmAudio.paused; /* 手紙を読んでいない＝まだ鳴っていない */
+    if(quiet){
+      /* 再生の許可は押した瞬間にしか得られないため、ここで無音のまま鳴らし始める */
+      if(route()){gn.gain.cancelScheduledValues(ac.currentTime);gn.gain.setValueAtTime(0,ac.currentTime);}
+      bgmOn();bgmFade(0,40);
+    }else clear();
     st.day=today();st.lastVisit=today();keep();
     var fxw=document.getElementById('entrFx');if(fxw)fxw.style.opacity='0';
     document.getElementById('entrOpen').style.opacity='1';
@@ -2893,6 +2908,10 @@ var ENTR_TEXT={
       el.style.background='transparent';scene.style.visibility='hidden';
       if(dest&&typeof goZone==='function'&&ZONES[dest])goZone(dest);
       black.style.transition='opacity .7s ease';black.style.opacity='0';
+      if(quiet){ /* 暗転が明けるのに合わせて聞こえ始める */
+        if(gn){var t0=ac.currentTime;gn.gain.cancelScheduledValues(t0);gn.gain.setValueAtTime(0,t0);gn.gain.linearRampToValueAtTime(1,t0+.9);}
+        bgmFade(bgmVol(),900);
+      }
       setTimeout(function(){state='in';el.classList.add('gone');if(!dest)hintOnce(document.getElementById('scene'));},reduce?50:750);
     },d2);
   }
