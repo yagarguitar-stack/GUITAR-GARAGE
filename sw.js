@@ -1,9 +1,9 @@
 /* GUITAR GARAGE：電波のない所でも開けるようにする仕組み
    ファイルを差し替えたら VERSION の数字を一つ上げる（上げると、次に開いたときに新しい中身へ入れ替わる） */
-const VERSION = 'gg-v1';
+const VERSION = 'gg-v2';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
-  './img/overview.webp', './img/guitars.webp', './img/workbench.webp', './img/tools.webp',
+  './img/entrance-closed.webp', './img/entrance-open.webp', './img/overview.webp', './img/guitars.webp', './img/workbench.webp', './img/tools.webp',
   './img/library.webp', './img/practice.webp', './img/loft.webp', './img/jukebox.webp',
   './audio/eiga-de-mita-machi.mp3', './audio/odoru-rihatsushi.mp3',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'
