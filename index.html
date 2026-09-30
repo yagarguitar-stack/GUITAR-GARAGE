@@ -1052,6 +1052,8 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 .entr-go{display:block;margin:18px auto 2px;font-family:var(--font-head);font-size:14px;letter-spacing:.15em;background:rgba(40,22,6,.1);color:#2a180a;border:1px solid rgba(42,24,10,.6);border-radius:2px;padding:9px 22px;cursor:pointer;opacity:0;transition:opacity .25s .2s;pointer-events:none;}
 .out .entr-go{opacity:1;pointer-events:auto;}
 @media (prefers-reduced-motion:reduce){.entr-envbig,.entr-paper,.eb-flap,.eb-peek,#entrOpen,.entr-black{transition-duration:.01s!important;transition-delay:0s!important}}
+.z-fr.zq{left:0;top:0;width:100%;height:100%;border:none;border-radius:0;box-shadow:none;overflow:visible;filter:drop-shadow(0 0 1px rgba(6,24,40,.8)) drop-shadow(0 0 5px rgba(64,172,255,.85)) drop-shadow(0 0 10px rgba(64,172,255,.45));}
+.z-fr.zq polygon{fill:rgba(64,172,255,.10);stroke:#a8e0ff;stroke-width:2;stroke-linejoin:round;}
 </style>
 <script>window.GG_ENTRANCE=true;</script>
 </head>
@@ -1070,7 +1072,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
     <img class="bg" src="img/overview.webp" alt="工房の全体図" alt="工房">
     <div class="lighting" id="lighting"></div>
     <!-- 場所の枠（パソコン：合わせると出る／スマホ：1回目で出て2回目で入る） -->
-    <button class="zone" data-z="shelf" data-lbl="t" style="left:1.43%;top:25.59%;width:14.19%;height:17.87%" aria-label="愛器"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-guitar"/></svg> 愛器</span></button>
+    <button class="zone" data-z="shelf" data-lbl="t" data-q="20,253 245,334 245,454 20,426" style="left:1.43%;top:25.59%;width:14.19%;height:17.87%" aria-label="愛器"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-guitar"/></svg> 愛器</span></button>
     <button class="zone" data-z="jukebox" data-lbl="t" style="left:35.48%;top:14.45%;width:5.99%;height:15.04%" aria-label="ジュークボックス"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-vinyl-record"/></svg> ジュークボックス</span></button>
     <button class="zone" data-z="guide" data-lbl="t" style="left:43.49%;top:9.57%;width:23.70%;height:13.48%" aria-label="案内"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-map-trifold"/></svg> 案内</span></button>
     <button class="zone" data-z="bench" data-lbl="t" style="left:27.99%;top:38.87%;width:14.97%;height:25.59%" aria-label="整備台"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg> 整備台</span></button>
@@ -1366,10 +1368,10 @@ var ZONES={
 /* 絵の中の枠（元画像 1536×1024 の座標）。panel：画面を開く／group：説明を出す／link：別のタブで開く／go：別の場所へ */
 var CZ={
   shelf:[{n:'愛器の壁',r:[455,225,625,335],panel:'shelf',ic:'guitar'},{n:'ことりノーム',r:[635,700,70,115],link:'ことりノーム',ic:'metronome'}],
-  bench:[{n:'弦交換・手入れ',r:[460,470,700,180],panel:'bench',ic:'wrench'}],
+  bench:[{n:'弦交換・手入れ',r:[460,470,700,180],q:[[590,505],[1210,490],[935,668],[560,625]],panel:'bench',ic:'wrench'}],
   tools:[{n:'道具（ツール）',r:[240,165,610,550],group:'tools',ic:'toolbox'}],
-  books:[{n:'音楽理論の本',r:[378,168,527,310],group:'theory',ic:'books'},{n:'ギタリスト図鑑',r:[905,95,80,510],link:'ギタリスト図鑑',ic:'books'},{n:'メモ',r:[580,570,142,42],panel:'memo',ic:'note-pencil'}],
-  practice:[{n:'練習開始',r:[785,600,210,300],panel:'practice',ic:'timer'},{n:'ScoreLine シリーズ',r:[895,395,262,130],group:'scoreline',ic:'music-notes'},{n:'エフェクター',r:[1040,760,260,115],group:'pedals',ic:'pedal'}],
+  books:[{n:'音楽理論の本',r:[378,168,527,310],group:'theory',ic:'books'},{n:'ギタリスト図鑑',r:[905,95,80,510],link:'ギタリスト図鑑',ic:'books'},{n:'メモ',r:[580,570,142,42],q:[[596,578],[706,580],[726,607],[572,606]],panel:'memo',ic:'note-pencil'}],
+  practice:[{n:'練習開始',r:[785,600,210,300],panel:'practice',ic:'timer'},{n:'ScoreLine シリーズ',r:[895,395,262,130],q:[[955,412],[1160,404],[1105,522],[898,518]],group:'scoreline',ic:'music-notes'},{n:'エフェクター',r:[1040,760,260,115],q:[[1045,772],[1290,750],[1305,872],[1040,850]],group:'pedals',ic:'pedal'}],
   guide:[{n:'案内',r:[705,38,495,184],panel:'guide',ic:'map-trifold'},{n:'曲の記録',r:[800,226,570,170],panel:'repertoire',ic:'vinyl-record'},{n:'ジュークボックスへ',r:[310,225,195,340],go:'jukebox',ic:'vinyl-record'}]
 };
 /* 札：場所に着いたら最初から出す（位置は元画像の座標、札の中心） */
@@ -1417,13 +1419,22 @@ document.querySelectorAll('#scene .zone').forEach(function(m){zoneTap(m,function
 document.addEventListener('click',function(e){if(armedZone&&!e.target.closest('.zone'))disarmZone();},true);
 
 function pct(v,base){return (v/base*100).toFixed(2)+'%';}
+/* 枠を絵の角度に合わせる：四隅（元画像 1536×1024 上）を結んだ形で描く */
+function quadBox(q){var xs=q.map(function(p){return p[0];}),ys=q.map(function(p){return p[1];});var x=Math.min.apply(null,xs),y=Math.min.apply(null,ys);return [x,y,Math.max.apply(null,xs)-x,Math.max.apply(null,ys)-y];}
+function quadFrame(q,r){var pts=q.map(function(p){return ((p[0]-r[0])/r[2]*100).toFixed(2)+','+((p[1]-r[1])/r[3]*100).toFixed(2);}).join(' ');
+  return '<svg class="z-fr zq" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polygon points="'+pts+'" vector-effect="non-scaling-stroke"/></svg>';}
+(function(){document.querySelectorAll('#scene .zone[data-q]').forEach(function(b){
+  var q=b.dataset.q.split(' ').map(function(s){return s.split(',').map(Number);}),r=quadBox(q);
+  b.style.left=pct(r[0],1536);b.style.top=pct(r[1],1024);b.style.width=pct(r[2],1536);b.style.height=pct(r[3],1024);
+  var f=b.querySelector('.z-fr');if(f)f.outerHTML=quadFrame(q,r);});})();
 function drawCz(id){
   czBox.innerHTML='';
   (CZ[id]||[]).forEach(function(c){
     var b=document.createElement('button');b.className='zone czone';b.setAttribute('aria-label',c.n);
-    b.style.left=pct(c.r[0],1536);b.style.top=pct(c.r[1],1024);b.style.width=pct(c.r[2],1536);b.style.height=pct(c.r[3],1024);
-    if(c.r[1]<90)b.dataset.lbl='in';
-    b.innerHTML='<span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-'+c.ic+'"/></svg> '+esc(c.n)+'</span>';
+    var r=c.q?quadBox(c.q):c.r;
+    b.style.left=pct(r[0],1536);b.style.top=pct(r[1],1024);b.style.width=pct(r[2],1536);b.style.height=pct(r[3],1024);
+    if(r[1]<90)b.dataset.lbl='in';
+    b.innerHTML=(c.q?quadFrame(c.q,r):'<span class="z-fr"></span>')+'<span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-'+c.ic+'"/></svg> '+esc(c.n)+'</span>';
     zoneTap(b,function(){
       if(c.panel)openPanel(c.panel);
       else if(c.group)explain(c.group);
