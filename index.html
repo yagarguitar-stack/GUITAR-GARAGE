@@ -2289,12 +2289,12 @@ function renderAdjustBar(){
   var bar=document.getElementById('adjustBar');
   bar.innerHTML='<span class="lbl">指でドラッグして位置・ボタンで大きさと角度</span>'+
     '<span class="adj-row"><span class="adj-k">大きさ</span><button id="aSmall">－ 小</button><button class="fine" data-hold="size:-1" aria-label="大きさを1%小さく">−1%</button><span class="adj-val" id="aSizeVal"></span><button class="fine" data-hold="size:1" aria-label="大きさを1%大きく">+1%</button><button id="aBig">大 ＋</button></span>'+
-    '<span class="adj-row"><span class="adj-k">角度</span><button id="aRotL">⟲ 左に</button><button class="fine" data-hold="rot:-0.5" aria-label="角度を0.5度左に">−0.5°</button><span class="adj-val" id="aRotVal"></span><button class="fine" data-hold="rot:0.5" aria-label="角度を0.5度右に">+0.5°</button><button id="aRotR">右に ⟳</button></span>'+
+    '<span class="adj-row"><span class="adj-k">角度</span><button id="aRotL">◀ 左に</button><button class="fine" data-hold="rot:0.5" aria-label="胴を0.5度左に">◀ 0.5°</button><span class="adj-val" id="aRotVal"></span><button class="fine" data-hold="rot:-0.5" aria-label="胴を0.5度右に">0.5° ▶</button><button id="aRotR">右に ▶</button></span>'+
     '<span class="adj-row"><button id="aMatch">他のギターと大きさを揃える</button><button id="aReset">リセット</button><button class="done" id="aDone">完了</button></span>';
   document.getElementById('aSmall').addEventListener('click',function(){resizeAdj(1/1.1);});
   document.getElementById('aBig').addEventListener('click',function(){resizeAdj(1.1);});
-  document.getElementById('aRotL').addEventListener('click',function(){rotateAdj(-5);});
-  document.getElementById('aRotR').addEventListener('click',function(){rotateAdj(5);});
+  document.getElementById('aRotL').addEventListener('click',function(){rotateAdj(5);});
+  document.getElementById('aRotR').addEventListener('click',function(){rotateAdj(-5);});
   document.getElementById('aMatch').addEventListener('click',matchSizeAdj);
   document.getElementById('aReset').addEventListener('click',function(){var g=cur();if(g){g.ox=0;g.oy=0;g.sc=1;g.rot=0;save();renderWall();adjVals();}});
   document.getElementById('aDone').addEventListener('click',function(){toast('位置を保存しました');exitAdjust();});
@@ -2310,7 +2310,7 @@ function renderAdjustBar(){
   adjVals();
 }
 function adjVals(){var g=cur(),s=document.getElementById('aSizeVal'),r=document.getElementById('aRotVal');if(!g||!s)return;
-  s.textContent=Math.round((g.sc||1)*100)+'%';var d=Math.round((g.rot||0)*10)/10;r.textContent=(d>0?'+':'')+d+'°';}
+  s.textContent=Math.round((g.sc||1)*100)+'%';var d=Math.round((g.rot||0)*10)/10;r.textContent=d===0?'まっすぐ':(d>0?'左 ':'右 ')+Math.abs(d)+'°';}
 /* 見た目の高さ（壁の上での縦の長さ）＝ 幅 ÷ 写真の縦横比 */
 function hungBaseW(g){var arr=g.ar||0.345;return g.photo?Math.max(4.8,Math.min(14.4,21.3*arr)):4.8;}
 function hungH(g){return hungBaseW(g)*(g.sc||1)/(g.photo?(g.ar||0.345):1);}
@@ -2338,10 +2338,27 @@ function attachDrag(h){
     h.style.left=(adjHookX+g.ox).toFixed(2)+'%';
     h.style.top=(HANG_Y+g.oy).toFixed(2)+'%';
   });
-  function up(){if(dragging){dragging=false;save();}}
+  function up(){if(dragging){dragging=false;save();snapToHook();}}
   h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up);
 }
 
+/* 離した所が別のフックに近ければ、そのフックへ掛け替える（空いていれば移し、埋まっていれば入れ替える） */
+function snapToHook(){
+  var g=cur();if(!g)return false;var i=db.guitars.indexOf(g);if(i<0)return false;
+  var slot=i%5,page=Math.floor(i/5),x=HOOK_X[slot]+(g.ox||0),best=slot,bd=Infinity;
+  HOOK_X.forEach(function(hx,s){var d=Math.abs(hx-x);if(d<bd){bd=d;best=s;}});
+  if(best===slot)return false;
+  var j=page*5+best;
+  if(j>=db.guitars.length){ /* 空いているフック：その壁の最後の空きへ */
+    db.guitars.splice(i,1);db.guitars.push(g);j=db.guitars.length-1;
+    if(j===i){g.ox=0;save();renderWall();var e0=document.querySelector('.hung.adjusting');if(e0){adjEl=e0;adjHookX=parseFloat(e0.dataset.hookx);}toast('空いているフックは左から順に使います');return true;}
+    if(j%5!==best)toast('空いているフックは左から順に使います');
+  }else{var o=db.guitars[j];db.guitars[j]=g;db.guitars[i]=o;}
+  var ns=j%5;g.ox=(ns===best)?x-HOOK_X[ns]:0;wallPage=Math.floor(j/5);
+  save();renderWall();
+  var el=document.querySelector('.hung.adjusting');if(el){adjEl=el;adjHookX=parseFloat(el.dataset.hookx);}
+  return true;
+}
 /* 壁のギターを長押しして動かしたとき：位置合わせに入り、指を離すまでそのまま動かす */
 function liftToAdjust(id,x0,y0,e){
   enterAdjust(id);
@@ -2350,7 +2367,7 @@ function liftToAdjust(id,x0,y0,e){
   function mv(ev){if(!dragging)return;var rect=document.getElementById('closeView').getBoundingClientRect();
     g.ox=baseOx+(ev.clientX-dStartX)/rect.width*100;g.oy=baseOy+(ev.clientY-dStartY)/rect.height*100;
     adjEl.style.left=(adjHookX+g.ox).toFixed(2)+'%';adjEl.style.top=(HANG_Y+g.oy).toFixed(2)+'%';}
-  function up(){dragging=false;save();document.removeEventListener('pointermove',mv,true);document.removeEventListener('pointerup',up,true);document.removeEventListener('pointercancel',up,true);}
+  function up(){dragging=false;save();snapToHook();document.removeEventListener('pointermove',mv,true);document.removeEventListener('pointerup',up,true);document.removeEventListener('pointercancel',up,true);}
   document.addEventListener('pointermove',mv,true);document.addEventListener('pointerup',up,true);document.addEventListener('pointercancel',up,true);
   if(e)mv(e);
   toast('位置合わせ中です。「完了」で保存します');
@@ -2876,7 +2893,7 @@ var GGA=(function(){
 (function(){
   var SEL='button,.zone,.cz,[role="button"],a.btn,.hung,.empty-hook,.bgm-row';
   document.addEventListener('click',function(e){
-    var el=e.target&&e.target.closest&&e.target.closest(SEL);if(!el||el.disabled)return;
+    var el=e.target&&e.target.closest&&e.target.closest(SEL);if(!el||el.disabled||el.id==='entrDoor')return;
     GGA.init();var t0=performance.now();
     setTimeout(function(){if(GGA.claimed()<t0)GGA.se('tap');},0);
   },true);
@@ -3035,8 +3052,11 @@ var ENTR_TEXT={
   veil.addEventListener('click',function(){if(state!=='read')return;state='idle';closeLetter();letter=null;hint.textContent='扉を押すと中に入ります';hint.style.opacity='1';});
   document.getElementById('entrGo').addEventListener('click',function(){if(state!=='read')return;dest='';closeLetter();enter();});
   door.addEventListener('click',function(){if(state!=='idle')return;dest='';enter();});
+  var doorSnd=new Audio('audio/door-open.mp3');doorSnd.preload='auto';
+  function doorSound(){try{if(localStorage.getItem('gg_se_off')==='1')return;}catch(e){}
+    try{doorSnd.currentTime=0;var pr=doorSnd.play();if(pr&&pr.catch)pr.catch(function(){});}catch(e){}}
   function enter(){
-    if(state==='opening'||state==='in')return;state='opening';
+    if(state==='opening'||state==='in')return;state='opening';doorSound();
     env.hidden=true;hint.style.opacity='0';
     var quiet=bgmAudio.paused; /* 手紙を読んでいない＝まだ鳴っていない */
     if(quiet){
