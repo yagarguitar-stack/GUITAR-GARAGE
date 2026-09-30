@@ -1,6 +1,6 @@
 /* GUITAR GARAGE：電波のない所でも開けるようにする仕組み
    ファイルを差し替えたら VERSION の数字を一つ上げる（上げると、次に開いたときに新しい中身へ入れ替わる） */
-const VERSION = 'gg-v7';
+const VERSION = 'gg-v9';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './img/entrance-closed.webp', './img/entrance-open.webp', './img/overview.webp', './img/guitars.webp', './img/workbench.webp', './img/tools.webp',

@@ -273,6 +273,7 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .wallpager{position:absolute;left:0;right:0;bottom:12px;z-index:8;display:none;align-items:center;justify-content:center;gap:var(--sp-3);}
 .viewport.shelf-on .wallpager{display:flex;}
 .hung.adjusting{z-index:9;cursor:move;touch-action:none;}
+.hung{touch-action:none;}
 .hung.adjusting .g-wrap{animation:none;outline:2px dashed var(--brass-light);outline-offset:4px;border-radius:var(--r-sm);}
 .viewport.adjusting .hung:not(.adjusting),.viewport.adjusting .empty-hook,.viewport.adjusting .marker{pointer-events:none;}
 .adjustbar{position:absolute;left:0;right:0;bottom:12px;z-index:9;display:none;align-items:center;justify-content:center;gap:var(--sp-2);flex-wrap:wrap;padding:0 var(--sp-3);}
@@ -283,6 +284,10 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .adjustbar button{background:rgba(20,12,6,.92);border:1px solid var(--wood-light);color:var(--paper);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-3);font-family:inherit;font-size:var(--fs-md);cursor:pointer;}
 .adjustbar button:active{background:var(--wood);}
 .adjustbar .done{background:linear-gradient(180deg,var(--brass-light),var(--brass));color:#3a2807;border:none;font-weight:700;}
+.adjustbar .adj-row{display:flex;align-items:center;justify-content:center;gap:var(--sp-2);flex-wrap:wrap;width:100%;}
+.adjustbar .adj-k{color:var(--paper-dim);font-size:var(--fs-xs);min-width:3.2em;text-align:right;}
+.adjustbar .adj-val{min-width:4.2em;text-align:center;color:var(--brass-light);font-variant-numeric:tabular-nums;background:rgba(20,12,6,.92);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-2);font-size:var(--fs-sm);}
+.adjustbar .fine{padding:var(--sp-2);min-width:3.4em;font-variant-numeric:tabular-nums;touch-action:none;}
 .adjustbar .lbl{color:var(--brass-light);font-size:var(--fs-xs);letter-spacing:.5px;background:rgba(20,12,6,.92);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-md);}
 .wallpager button{background:rgba(20,12,6,.85);border:1px solid var(--wood-light);color:var(--brass-light);width:36px;height:36px;border-radius:50%;font-size:var(--fs-xl);cursor:pointer;font-family:inherit;}
 .wallpager button:disabled{opacity:.3;}
@@ -721,7 +726,7 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 @media (hover:hover){.hung:hover .g-price{opacity:1;transform:rotate(8deg) scale(1);}}
 .hung.show-price .g-price{opacity:1;transform:rotate(8deg) scale(1);}
 .hung.adjusting .g-price{display:none;}
-.hung img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+.hung img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;}
 /* ===== 弦の補充カード ===== */
 .restock{display:flex;flex-direction:column;align-items:center;margin:-4px 0 var(--sp-4);}
 .restock-peg{width:3px;height:18px;background:var(--steel);border-radius:2px;margin-bottom:-8px;position:relative;z-index:1;}
@@ -1172,7 +1177,10 @@ function cleanDb(src){
     var m=map(g.maint);g.maint={};for(k in m){if(typeof m[k]==='string'&&DATE_RE.test(m[k]))g.maint[k]=m[k];else fixed++;}
     g.stringHistory=list(g.stringHistory);g.repairs=list(g.repairs);
     if(g.added!=null&&!(typeof g.added==='string'&&DATE_RE.test(g.added))){delete g.added;fixed++;}
-    if(g.loan!=null){var L=g.loan;if(!(isObj(L)&&num(L.total,1,1e9)&&num(L.monthly,1,1e9)&&typeof L.start==='string'&&MONTH_RE.test(L.start))){delete g.loan;fixed++;}else{if(L.first!=null&&!num(L.first,1,1e9)){delete L.first;fixed++;}if(L.count!=null&&!num(L.count,1,600)){delete L.count;fixed++;}if(L.end!=null&&!(typeof L.end==='string'&&MONTH_RE.test(L.end))){delete L.end;fixed++;}if(L.mode!=null&&L.mode!=='monthly'&&L.mode!=='end'){delete L.mode;fixed++;}}}
+    if(g.loan!=null){var L=g.loan;var fullL=isObj(L)&&num(L.total,1,1e9)&&num(L.monthly,1,1e9)&&typeof L.start==='string'&&MONTH_RE.test(L.start);
+      var endL=isObj(L)&&typeof L.end==='string'&&MONTH_RE.test(L.end);
+      if(endL&&!fullL){if(L.total!=null&&!num(L.total,1,1e9)){delete L.total;fixed++;}if(L.monthly!=null&&!num(L.monthly,1,1e9)){delete L.monthly;fixed++;}if(L.start!=null&&!(typeof L.start==='string'&&MONTH_RE.test(L.start))){delete L.start;fixed++;}}
+      if(!(fullL||endL)){delete g.loan;fixed++;}else{if(L.first!=null&&!num(L.first,1,1e9)){delete L.first;fixed++;}if(L.count!=null&&!num(L.count,1,600)){delete L.count;fixed++;}if(L.end!=null&&!(typeof L.end==='string'&&MONTH_RE.test(L.end))){delete L.end;fixed++;}if(L.mode!=null&&L.mode!=='monthly'&&L.mode!=='end'){delete L.mode;fixed++;}}}
     return g;
   });
   return {db:out,fixed:fixed};
@@ -1207,7 +1215,14 @@ function loanPlan(total,start,opt){ /* opt.monthly か opt.end から回数・�
   return null;
 }
 function loanInfo(g){
-  var L=g.loan;if(!L||!(L.total>0)||!(L.monthly>0)||!L.start)return null;
+  var L=g.loan;if(!L)return null;
+  if(L.end&&!(L.total>0&&L.monthly>0&&L.start)){ /* 終わる月だけ（＋分かる分）から逆算 */
+    var nw=new Date(),cm=nw.getFullYear()+'-'+String(nw.getMonth()+1).padStart(2,'0');
+    var rem=Math.max(0,ymDiff(cm,L.end)),nn=L.start?ymDiff(L.start,L.end)+1:null;if(nn)rem=Math.min(rem,nn);
+    var lf=L.monthly>0?L.monthly*rem:((L.total>0&&nn)?Math.round(L.total*rem/nn):null);
+    return {left:lf,done:rem<=0,count:rem,total:nn,monthly:L.monthly>0?L.monthly:null,end:L.end,pct:nn?Math.round((nn-rem)/nn*100):null};
+  }
+  if(!(L.total>0)||!(L.monthly>0)||!L.start)return null;
   var first=L.first>0?L.first:L.monthly;
   var n=L.count>0?L.count:Math.max(1,Math.ceil((L.total-first)/L.monthly)+1);
   var now=new Date(),cur=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
@@ -2216,7 +2231,7 @@ function renderWall(){
         :('<div class="g-plate"'+fx+'>'+esc(g.name).slice(0,6)+'</div>');
       if(dust>0)inner+='<div class="g-dust" style="opacity:'+(0.25+0.75*dust).toFixed(2)+';background-image:'+DUST_TILE+(g.photo?';-webkit-mask-image:url('+cssUrl(g.photo)+');mask-image:url('+cssUrl(g.photo)+')':'')+'"></div>';
       if(isFresh(g))inner+='<div class="g-spark" aria-hidden="true"><svg class="ic"><use href="#i-sparkle"/></svg><svg class="ic"><use href="#i-sparkle"/></svg><svg class="ic"><use href="#i-sparkle"/></svg></div>';
-      var price=li?('<div class="g-price'+(li.done?' paid':'')+'">'+(li.done?'完済':'残り'+yen(li.left))+'</div>'):'';
+      var price=li?('<div class="g-price'+(li.done?' paid':'')+'">'+(li.done?'完済':(li.left!=null?'残り'+yen(li.left):'あと'+li.count+'回'))+'</div>'):'';
       var art='<div class="g-wrap"><div class="g-rot" style="transform:rotate('+rot+'deg)">'+inner+'</div>'+price+'</div>';
       var adj=(adjustId===g.id)?' adjusting':'';
       html+='<div class="hung'+adj+'" data-id="'+g.id+'" data-hookx="'+x+'" style="left:'+left+'%;top:'+top+'%;width:'+hungW+'%;transform:translate(-50%,0)"><div class="g-shadow"></div>'+art+'<span class="dot-status '+dcls+'"></span></div>';
@@ -2225,13 +2240,22 @@ function renderWall(){
     }
   }
   layer.innerHTML=html;
+  layer.querySelectorAll('.hung img').forEach(function(im){im.draggable=false;});
+  layer.ondragstart=function(e){e.preventDefault();};
   layer.querySelectorAll('.hung').forEach(function(h){
     if(h.classList.contains('adjusting')){attachDrag(h);}
     else{
       var lp=null,sx=0,sy=0,held=false;
-      h.addEventListener('pointerdown',function(e){if(e.pointerType==='mouse'||!h.querySelector('.g-price'))return;held=false;sx=e.clientX;sy=e.clientY;
-        lp=setTimeout(function(){held=true;document.querySelectorAll('.hung.show-price').forEach(function(x){x.classList.remove('show-price');});h.classList.add('show-price');if(navigator.vibrate)try{navigator.vibrate(15);}catch(_){}setTimeout(function(){h.classList.remove('show-price');},3000);},450);});
-      h.addEventListener('pointermove',function(e){if(lp&&Math.hypot(e.clientX-sx,e.clientY-sy)>10){clearTimeout(lp);lp=null;}});
+      h.addEventListener('pointerdown',function(e){if(adjustId||(e.pointerType==='mouse'&&e.button!==0))return;held=false;sx=e.clientX;sy=e.clientY;
+        lp=setTimeout(function(){lp=null;held=true;
+          if(h.querySelector('.g-price')&&e.pointerType!=='mouse'){document.querySelectorAll('.hung.show-price').forEach(function(x){x.classList.remove('show-price');});h.classList.add('show-price');setTimeout(function(){h.classList.remove('show-price');},3000);}
+          if(navigator.vibrate)try{navigator.vibrate(15);}catch(_){}
+        },450);});
+      h.addEventListener('pointermove',function(e){
+        if(lp&&Math.hypot(e.clientX-sx,e.clientY-sy)>10){clearTimeout(lp);lp=null;}
+        /* 長押しのあと指を動かしたら、位置合わせに入ってそのまま動かす */
+        else if(held&&!adjustId&&!h.classList.contains('want')&&Math.hypot(e.clientX-sx,e.clientY-sy)>8){h.classList.remove('show-price');liftToAdjust(h.dataset.id,sx,sy,e);}
+      });
       ['pointerup','pointercancel'].forEach(function(ev){h.addEventListener(ev,function(){clearTimeout(lp);lp=null;});});
       h.addEventListener('contextmenu',function(e){e.preventDefault();});
       h.addEventListener('click',function(){if(held){held=false;return;}if(adjustId)return;if(h.classList.contains('want'))openWanted(h.dataset.id);else openDetail(h.dataset.id);});
@@ -2264,19 +2288,42 @@ function exitAdjust(){adjustId=null;adjEl=null;dragging=false;vp.classList.remov
 function renderAdjustBar(){
   var bar=document.getElementById('adjustBar');
   bar.innerHTML='<span class="lbl">指でドラッグして位置・ボタンで大きさと角度</span>'+
-    '<button id="aSmall">－ 小</button><button id="aBig">大 ＋</button>'+
-    '<button id="aRotL">⟲ 左に</button><button id="aRotR">右に ⟳</button>'+
-    '<button id="aReset">リセット</button><button class="done" id="aDone">完了</button>';
+    '<span class="adj-row"><span class="adj-k">大きさ</span><button id="aSmall">－ 小</button><button class="fine" data-hold="size:-1" aria-label="大きさを1%小さく">−1%</button><span class="adj-val" id="aSizeVal"></span><button class="fine" data-hold="size:1" aria-label="大きさを1%大きく">+1%</button><button id="aBig">大 ＋</button></span>'+
+    '<span class="adj-row"><span class="adj-k">角度</span><button id="aRotL">⟲ 左に</button><button class="fine" data-hold="rot:-0.5" aria-label="角度を0.5度左に">−0.5°</button><span class="adj-val" id="aRotVal"></span><button class="fine" data-hold="rot:0.5" aria-label="角度を0.5度右に">+0.5°</button><button id="aRotR">右に ⟳</button></span>'+
+    '<span class="adj-row"><button id="aMatch">他のギターと大きさを揃える</button><button id="aReset">リセット</button><button class="done" id="aDone">完了</button></span>';
   document.getElementById('aSmall').addEventListener('click',function(){resizeAdj(1/1.1);});
   document.getElementById('aBig').addEventListener('click',function(){resizeAdj(1.1);});
   document.getElementById('aRotL').addEventListener('click',function(){rotateAdj(-5);});
   document.getElementById('aRotR').addEventListener('click',function(){rotateAdj(5);});
-  document.getElementById('aReset').addEventListener('click',function(){var g=cur();if(g){g.ox=0;g.oy=0;g.sc=1;g.rot=0;save();renderWall();}});
+  document.getElementById('aMatch').addEventListener('click',matchSizeAdj);
+  document.getElementById('aReset').addEventListener('click',function(){var g=cur();if(g){g.ox=0;g.oy=0;g.sc=1;g.rot=0;save();renderWall();adjVals();}});
   document.getElementById('aDone').addEventListener('click',function(){toast('位置を保存しました');exitAdjust();});
+  /* 細かく送る：押し続けると連続で動く */
+  bar.querySelectorAll('[data-hold]').forEach(function(btn){
+    var p=btn.dataset.hold.split(':'),kind=p[0],step=parseFloat(p[1]),t1=null,t2=null;
+    function once(){if(kind==='size')stepSizeAdj(step);else rotateAdj(step);}
+    function stop(){clearTimeout(t1);clearInterval(t2);t1=t2=null;}
+    btn.addEventListener('pointerdown',function(e){e.preventDefault();once();stop();t1=setTimeout(function(){t2=setInterval(once,70);},380);});
+    ['pointerup','pointerleave','pointercancel'].forEach(function(ev){btn.addEventListener(ev,stop);});
+    btn.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();once();}});
+  });
+  adjVals();
 }
+function adjVals(){var g=cur(),s=document.getElementById('aSizeVal'),r=document.getElementById('aRotVal');if(!g||!s)return;
+  s.textContent=Math.round((g.sc||1)*100)+'%';var d=Math.round((g.rot||0)*10)/10;r.textContent=(d>0?'+':'')+d+'°';}
+/* 見た目の高さ（壁の上での縦の長さ）＝ 幅 ÷ 写真の縦横比 */
+function hungBaseW(g){var arr=g.ar||0.345;return g.photo?Math.max(4.8,Math.min(14.4,21.3*arr)):4.8;}
+function hungH(g){return hungBaseW(g)*(g.sc||1)/(g.photo?(g.ar||0.345):1);}
+function matchSizeAdj(){var g=cur();if(!g)return;
+  if(!g.photo){toast('写真のあるギターだけ揃えられます');return;}
+  var others=db.guitars.filter(function(x){return x.id!==g.id&&!x.wanted&&x.photo;});
+  if(!others.length){toast('揃える相手のギターがありません');return;}
+  var avg=others.reduce(function(s,x){return s+hungH(x);},0)/others.length;
+  g.sc=Math.max(0.5,Math.min(2.2,avg*(g.ar||0.345)/hungBaseW(g)));save();renderWall();adjVals();toast('他のギターと大きさを揃えました');}
+function stepSizeAdj(pct){var g=cur();if(!g)return;g.sc=Math.max(0.5,Math.min(2.2,Math.round(((g.sc||1)+pct/100)*100)/100));save();renderWall();adjVals();}
 function cur(){return db.guitars.find(function(x){return x.id===adjustId;});}
-function resizeAdj(f){var g=cur();if(!g)return;g.sc=Math.max(0.5,Math.min(2.2,(g.sc||1)*f));save();renderWall();}
-function rotateAdj(d){var g=cur();if(!g)return;g.rot=Math.max(-180,Math.min(180,(g.rot||0)+d));save();renderWall();}
+function resizeAdj(f){var g=cur();if(!g)return;g.sc=Math.max(0.5,Math.min(2.2,(g.sc||1)*f));save();renderWall();adjVals();}
+function rotateAdj(d){var g=cur();if(!g)return;g.rot=Math.max(-180,Math.min(180,Math.round(((g.rot||0)+d)*10)/10));save();renderWall();adjVals();}
 function attachDrag(h){
   adjEl=h;adjHookX=parseFloat(h.dataset.hookx);
   h.addEventListener('pointerdown',function(e){
@@ -2293,6 +2340,20 @@ function attachDrag(h){
   });
   function up(){if(dragging){dragging=false;save();}}
   h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up);
+}
+
+/* 壁のギターを長押しして動かしたとき：位置合わせに入り、指を離すまでそのまま動かす */
+function liftToAdjust(id,x0,y0,e){
+  enterAdjust(id);
+  var g=cur(),el=document.querySelector('.hung.adjusting');if(!g||!el)return;
+  adjEl=el;adjHookX=parseFloat(el.dataset.hookx);dragging=true;dStartX=x0;dStartY=y0;baseOx=g.ox||0;baseOy=g.oy||0;
+  function mv(ev){if(!dragging)return;var rect=document.getElementById('closeView').getBoundingClientRect();
+    g.ox=baseOx+(ev.clientX-dStartX)/rect.width*100;g.oy=baseOy+(ev.clientY-dStartY)/rect.height*100;
+    adjEl.style.left=(adjHookX+g.ox).toFixed(2)+'%';adjEl.style.top=(HANG_Y+g.oy).toFixed(2)+'%';}
+  function up(){dragging=false;save();document.removeEventListener('pointermove',mv,true);document.removeEventListener('pointerup',up,true);document.removeEventListener('pointercancel',up,true);}
+  document.addEventListener('pointermove',mv,true);document.addEventListener('pointerup',up,true);document.addEventListener('pointercancel',up,true);
+  if(e)mv(e);
+  toast('位置合わせ中です。「完了」で保存します');
 }
 
 /* ===== modal ===== */
@@ -2349,8 +2410,8 @@ function openForm(g,seed){
       '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>総額（円）</label><input id="fLoanTotal" type="number" min="0" inputmode="numeric" placeholder="120000" value="'+((g.loan&&g.loan.total)||'')+'"></div>'+
       '<div class="field" style="flex:1;margin:0"><label>最初に支払う月</label><input id="fLoanStart" type="month" value="'+((g.loan&&g.loan.start)||'')+'"></div></div>'+
       '<div class="field" style="margin:12px 0 0"><label>決め方</label><div class="loan-mode" id="fLoanMode"><button type="button" data-m="monthly">月々の額で決める</button><button type="button" data-m="end">終わる月で決める</button></div></div>'+
+      '<div class="field" id="fLoanEndF" style="margin:0 0 12px"><label>最後に支払う月</label><input id="fLoanEnd" type="month" value="'+attr(loanEndOf(g))+'"><div class="hint" id="fLoanEndHint">最後に支払う月だけでも、残りの回数を出せます。総額・最初の月・月々の額は、分かる分だけで大丈夫です。</div></div>'+
       '<div class="field" id="fLoanMonthlyF" style="margin:0"><label>月々の額（円）</label><input id="fLoanMonthly" type="number" min="0" inputmode="numeric" placeholder="5000" value="'+((g.loan&&g.loan.monthly)||'')+'"></div>'+
-      '<div class="field" id="fLoanEndF" style="margin:0"><label>最後に支払う月</label><input id="fLoanEnd" type="month" value="'+attr(loanEndOf(g))+'"><div class="hint">割り切れない分は初回にまとめます。</div></div>'+
       '<div class="loan-calc" id="fLoanCalc"></div>'+
       '<div class="field" style="margin:8px 0 0"><div class="hint">手数料がある場合は、手数料込みの総額を入れてください。壁のギターに指を合わせる（スマホは長押し）と値札が出ます。</div></div></div>'+
     '</div>'+
@@ -2362,18 +2423,31 @@ function openForm(g,seed){
   document.getElementById('fCancel').addEventListener('click',closeModal);
   var loanMode=(g.loan&&g.loan.mode)||'monthly';
   function loanRead(){var T=parseInt(document.getElementById('fLoanTotal').value,10)||0,S=document.getElementById('fLoanStart').value,M=parseInt(document.getElementById('fLoanMonthly').value,10)||0,E=document.getElementById('fLoanEnd').value;
-    return {T:T,S:S,M:M,E:E,plan:loanPlan(T,S,loanMode==='end'?{end:E}:{monthly:M})};}
+    var r={T:T,S:S,M:M,E:E,plan:null,loan:null,err:''};
+    if(loanMode==='monthly'){r.plan=loanPlan(T,S,{monthly:M});if(r.plan)r.loan={total:T,start:S,monthly:r.plan.monthly,first:r.plan.first,count:r.plan.count,mode:'monthly'};else r.err='ローンは総額・最初に支払う月・月々の額を入れてください';return r;}
+    if(!E){r.err='最後に支払う月を入れてください';return r;}
+    if(S&&ymDiff(S,E)<0){r.err='最後に支払う月は、最初に支払う月より後にしてください';return r;}
+    var L={mode:'end',end:E};
+    if(T&&S){r.plan=loanPlan(T,S,{end:E});if(!r.plan){r.err='最後に支払う月を確かめてください';return r;}L.total=T;L.start=S;L.monthly=r.plan.monthly;L.first=r.plan.first;L.count=r.plan.count;}
+    else{if(T)L.total=T;if(S){L.start=S;L.count=ymDiff(S,E)+1;}if(M)L.monthly=M;}
+    r.loan=L;return r;}
   function loanPaint(){
     document.querySelectorAll('#fLoanMode button').forEach(function(b){b.classList.toggle('on',b.dataset.m===loanMode);});
-    document.getElementById('fLoanMonthlyF').style.display=loanMode==='monthly'?'':'none';
     document.getElementById('fLoanEndF').style.display=loanMode==='end'?'':'none';
-    var r=loanRead(),c=document.getElementById('fLoanCalc'),p=r.plan;
-    if(!p){c.textContent=(r.T&&r.S&&loanMode==='end'&&r.E&&ymDiff(r.S,r.E)<0)?'最後に支払う月は、最初に支払う月より後にしてください':'';return;}
-    c.textContent=p.count+'回払い ・ 月々 '+yen(p.monthly)+(p.first!==p.monthly&&loanMode==='end'?'（初回 '+yen(p.first)+'）':'')+' ・ 完済予定 '+fmtYm(p.end);
+    document.getElementById('fLoanMonthly').placeholder=loanMode==='end'?'わかれば':'5000';
+    var r=loanRead(),c=document.getElementById('fLoanCalc');
+    if(!r.loan){c.textContent=(r.T||r.S||r.M||r.E)&&r.err&&!(loanMode==='end'&&!r.E)?r.err:'';return;}
+    var li=loanInfo({loan:r.loan});if(!li){c.textContent='';return;}
+    var parts=[];if(li.total)parts.push(li.total+'回払い');
+    if(li.monthly)parts.push('月々 '+yen(li.monthly)+(r.loan.first&&r.loan.first!==li.monthly?'（初回 '+yen(r.loan.first)+'）':''));
+    if(li.done){parts.push(fmtYm(li.end)+'に完済');}
+    else{parts.push('あと'+li.count+'回');if(li.left!=null)parts.push('残り '+yen(li.left));parts.push('完済予定 '+fmtYm(li.end));}
+    c.textContent=parts.join(' ・ ');
   }
   document.querySelectorAll('#fLoanMode button').forEach(function(b){b.addEventListener('click',function(){
     var r=loanRead();
     if(b.dataset.m==='end'&&r.plan&&!r.E)document.getElementById('fLoanEnd').value=r.plan.end;
+    if(b.dataset.m==='monthly'&&r.loan&&r.loan.monthly&&!r.M)document.getElementById('fLoanMonthly').value=r.loan.monthly;
     if(b.dataset.m==='monthly'&&r.plan&&!r.M)document.getElementById('fLoanMonthly').value=r.plan.monthly;
     loanMode=b.dataset.m;loanPaint();});});
   ['fLoanTotal','fLoanStart','fLoanMonthly','fLoanEnd'].forEach(function(id){document.getElementById(id).addEventListener('input',loanPaint);});
@@ -2387,9 +2461,9 @@ function openForm(g,seed){
     var stLife=(stType==='custom')?(parseInt(document.getElementById('fStrLife').value,10)||30):stPreset.days;
     if(stLife<1)stLife=30;
     var lr=loanRead(),loan=null;
-    if(lr.T||lr.S||(loanMode==='monthly'?lr.M:lr.E)){
-      if(!lr.plan){toast(loanMode==='end'?'ローンは総額・最初に支払う月・最後に支払う月を入れてください':'ローンは総額・最初に支払う月・月々の額を入れてください');return;}
-      loan={total:lr.T,start:lr.S,monthly:lr.plan.monthly,first:lr.plan.first,count:lr.plan.count,mode:loanMode};if(loanMode==='end')loan.end=lr.plan.end;}
+    if(lr.T||lr.S||lr.M||lr.E){
+      if(!lr.loan){toast(lr.err);return;}
+      loan=lr.loan;}
     var extra=readGuitarExtra();
     if(isEdit){
       var t=db.guitars.find(function(x){return x.id===g.id;});
@@ -2433,11 +2507,12 @@ function priceTagHtml(g,ss){
   if(ss.state!=='none'){var sc=ss.state==='bad'?'#d8453a':(ss.state==='warn'?'#c08018':'#1f7a3a');var st=ss.state==='bad'?'交換<br>どき':(ss.state==='warn'?'そろ<br>そろ':'良好');stamp='<span class="ptag-stamp" style="color:'+sc+'">弦<br>'+st+'</span>';}
   var li=loanInfo(g),credit='';
   if(li){
-    credit='<div class="pcredit"><div class="pcredit-top"><span class="pcredit-lim'+(li.done?' done':'')+'">'+(li.done?'完済':'支払い中')+'</span><span class="pcredit-t">ショッピングクレジット</span></div>'+
-      (li.done?'<div class="pcredit-mid"><span class="pcredit-n">'+li.total+'回</span><span>すべて支払い済み</span></div>'
-        :'<div class="pcredit-mid"><span class="pcredit-n">'+li.total+'回</span><span>のうち 残り <b style="font-size:19px;color:#f3d9a0">'+li.count+'回</b></span></div>')+
-      '<div class="pcredit-bar"><i style="width:'+li.pct+'%"></i></div>'+
-      '<div class="pcredit-fine">'+(li.done?'完済 '+fmtYm(li.end):'残り '+yen(li.left)+' ・ 月々 '+yen(li.monthly)+' ・ 完済予定 '+fmtYm(li.end))+'</div></div>';
+    var fine=li.done?('完済 '+fmtYm(li.end)):[li.left!=null?'残り '+yen(li.left):'',li.monthly?'月々 '+yen(li.monthly):'','完済予定 '+fmtYm(li.end)].filter(Boolean).join(' ・ ');
+    var mid=li.done?('<div class="pcredit-mid">'+(li.total?'<span class="pcredit-n">'+li.total+'回</span>':'')+'<span>すべて支払い済み</span></div>')
+      :(li.total?'<div class="pcredit-mid"><span class="pcredit-n">'+li.total+'回</span><span>のうち 残り <b style="font-size:19px;color:#f3d9a0">'+li.count+'回</b></span></div>'
+               :'<div class="pcredit-mid"><span>あと</span><span class="pcredit-n">'+li.count+'回</span></div>');
+    credit='<div class="pcredit"><div class="pcredit-top"><span class="pcredit-lim'+(li.done?' done':'')+'">'+(li.done?'完済':'支払い中')+'</span><span class="pcredit-t">ショッピングクレジット</span></div>'+mid+
+      (li.pct!=null?'<div class="pcredit-bar"><i style="width:'+li.pct+'%"></i></div>':'')+'<div class="pcredit-fine">'+fine+'</div></div>';
   }
   return '<div class="ptag-wrap"><div class="ptag swing">'+stamp+hd+main+sn+memo+spec+price+buy+'</div>'+credit+'</div>';
 }
