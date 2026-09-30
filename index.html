@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="GUITAR GARAGE">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Syuku&family=Rye&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Syuku&family=Rye&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@700&family=Klee+One:wght@400;600&display=swap">
 <!-- 共通デザイン v1：design-system/v1 の4ファイルと同じ中身。共有を始めたら各ブロックを共通ファイルの読み込みに置き換える -->
 <style id="ds-fonts">
 :root{
@@ -987,6 +987,73 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 #closeView .hung .g-plate{font-size:min(1.36vw,15px);}
 #closeView .empty-hook{width:5.8%;height:14.4%;font-size:min(1.76vw,20px);}
 </style>
+<style id="entrance-css">
+/* ===== 入口（工房の扉） ===== */
+.entr{position:fixed;inset:0;z-index:9000;background:#0b0704;overflow:hidden;
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .12 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --fiber:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .09' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .33 0 0 0 0 .15 0 0 0 .10 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");}
+.entr.gone{display:none;}
+.entr-scene{position:absolute;aspect-ratio:3/2;}
+.entr-scene img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none;}
+#entrOpen{opacity:0;transition:opacity .3s ease;}
+.entr-plane{position:absolute;left:0;top:0;width:1000px;height:1000px;transform-origin:0 0;}
+.entr-door{position:absolute;inset:0;cursor:pointer;border:3px solid rgba(127,214,255,.85);border-radius:2px;box-shadow:0 0 30px rgba(127,214,255,.45),inset 0 0 30px rgba(127,214,255,.18);transition:opacity .3s;background:none;padding:0;}
+@media (hover:hover){.entr-door:hover{box-shadow:0 0 44px rgba(127,214,255,.7),inset 0 0 36px rgba(127,214,255,.26);}}
+.entr-door:focus-visible{outline:3px solid #fff;outline-offset:4px;}
+.entr-env{position:absolute;left:43.6%;top:66%;width:150px;height:98px;cursor:pointer;transform-origin:0 50%;transform:rotate(-4deg);border:0;padding:0;background:none;}
+.entr-env .mini{position:absolute;inset:0;border-radius:1px;filter:brightness(.6) sepia(.35) saturate(1.25) contrast(1.08) blur(.35px);
+  background:linear-gradient(100deg,rgba(40,20,5,.55) 0,rgba(40,20,5,0) 22%),radial-gradient(ellipse at 20% 0%,rgba(255,196,120,.35),transparent 70%),var(--noise),linear-gradient(170deg,#d9c39a,#b89a6c);
+  box-shadow:1px 9px 10px rgba(0,0,0,.7),0 2px 2px rgba(0,0,0,.5),inset 0 0 14px rgba(60,35,12,.45);}
+.entr-env .mini::before{content:'';position:absolute;inset:0;clip-path:polygon(0 0,100% 0,52% 56%);background:linear-gradient(180deg,rgba(255,230,190,.12),rgba(60,35,10,.25));}
+.entr-env .mini::after{content:'';position:absolute;left:-2px;top:-4px;bottom:-4px;width:10px;background:linear-gradient(90deg,#1a0f07,rgba(26,15,7,0));}
+.entr-env::after{content:'';position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;background:linear-gradient(180deg,rgba(255,190,110,0),rgba(40,20,6,.45)),var(--noise);opacity:.9;}
+.entr-seal{position:absolute;aspect-ratio:1;border-radius:47% 53% 50% 50%/52% 48% 52% 48%;
+  background:radial-gradient(circle at 38% 32%,#d8604a 0,#a8321f 38%,#6e1a0f 80%);box-shadow:0 1px 2px rgba(0,0,0,.5),inset 0 -2px 3px rgba(0,0,0,.35),inset 0 2px 2px rgba(255,190,160,.35);
+  display:flex;align-items:center;justify-content:center;color:#5a150b;font-family:var(--font-sign);text-shadow:0 1px 0 rgba(255,170,140,.45),0 -1px 0 rgba(0,0,0,.4);}
+.entr-seal::after{content:'';position:absolute;inset:14%;border-radius:50%;border:1px solid rgba(70,15,8,.45);}
+.entr-env .entr-seal{width:22%;left:41%;top:36%;font-size:13px;}
+.entr-hint{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);transform:translateX(-50%);background:rgba(20,12,6,.82);border:1px solid #5a3d22;color:#e8dcc0;padding:8px 16px;border-radius:999px;font-size:14px;white-space:nowrap;pointer-events:none;font-family:var(--font-body);transition:opacity .3s;}
+.entr-black{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .45s ease;z-index:5;}
+/* 手紙 */
+.entr-veil{position:absolute;inset:0;z-index:3;-webkit-backdrop-filter:blur(6px) brightness(.8);backdrop-filter:blur(6px) brightness(.8);background:radial-gradient(ellipse at 50% 40%,rgba(60,30,8,.35),rgba(5,3,1,.9));opacity:0;pointer-events:none;transition:opacity .25s;}
+.entr-veil.show{opacity:1;pointer-events:auto;}
+.entr-stage{position:absolute;left:50%;top:50%;width:min(88vw,420px);transform:translate(-50%,-50%);z-index:4;pointer-events:none;perspective:900px;visibility:hidden;}
+.entr-stage.show{visibility:visible;}
+.entr-envbig{position:relative;aspect-ratio:1.55;opacity:0;transform:translateY(40px) scale(.5) rotate(-7deg);transition:transform .3s cubic-bezier(.3,1.2,.5,1),opacity .2s;}
+.show .entr-envbig{opacity:1;transform:none;}
+.entr-envbig .eb-back{position:absolute;inset:0;border-radius:2px;background:radial-gradient(ellipse at 25% 0%,rgba(255,200,130,.3),transparent 70%),var(--noise),linear-gradient(160deg,#dcc69c,#b99b6b);box-shadow:0 18px 40px rgba(0,0,0,.6);}
+.entr-envbig .eb-front{position:absolute;inset:0;z-index:3;border-radius:2px;pointer-events:none;background:radial-gradient(ellipse at 25% 20%,rgba(255,200,130,.25),transparent 70%),var(--noise),linear-gradient(170deg,#e3cfa8,#c2a676);clip-path:polygon(0 30%,50% 64%,100% 30%,100% 100%,0 100%);box-shadow:inset 0 0 30px rgba(120,90,40,.25);}
+.entr-envbig .eb-flap{position:absolute;left:0;right:0;top:0;height:64%;z-index:4;transform-origin:50% 0;transition:transform .28s ease .22s,z-index 0s .36s;background:radial-gradient(ellipse at 30% 0%,rgba(255,205,140,.35),transparent 70%),var(--noise),linear-gradient(180deg,#e6d3ad,#c9ae7e);clip-path:polygon(0 0,100% 0,50% 100%);}
+.entr-envbig .eb-flap .entr-seal{width:20%;left:40%;top:74%;font-size:clamp(14px,4.4vw,22px);transition:opacity .15s .2s;}
+.open .entr-envbig .eb-flap{transform:rotateX(180deg);z-index:1;}
+.open .entr-envbig .eb-flap .entr-seal{opacity:0;}
+.entr-envbig .eb-peek{position:absolute;left:6%;right:6%;top:8%;height:80%;z-index:2;border-radius:1px;background:var(--noise),var(--fiber),linear-gradient(180deg,#eadcc0,#d9c7a2);transition:transform .25s cubic-bezier(.3,1,.4,1) .45s;}
+.open .entr-envbig .eb-peek{transform:translateY(-38%);}
+.out .entr-envbig{opacity:0;transform:translateY(90px) scale(.92);transition:transform .3s ease,opacity .25s;}
+.entr-paper{position:absolute;left:0;right:0;top:50%;z-index:5;max-height:86vh;overflow:auto;padding:30px 26px 22px;color:#22140a;opacity:0;pointer-events:none;isolation:isolate;
+  transform:translateY(-38%) rotateX(9deg) rotate(-1.2deg);transition:transform .3s cubic-bezier(.3,1,.4,1),opacity .25s;font-family:"Klee One",var(--font-head);
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.55)) drop-shadow(0 24px 30px rgba(0,0,0,.7)) sepia(.12) contrast(1.04);}
+.entr-paper::before{content:'';position:absolute;inset:0;z-index:-1;filter:url(#entrRough);
+  background:radial-gradient(ellipse 85% 60% at 45% -8%,rgba(255,196,120,.55),transparent 72%),radial-gradient(ellipse 120% 95% at 50% 45%,transparent 45%,rgba(45,22,6,.55) 100%),var(--noise),var(--noise),var(--fiber),linear-gradient(178deg,#dcc59a,#c6a877 65%,#a98a59);}
+.entr-paper::after{content:'';position:absolute;inset:6px;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,transparent 32.6%,rgba(80,52,20,.20) 33.2%,rgba(255,244,220,.28) 33.7%,transparent 35%),linear-gradient(180deg,transparent 65.8%,rgba(80,52,20,.20) 66.4%,rgba(255,244,220,.28) 66.9%,transparent 68.2%);}
+.out .entr-paper{opacity:1;transform:translateY(-50%) rotateX(9deg) rotate(-1.2deg);pointer-events:auto;}
+.entr-paper .lh{text-align:center;margin-bottom:16px;}
+.entr-paper .lh b{display:block;font-family:var(--font-sign);font-weight:400;letter-spacing:.2em;font-size:19px;color:#c7ad7d;text-shadow:0 1px 0 rgba(255,236,196,.55),0 -1px 0 rgba(70,42,12,.55);}
+.entr-paper .lh span{display:block;margin-top:2px;font-family:var(--font-head);font-size:10px;letter-spacing:.4em;color:#c2a877;text-shadow:0 1px 0 rgba(255,236,196,.5),0 -1px 0 rgba(70,42,12,.5);}
+.entr-paper .dt{text-align:right;font-size:13px;color:#4a3318;margin-bottom:10px;}
+.entr-paper .gr{font-size:16.5px;font-weight:600;margin:0 0 12px;}
+.entr-paper p,.entr-paper .dt,.entr-paper .gr,.entr-paper .sg{text-shadow:0 0 .6px rgba(46,30,14,.55);}
+.entr-paper p{margin:0 0 6px;font-size:15px;line-height:1.85;}
+.entr-item{margin:0 0 14px;}
+.entr-zone{font-family:"Klee One",var(--font-head);font-size:14px;font-weight:600;color:#6a2a14;background:none;border:0;border-bottom:1px solid rgba(106,42,20,.45);padding:0 2px 1px;cursor:pointer;}
+.entr-zone::before{content:'\2192\00a0';}
+.entr-paper .sg{text-align:right;margin-top:10px;font-size:14.5px;}
+.entr-go{display:block;margin:18px auto 2px;font-family:var(--font-head);font-size:14px;letter-spacing:.15em;background:rgba(40,22,6,.1);color:#2a180a;border:1px solid rgba(42,24,10,.6);border-radius:2px;padding:9px 22px;cursor:pointer;opacity:0;transition:opacity .25s .2s;pointer-events:none;}
+.out .entr-go{opacity:1;pointer-events:auto;}
+@media (prefers-reduced-motion:reduce){.entr-envbig,.entr-paper,.eb-flap,.eb-peek,#entrOpen,.entr-black{transition-duration:.01s!important;transition-delay:0s!important}}
+</style>
+<script>window.GG_ENTRANCE=true;</script>
 </head>
 <body>
 <div id="boot"></div>
@@ -1469,7 +1536,7 @@ function goHome(){
   closeView.classList.add('fading');
   homeTimer=setTimeout(done,500);
 }
-setTimeout(function(){hintOnce(document.getElementById('scene'));},1600);
+if(!window.GG_ENTRANCE)setTimeout(function(){hintOnce(document.getElementById('scene'));},1600);
 
 /* ===== ジュークボックスの操作盤 ===== */
 function plSync(){
@@ -2634,6 +2701,7 @@ function renderBgm(){
 document.getElementById('bgmBtn').addEventListener('click',function(e){e.stopPropagation();if(bgmIdx<0)return;if(bgmAudio.paused)bgmResume();else bgmPause();});
 /* 開いたら1曲目から流す。ブラウザが音の自動再生を止めるため、止められたときは最初の操作で流し始める */
 (function(){
+  if(window.GG_ENTRANCE){bgmIdx=0;bgmAudio.src=BGM[0].src;return;} /* 入口で扉や手紙を押したときに流し始める */
   var started=false;
   function kick(e){if(started)return;if(e&&e.target&&e.target.closest&&e.target.closest('#bgmBtn,.bgm-row,.bgm-stop,.jbplayer'))return;started=true;['pointerdown','keydown','touchstart'].forEach(function(ev){document.removeEventListener(ev,kick,true);});if(bgmIdx<0)bgmStart(0);else if(bgmAudio.paused&&!bgmDucked)bgmResume();}
   ['pointerdown','keydown','touchstart'].forEach(function(ev){document.addEventListener(ev,kick,true);});
@@ -2648,6 +2716,160 @@ function applyLighting(){var sc=document.getElementById('viewport');if(!sc)retur
 function setLightingPreview(v){lightingOverride=(v==='auto')?null:v;applyLighting();var box=document.getElementById('litPreview');if(box){var cur=lightingOverride||'auto';box.querySelectorAll('button').forEach(function(b){b.classList.toggle('lit-active',b.getAttribute('data-lit')===cur);});}}
 load();renderWall();applyLighting();setInterval(applyLighting,60000);
 (function(){var box=document.getElementById('litPreview');if(box){box.addEventListener('click',function(e){var b=e.target.closest('[data-lit]');if(b)setLightingPreview(b.getAttribute('data-lit'));});setLightingPreview('auto');}})();
+</script>
+<!-- ===== 入口（工房の扉） ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="entrRough" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="3" seed="7"/><feDisplacementMap in="SourceGraphic" scale="7"/></filter></svg>
+<div class="entr" id="entr">
+  <div class="entr-scene" id="entrScene">
+    <img id="entrClosed" src="img/entrance-closed.webp" alt="工房の入口">
+    <img id="entrOpen" src="img/entrance-open.webp" alt="">
+    <div class="entr-plane" id="entrPlane">
+      <button class="entr-door" id="entrDoor" aria-label="扉を開けて中へ入る"></button>
+      <button class="entr-env" id="entrEnv" aria-label="扉に差し込まれた手紙を読む" hidden><span class="mini"><span class="entr-seal">G</span></span></button>
+    </div>
+  </div>
+  <div class="entr-hint" id="entrHint">扉を押すと中に入ります</div>
+  <div class="entr-veil" id="entrVeil"></div>
+  <div class="entr-stage" id="entrStage">
+    <div class="entr-envbig"><div class="eb-back"></div><div class="eb-peek"></div><div class="eb-front"></div><div class="eb-flap"><span class="entr-seal">G</span></div></div>
+    <div class="entr-paper" role="dialog" aria-label="工房からの手紙">
+      <div class="lh"><b>GUITAR GARAGE</b><span>THE GARAGE</span></div>
+      <div class="dt" id="entrDate"></div>
+      <p class="gr" id="entrGreet"></p>
+      <div id="entrItems"></div>
+      <div class="sg">どうぞごゆっくり。</div>
+      <button class="entr-go" id="entrGo">扉を開けて入る</button>
+    </div>
+  </div>
+  <div class="entr-black" id="entrBlack"></div>
+</div>
+<script>
+/* ===== 入口（工房の扉） =====
+   扉はいつでも押せば入れる。手紙は用件がある日（と3日に1度ほどのおすすめの日）だけ届き、開かずに入ると処分される。
+   手紙の言葉は ENTR_TEXT にまとめてある。一行足せば増やせる。 */
+var ENTR_TEXT={
+  greet:{
+    away:'お久しぶりです。お変わりありませんか。',
+    morning:'おはようございます。今日も良い一日になりますように。',
+    day:'こんにちは。ようこそお越しくださいました。',
+    evening:'こんばんは。今日も一日おつかれさまでした。',
+    night:'夜も更けてまいりました。音量は控えめに。'
+  },
+  /* 愛器の用件（{name} にギターの呼び名が入る） */
+  strWarn:'{name}の弦が、そろそろ替えどきのようです。',
+  strBad:'{name}の弦が、替えどきを過ぎているようです。',
+  maintBad:'{name}の{what}、しばらくお手入れしていないようです。',
+  anniv:'{name}を迎えて、今月で{n}年になります。',
+  /* おすすめ（z：向かう場所） */
+  recommend:[
+    {t:'今日は、聞こえた音を当てる耳の練習はいかがでしょう。',z:'tools'},
+    {t:'チョーキングで、狙った音まで上がっているか確かめてみませんか。',z:'tools'},
+    {t:'指板の音の位置を、少しだけおさらいしてみませんか。',z:'tools'},
+    {t:'音符の長さを、聞いて叩いて覚えてみませんか。',z:'tools'},
+    {t:'音楽理論の本を、一節だけ読んでみませんか。',z:'books'},
+    {t:'リズムの基礎を、一節だけおさらいしてみませんか。',z:'books'},
+    {t:'ギタリスト図鑑で、新しいギタリストを探してみませんか。',z:'books'},
+    {t:'今日の練習時間を、測ってみませんか。',z:'practice'},
+    {t:'思いついたフレーズを、TAB譜に書き留めてみませんか。',z:'practice'}
+  ],
+  /* 季節の言葉（月ごと） */
+  season:{1:'新しい年です。今年はどんな曲を弾きましょう。',3:'春が近づいてまいりました。弦を張り替えて、気分も新たにいかがでしょう。',4:'新しい季節です。弦を張り替えて、気分も新たにいかがでしょう。',6:'湿気の多い季節です。ネックの反りにお気をつけください。',7:'暑い日が続きます。車の中にギターを置いたままにしないでくださいね。',8:'暑い日が続きます。車の中にギターを置いたままにしないでくださいね。',9:'季節の変わり目です。ギターのお手入れはいかがでしょう。',10:'季節の変わり目です。ギターのお手入れはいかがでしょう。',11:'空気が乾いてまいりました。指板にオイルはいかがでしょう。',12:'一年おつかれさまでした。弾き納めはどの一本にしましょう。'},
+  zoneBtn:{bench:'整備台へ行く',shelf:'愛器の壁へ行く',tools:'道具箱へ行く',books:'本棚へ行く',practice:'練習の場所へ行く'},
+  maintName:{oil:'指板',clean:'ボディ',polish:'金属の部分'}
+};
+(function(){
+  var KEY='gg_entrance_v1',st={};
+  try{st=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){st={};}
+  function keep(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+  var el=document.getElementById('entr'),scene=document.getElementById('entrScene'),plane=document.getElementById('entrPlane');
+  var door=document.getElementById('entrDoor'),env=document.getElementById('entrEnv'),hint=document.getElementById('entrHint');
+  var veil=document.getElementById('entrVeil'),stage=document.getElementById('entrStage'),black=document.getElementById('entrBlack');
+  var state='idle',dest='',letter=null,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* 扉の四隅（元画像 1536×1024 上の位置）。枠と封筒をこの面に合わせて歪める */
+  var DOOR=[[640,198],[1395,132],[1395,870],[640,818]];
+  function solve(A,b){var n=b.length,i,j,k;for(i=0;i<n;i++){var m=i;for(k=i+1;k<n;k++)if(Math.abs(A[k][i])>Math.abs(A[m][i]))m=k;var tA=A[i];A[i]=A[m];A[m]=tA;var tb=b[i];b[i]=b[m];b[m]=tb;
+    for(k=i+1;k<n;k++){var f=A[k][i]/A[i][i];for(j=i;j<n;j++)A[k][j]-=f*A[i][j];b[k]-=f*b[i];}}
+    var x=new Array(n);for(i=n-1;i>=0;i--){var s=b[i];for(j=i+1;j<n;j++)s-=A[i][j]*x[j];x[i]=s/A[i][i];}return x;}
+  function toQuad(node,W,H,dst){var src=[[0,0],[W,0],[W,H],[0,H]],A=[],b=[];
+    for(var i=0;i<4;i++){var s=src[i],d=dst[i];A.push([s[0],s[1],1,0,0,0,-s[0]*d[0],-s[1]*d[0]]);b.push(d[0]);A.push([0,0,0,s[0],s[1],1,-s[0]*d[1],-s[1]*d[1]]);b.push(d[1]);}
+    var h=solve(A,b);node.style.transform='matrix3d('+[h[0],h[3],0,h[6],h[1],h[4],0,h[7],0,0,1,0,h[2],h[5],0,1].join(',')+')';}
+  function fit(){var W=innerWidth,H=innerHeight,w=Math.max(W,H*1.5),h=w/1.5,left=Math.min(0,Math.max(W-w,W/2-.64*w));
+    scene.style.width=w+'px';scene.style.height=h+'px';scene.style.left=left+'px';scene.style.top=((H-h)/2)+'px';
+    var k=w/1536;toQuad(plane,1000,1000,DOOR.map(function(p){return [p[0]*k,p[1]*k];}));}
+  addEventListener('resize',function(){if(state!=='in')fit();});fit();
+
+  /* ---- BGM：手紙を読む間はこもった音、扉が開くと澄む ---- */
+  var ac=null,lp=null;
+  function route(){
+    if(ac)return true;if(location.protocol!=='https:')return false;
+    try{var C=window.AudioContext||window.webkitAudioContext;ac=new C();var src=ac.createMediaElementSource(bgmAudio);lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=20000;lp.Q.value=.4;src.connect(lp);lp.connect(ac.destination);}
+    catch(e){ac=null;lp=null;return false;}
+    document.addEventListener('visibilitychange',function(){if(!document.hidden&&ac&&ac.state==='suspended')ac.resume();});
+    document.addEventListener('pointerdown',function(){if(ac&&ac.state==='suspended')ac.resume();},true);
+    return true;}
+  function bgmOn(){if(ac&&ac.state==='suspended')ac.resume();if(bgmAudio.paused){if(!bgmAudio.getAttribute('src')||bgmIdx<0)bgmStart(0);else bgmResume();}}
+  function muffle(){var ok=route();if(ok){lp.frequency.cancelScheduledValues(ac.currentTime);lp.frequency.setValueAtTime(420,ac.currentTime);}
+    bgmOn();if(!ok)setTimeout(function(){bgmFade(bgmVol()*.35,300);},850);}
+  function clear(){if(lp){var t=ac.currentTime;lp.frequency.cancelScheduledValues(t);lp.frequency.setValueAtTime(lp.frequency.value,t);lp.frequency.exponentialRampToValueAtTime(20000,t+.6);}
+    if(bgmAudio.paused)bgmOn();else bgmFade(bgmVol(),600);}
+
+  /* ---- 手紙を作る ---- */
+  function greet(away){if(away)return ENTR_TEXT.greet.away;var h=new Date().getHours();
+    return h>=5&&h<10?ENTR_TEXT.greet.morning:h<17&&h>=10?ENTR_TEXT.greet.day:h>=17&&h<22?ENTR_TEXT.greet.evening:ENTR_TEXT.greet.night;}
+  function fill(s,o){return s.replace(/\{(\w+)\}/g,function(_,k){return o[k];});}
+  function pick(a){return a[Math.floor(Math.random()*a.length)];}
+  function makeLetter(){
+    var td=today();if(st.day===td)return null;
+    var away=st.lastVisit?(daysSince(st.lastVisit)>=7):false,items=[],ym=td.slice(0,7);
+    (db.guitars||[]).forEach(function(g){if(g.wanted)return;
+      var s=stringStatus(g);if(s.state==='bad')items.push({t:fill(ENTR_TEXT.strBad,{name:g.name}),z:'bench'});else if(s.state==='warn')items.push({t:fill(ENTR_TEXT.strWarn,{name:g.name}),z:'bench'});
+      MAINT.slice(1).forEach(function(m){if(maintStatus(g,m).state==='bad'&&ENTR_TEXT.maintName[m.key])items.push({t:fill(ENTR_TEXT.maintBad,{name:g.name,what:ENTR_TEXT.maintName[m.key]}),z:'bench'});});
+      if(g.buy&&g.buy.slice(5,7)===ym.slice(5,7)&&g.buy<ym&&st.anniv!==ym){var n=+ym.slice(0,4)-+g.buy.slice(0,4);if(n>0)items.push({t:fill(ENTR_TEXT.anniv,{name:g.name,n:n}),z:'shelf',anniv:1});}
+    });
+    items=items.sort(function(){return Math.random()-.5;}).slice(0,2);
+    var reason=items.length>0||away,recOnly=!reason&&(!st.lastLetter||daysSince(st.lastLetter)>=3);
+    if(!reason&&!recOnly)return null;
+    if(items.length<2)items.push(pick(ENTR_TEXT.recommend));
+    if(items.length<2&&ENTR_TEXT.season[new Date().getMonth()+1])items.push({t:ENTR_TEXT.season[new Date().getMonth()+1]});
+    if(items.some(function(x){return x.anniv;}))st.anniv=ym;
+    st.lastLetter=td;keep();
+    return {greet:greet(away),items:items};
+  }
+  function renderLetter(L){
+    var d=new Date();document.getElementById('entrDate').textContent=(d.getMonth()+1)+'月'+d.getDate()+'日（'+'日月火水木金土'[d.getDay()]+'）';
+    document.getElementById('entrGreet').textContent=L.greet;
+    var box=document.getElementById('entrItems');box.innerHTML='';
+    L.items.forEach(function(x){var it=document.createElement('div');it.className='entr-item';var p=document.createElement('p');p.textContent=x.t;it.appendChild(p);
+      if(x.z&&ENTR_TEXT.zoneBtn[x.z]){var b=document.createElement('button');b.className='entr-zone';b.textContent=ENTR_TEXT.zoneBtn[x.z];b.addEventListener('click',function(){if(state!=='read')return;dest=x.z;closeLetter();enter();});it.appendChild(b);}
+      box.appendChild(it);});
+  }
+  /* ---- 流れ ---- */
+  function readLetter(){if(state!=='idle'||!letter)return;state='read';env.hidden=true;hint.style.opacity='0';muffle();
+    veil.classList.add('show');stage.classList.add('show');setTimeout(function(){stage.classList.add('open');},40);setTimeout(function(){if(state==='read')stage.classList.add('out');},reduce?60:750);}
+  function closeLetter(){stage.classList.remove('open','out','show');veil.classList.remove('show');}
+  env.addEventListener('click',function(e){e.stopPropagation();readLetter();});
+  veil.addEventListener('click',function(){if(state!=='read')return;state='idle';closeLetter();letter=null;hint.textContent='扉を押すと中に入ります';hint.style.opacity='1';});
+  document.getElementById('entrGo').addEventListener('click',function(){if(state!=='read')return;dest='';closeLetter();enter();});
+  door.addEventListener('click',function(){if(state!=='idle')return;dest='';enter();});
+  function enter(){
+    if(state==='opening'||state==='in')return;state='opening';
+    env.hidden=true;hint.style.opacity='0';clear();
+    st.day=today();st.lastVisit=today();keep();
+    document.getElementById('entrOpen').style.opacity='1';
+    var d1=reduce?50:550,d2=reduce?100:1600;
+    setTimeout(function(){black.style.opacity='1';},d1);
+    setTimeout(function(){
+      el.style.background='transparent';scene.style.visibility='hidden';
+      if(dest&&typeof goZone==='function'&&ZONES[dest])goZone(dest);
+      black.style.transition='opacity .7s ease';black.style.opacity='0';
+      setTimeout(function(){state='in';el.classList.add('gone');if(!dest)hintOnce(document.getElementById('scene'));},reduce?50:750);
+    },d2);
+  }
+  /* 起動 */
+  letter=makeLetter();
+  if(letter){renderLetter(letter);env.hidden=false;hint.textContent='扉に手紙が届いています';}
+  document.addEventListener('keydown',function(e){if(state==='in')return;if(e.key==='Escape'&&state==='read'){veil.click();}});
+})();
 </script>
 <script>
 /* ホーム画面に置けるアプリ：電波のない所でも開けるよう、絵と曲を保存する */
