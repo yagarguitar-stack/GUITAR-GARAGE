@@ -1125,6 +1125,8 @@ svg.ggfx{width:100%;height:100%;}
 <div class="overlay" id="settingsOverlay"><div class="ov-inner">
   <button class="back-link" id="setBack">‹ 工房へもどる</button>
   <div class="set-title">Tool Box — 道具箱</div>
+  <div class="set-row"><h4>ボタンの音</h4><p>枠やボタンを押したとき、画面を開け閉めしたときに小さな音を鳴らします。</p>
+    <label class="switch"><input type="checkbox" id="setSe"><span class="sw-track"><span class="sw-thumb"></span></span><span class="sw-lbl">音を鳴らす</span></label></div>
   <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> データを書き出す</h4><p>すべての愛器・記録を1つのファイルに保存します。機種変更やバックアップに。</p><button class="btn btn-brass btn-block" id="btnExport">バックアップを書き出す</button></div>
   <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-download-simple"/></svg> データを読み込む</h4><p>書き出したファイルから復元します。現在のデータは置き換わります。</p><button class="btn btn-ghost btn-block" id="btnImport">ファイルを選んで読み込む</button><input type="file" id="importFile" accept="application/json,.json" class="hidden-input"></div>
   <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> すべて消去</h4><p>登録した愛器と記録をすべて削除します。この操作は戻せません。</p><button class="btn btn-danger btn-block" id="btnWipe">全データを消去する</button></div>
@@ -2747,6 +2749,76 @@ function setLightingPreview(v){lightingOverride=(v==='auto')?null:v;applyLightin
 load();renderWall();applyLighting();setInterval(applyLighting,60000);
 (function(){var box=document.getElementById('litPreview');if(box){box.addEventListener('click',function(e){var b=e.target.closest('[data-lit]');if(b)setLightingPreview(b.getAttribute('data-lit'));});setLightingPreview('auto');}})();
 </script>
+<script>
+/* ===== 工房の音響：BGM とボタンの音に「吹き抜けの下」の響きをかける ＋ ボタンの音 =====
+   扉の外（入口）では響きをかけず、中に入ってから響く。ボタンの音は 押す＝アンプのスイッチ／開く＝ハーモニクス／閉じる＝木箱のふた */
+var GGA=(function(){
+  var ac=null,master,conv,wetBgm,dryBgm,seBus,seDry,seWet,lp=null,gn=null,routed=false,roomOn=false;
+  var REV={len:2.2,early:[.018,.031,.047,.068,.09],wet:.3,damp:.35};
+  function makeIR(){var sr=ac.sampleRate,n=Math.floor(sr*REV.len),buf=ac.createBuffer(2,n,sr);
+    for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch),f=0;
+      for(var i=0;i<n;i++){var t=i/n,env=Math.pow(1-t,2.6)*Math.exp(-t*3),a=REV.damp+(1-REV.damp)*(1-t)*.9;f=a*f+(1-a)*(Math.random()*2-1);d[i]=f*env*.9;}
+      REV.early.forEach(function(s,k){var j=Math.floor((s+(ch?.003:0))*sr);if(j<n)d[j]+=(.55-k*.08)*(k%2?-1:1);});}
+    return buf;}
+  function init(){
+    if(ac){if(ac.state==='suspended')ac.resume();return true;}
+    try{var C=window.AudioContext||window.webkitAudioContext;ac=new C();}catch(e){ac=null;return false;}
+    master=ac.createGain();master.connect(ac.destination);
+    conv=ac.createConvolver();conv.buffer=makeIR();conv.connect(master);
+    seBus=ac.createGain();seBus.gain.value=.55;seDry=ac.createGain();seWet=ac.createGain();seWet.gain.value=0;
+    seBus.connect(seDry);seBus.connect(seWet);seDry.connect(master);seWet.connect(conv);
+    document.addEventListener('visibilitychange',function(){if(!document.hidden&&ac.state==='suspended')ac.resume();});
+    if(roomOn)room(true,0);
+    return true;}
+  /* BGM を音の通り道に入れる（公開した https のページでだけ働く） */
+  function routeBgm(){
+    if(routed)return true;if(!init()||location.protocol!=='https:')return false;
+    try{var src=ac.createMediaElementSource(bgmAudio);lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=20000;lp.Q.value=.4;gn=ac.createGain();
+      dryBgm=ac.createGain();wetBgm=ac.createGain();wetBgm.gain.value=0;src.connect(lp);lp.connect(gn);gn.connect(dryBgm);gn.connect(wetBgm);dryBgm.connect(master);wetBgm.connect(conv);}
+    catch(e){return false;}
+    routed=true;if(roomOn)room(true,0);return true;}
+  /* 響きの入り切り（扉の外＝なし、中＝あり） */
+  function room(on,ms){roomOn=on;if(!ac)return;var t=ac.currentTime,tc=Math.max(.01,(ms===undefined?800:ms)/3000);
+    seWet.gain.setTargetAtTime(on?REV.wet*1.2:0,t,tc);
+    if(routed){wetBgm.gain.setTargetAtTime(on?REV.wet:0,t,tc);dryBgm.gain.setTargetAtTime(on?1-REV.wet*.4:1,t,tc);}}
+  /* ---- ボタンの音 ---- */
+  function seOff(){try{return localStorage.getItem('gg_se_off')==='1';}catch(e){return false;}}
+  function noise(dur){var n=Math.floor(ac.sampleRate*dur),b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=Math.random()*2-1;return b;}
+  function burst(t,dur,type,f,q,g0,dec){var s=ac.createBufferSource();s.buffer=noise(dur+.05);var bq=ac.createBiquadFilter();bq.type=type;bq.frequency.value=f;bq.Q.value=q;var g=ac.createGain();
+    g.gain.setValueAtTime(g0,t);g.gain.exponentialRampToValueAtTime(.0001,t+dec);s.connect(bq);bq.connect(g);g.connect(seBus);s.start(t);s.stop(t+dur+.05);}
+  function tone(t,f,type,g0,dec,bend){var o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(bend)o.frequency.exponentialRampToValueAtTime(f*bend,t+dec);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(g0,t+.002);g.gain.exponentialRampToValueAtTime(.0001,t+dec);o.connect(g);g.connect(seBus);o.start(t);o.stop(t+dec+.02);}
+  var SE={
+    tap:function(t){burst(t,.003,'highpass',2800,1,1,.012);burst(t+.012,.004,'bandpass',1400,3,.5,.02);tone(t,70,'sine',.12,.03);},
+    open:function(t){tone(t,1318.5,'sine',.18,.9);tone(t,2637,'sine',.04,.5);burst(t,.004,'highpass',4000,1,.2,.01);},
+    close:function(t){burst(t,.02,'lowpass',700,1,.9,.09);tone(t,120,'sine',.35,.12,.8);tone(t,260,'sine',.12,.06);}
+  };
+  var lastAt=0,claimed=0;
+  function se(kind){if(seOff()||!init())return;var now=performance.now();if(now-lastAt<70)return;lastAt=now;if(kind!=='tap')claimed=now;SE[kind](ac.currentTime+.005);}
+  return {init:init,routeBgm:routeBgm,room:room,se:se,claimed:function(){return claimed;},ctx:function(){return ac;},lp:function(){return lp;},gn:function(){return gn;}};
+})();
+/* 押したとき：開く・閉じるの音が同時に鳴らなかった場合だけ「押す」の音 */
+(function(){
+  var SEL='button,.zone,.cz,[role="button"],a.btn,.hung,.empty-hook,.bgm-row';
+  document.addEventListener('click',function(e){
+    var el=e.target&&e.target.closest&&e.target.closest(SEL);if(!el||el.disabled)return;
+    GGA.init();var t0=performance.now();
+    setTimeout(function(){if(GGA.claimed()<t0)GGA.se('tap');},0);
+  },true);
+  /* 画面が開いた・閉じたのを見張って鳴らす */
+  function watch(node,cls){if(!node)return;var was=node.classList.contains(cls);
+    new MutationObserver(function(){var now=node.classList.contains(cls);if(now!==was){was=now;GGA.se(now?'open':'close');}}).observe(node,{attributes:true,attributeFilter:['class']});}
+  document.addEventListener('DOMContentLoaded',start);if(document.readyState!=='loading')start();
+  var started=false;
+  function start(){if(started)return;started=true;
+    ['detailOverlay','guideOverlay','settingsOverlay'].forEach(function(id){watch(document.getElementById(id),'show');});
+    watch(document.querySelector('.modal-bg')||document.getElementById('mbg'),'show');
+    watch(document.getElementById('viewport'),'panel-on');
+    watch(document.getElementById('entrStage'),'show');}
+  /* 入口が無いとき（扉を通らない場合）は最初から工房の中の響き */
+  if(!window.GG_ENTRANCE)GGA.room(true,0);
+})();
+</script>
 <!-- ===== 入口（工房の扉） ===== -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="entrRough" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="3" seed="7"/><feDisplacementMap in="SourceGraphic" scale="7"/></filter></svg>
 <div class="entr" id="entr">
@@ -2840,10 +2912,8 @@ var ENTR_TEXT={
   /* ---- BGM：手紙を読む間はこもった音、扉が開くと澄む ---- */
   var ac=null,lp=null,gn=null;
   function route(){
-    if(ac)return true;if(location.protocol!=='https:')return false;
-    try{var C=window.AudioContext||window.webkitAudioContext;ac=new C();var src=ac.createMediaElementSource(bgmAudio);lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=20000;lp.Q.value=.4;gn=ac.createGain();gn.gain.value=1;src.connect(lp);lp.connect(gn);gn.connect(ac.destination);}
-    catch(e){ac=null;lp=null;gn=null;return false;}
-    document.addEventListener('visibilitychange',function(){if(!document.hidden&&ac&&ac.state==='suspended')ac.resume();});
+    if(ac)return true;if(!GGA.routeBgm())return false;
+    ac=GGA.ctx();lp=GGA.lp();gn=GGA.gn();
     document.addEventListener('pointerdown',function(){if(ac&&ac.state==='suspended')ac.resume();},true);
     return true;}
   function bgmOn(){if(ac&&ac.state==='suspended')ac.resume();if(bgmAudio.paused){if(!bgmAudio.getAttribute('src')||bgmIdx<0)bgmStart(bgmFirst());else bgmResume();}}
@@ -2908,6 +2978,7 @@ var ENTR_TEXT={
       el.style.background='transparent';scene.style.visibility='hidden';
       if(dest&&typeof goZone==='function'&&ZONES[dest])goZone(dest);
       black.style.transition='opacity .7s ease';black.style.opacity='0';
+      GGA.room(true,900);
       if(quiet){ /* 暗転が明けるのに合わせて聞こえ始める */
         if(gn){var t0=ac.currentTime;gn.gain.cancelScheduledValues(t0);gn.gain.setValueAtTime(0,t0);gn.gain.linearRampToValueAtTime(1,t0+.9);}
         bgmFade(bgmVol(),900);
@@ -2966,6 +3037,10 @@ var ENTR_TEXT={
     else if(inside){lampTick(glows.ovLamps);if(dust.ovDust)dustTick(dust.ovDust);}}
   requestAnimationFrame(loop);
 })();
+</script>
+<script>
+(function(){var cb=document.getElementById('setSe');if(!cb)return;try{cb.checked=localStorage.getItem('gg_se_off')!=='1';}catch(e){cb.checked=true;}
+  cb.addEventListener('change',function(){try{localStorage.setItem('gg_se_off',cb.checked?'0':'1');}catch(e){}if(cb.checked)GGA.se('tap');});})();
 </script>
 <script>
 /* ホーム画面に置けるアプリ：電波のない所でも開けるよう、絵と曲を保存する */
