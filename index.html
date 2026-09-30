@@ -722,6 +722,85 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .hung.show-price .g-price{opacity:1;transform:rotate(8deg) scale(1);}
 .hung.adjusting .g-price{display:none;}
 .hung img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+/* ===== 弦の補充カード ===== */
+.restock{display:flex;flex-direction:column;align-items:center;margin:-4px 0 var(--sp-4);}
+.restock-peg{width:3px;height:18px;background:var(--steel);border-radius:2px;margin-bottom:-8px;position:relative;z-index:1;}
+.restock-card{position:relative;display:block;width:86%;max-width:340px;background:#f7d44a;color:#2a1c0f;text-decoration:none;text-align:center;padding:18px 14px 12px;border-radius:4px;
+  box-shadow:0 3px 0 rgba(0,0,0,.45),0 8px 18px rgba(0,0,0,.3);font-family:var(--font-body);transform-origin:50% 0;}
+.restock-card::before{content:'';position:absolute;left:50%;top:7px;width:20px;height:7px;border-radius:4px;background:#140c06;transform:translateX(-50%);}
+.restock-alert{display:none;background:#d8453a;color:#fff;font-weight:700;font-size:var(--fs-xs);letter-spacing:.1em;margin:4px -14px 8px;padding:3px 0;}
+.restock-t{font-weight:700;font-size:17px;letter-spacing:.06em;}
+.restock-s{font-size:13px;margin-top:5px;border-top:1px dashed #2a1c0f;padding-top:6px;}
+.restock-go{display:inline-flex;align-items:center;gap:6px;margin-top:9px;background:#2a1c0f;color:#f7d44a;font-size:13px;font-weight:700;padding:5px 12px;border-radius:3px;}
+.restock-go .ic{width:1em;height:1em;}
+.restock.due .restock-alert{display:block;}
+.restock.due .restock-card{outline:3px solid #d8453a;outline-offset:-3px;}
+@media (prefers-reduced-motion:no-preference){.restock.due .restock-card{animation:ptagSwing 1.1s ease-out .35s;}}
+.restock-card:active{transform:translateY(1px);}
+/* ===== 欲しいギターの札（壁） ===== */
+.hung.want .want-tag{position:relative;background:#fbf8f0;color:#1d1d1d;border:.18vw solid #d8453a;padding:1.1vw .4vw .5vw;text-align:center;font-family:var(--font-body);line-height:1.2;}
+.hung.want .want-tag::before{content:'';position:absolute;left:50%;top:.35vw;width:.45vw;height:.45vw;border-radius:50%;background:#140c06;transform:translateX(-50%);}
+.want-tag .wa{font-size:.55vw;color:#6b1d18;font-weight:700;letter-spacing:.1em;}
+.want-tag .wm{font-family:var(--font-head);font-size:.8vw;color:#1f7a3a;margin:.2vw 0;word-break:break-word;}
+.want-tag .wp{font-size:.8vw;font-weight:700;color:#e2362b;}
+.want-string{position:absolute;left:50%;top:-1.2vw;height:1.3vw;width:1px;background:#d9d2c2;}
+/* ===== 欲しいギターの札（画面） ===== */
+.want-big{position:relative;background:#fbf8f0;color:#1d1d1d;border:3px solid #d8453a;padding:22px 14px 14px;text-align:center;font-family:var(--font-body);margin:4px 8px 16px;}
+.want-big::before{content:'';position:absolute;left:50%;top:7px;width:8px;height:8px;border-radius:50%;background:#140c06;transform:translateX(-50%);}
+.want-big .wa{font-size:12px;color:#6b1d18;font-weight:700;letter-spacing:.14em;}
+.want-big .wk{font-family:var(--font-sign);font-size:15px;margin-top:6px;}
+.want-big .wm{font-family:var(--font-head);font-size:22px;color:#1f7a3a;margin:2px 0 6px;word-break:break-word;}
+.want-big .wp{font-size:26px;font-weight:700;color:#e2362b;}
+.want-big .wp small{font-size:13px;margin-right:4px;}
+.hook-ch{display:block;width:100%;text-align:left;border:1px solid var(--wood-light);background:var(--oil);color:var(--paper);border-radius:var(--r-md);padding:12px 14px;margin-top:10px;font-family:inherit;cursor:pointer;}
+.hook-ch b{display:block;font-size:var(--fs-md);}
+.hook-ch span{font-size:var(--fs-sm);color:var(--paper-dim);}
+.hook-ch:active{background:var(--wood);}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+/* ===== 愛器カルテ：楽器店の値札 ===== */
+.ptag-wrap{position:relative;margin:0 6px var(--sp-4);padding-top:22px;}
+.ptag-wrap::before{content:'';position:absolute;left:50%;top:-10px;height:34px;width:1px;background:#d9d2c2;transform:translateX(-50%);}
+.ptag{position:relative;background:#fbf8f0;color:#1d1d1d;border:3px solid #d8453a;box-shadow:0 4px 0 rgba(0,0,0,.45),0 10px 22px rgba(0,0,0,.35);
+  font-family:var(--font-body);transform-origin:50% -22px;}
+.ptag::before{content:'';position:absolute;left:50%;top:6px;width:7px;height:7px;border-radius:50%;background:#140c06;box-shadow:inset 0 0 0 1.5px #b9ad93;transform:translateX(-50%);}
+@media (prefers-reduced-motion:no-preference){.ptag.swing{animation:ptagSwing 1.1s ease-out;}}
+@keyframes ptagSwing{0%{transform:rotate(-4deg);}35%{transform:rotate(2.5deg);}65%{transform:rotate(-1deg);}100%{transform:rotate(0);}}
+.ptag-hd{display:flex;gap:8px;padding:18px 12px 6px;align-items:stretch;}
+.ptag-mk{border:1.5px solid #1d1d1d;padding:4px 9px;font-family:var(--font-sign);font-size:17px;display:flex;align-items:center;max-width:48%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.ptag-sel{flex:1;min-width:0;background:#6b1d18;color:#f3d9a0;font-weight:700;display:flex;flex-direction:column;justify-content:center;padding:3px 9px;line-height:1.35;}
+.ptag-sel small{font-size:10.5px;letter-spacing:.12em;opacity:.85;}
+.ptag-sel b{font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.ptag-main{display:flex;gap:10px;align-items:center;padding:4px 12px 0;}
+.ptag-yr{font-size:50px;font-weight:700;color:#e0b400;-webkit-text-stroke:1.5px #7a5a00;line-height:1;flex:0 0 auto;font-family:var(--font-body);}
+.ptag-mdl{font-family:var(--font-head);font-size:21px;color:#1f7a3a;line-height:1.15;word-break:break-word;}
+.ptag-sub{font-size:13px;color:#1f7a3a;font-weight:700;margin-top:2px;}
+.ptag-sn{display:flex;justify-content:space-between;gap:8px;font-weight:700;font-size:15px;padding:5px 12px;border-top:1px solid #d8453a;border-bottom:1px solid #d8453a;margin-top:8px;}
+.ptag-memo{font-size:12px;color:#c0392b;line-height:1.6;padding:7px 12px;white-space:pre-wrap;word-break:break-word;}
+.ptag-spec{padding:2px 12px 6px;font-size:12.5px;font-weight:700;color:#333;display:grid;grid-template-columns:auto 1fr;gap:1px 10px;}
+.ptag-spec span:nth-child(odd){color:#8a8f96;font-weight:500;}
+.ptag-price{padding:7px 12px 2px;border-top:1px dashed #d8453a;}
+.ptag-reg{font-size:13px;font-weight:700;}
+.ptag-reg s{font-size:17px;margin-left:6px;color:#333;}
+.ptag-big{font-size:42px;font-weight:700;color:#e2362b;letter-spacing:-.02em;line-height:1.1;}
+.ptag-tax{font-size:14px;color:#e2362b;font-weight:700;margin-left:4px;}
+.ptag-buy{text-align:right;font-weight:700;font-size:12.5px;padding:2px 12px 10px;}
+.ptag-stamp{position:absolute;right:10px;top:-16px;z-index:2;border:2px solid currentColor;background:#fbf8f0;border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:11.5px;line-height:1.2;transform:rotate(-12deg);}
+.ptag-edge{height:10px;}
+.pcredit{position:relative;background:#141414;color:#fff;margin:6px 4px 0;border:1px solid #444;padding:9px 12px;font-family:var(--font-body);}
+.pcredit-top{display:flex;align-items:center;gap:8px;}
+.pcredit-lim{background:#8a1a14;font-size:11px;font-weight:700;padding:2px 7px;}
+.pcredit-lim.done{background:#3f6b4a;}
+.pcredit-t{font-size:14px;font-weight:700;letter-spacing:.08em;}
+.pcredit-mid{display:flex;align-items:baseline;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.pcredit-n{font-size:28px;font-weight:700;color:#f3d9a0;}
+.pcredit-bar{height:6px;background:#333;margin:6px 0 5px;}
+.pcredit-bar i{display:block;height:100%;background:#e8c468;}
+.pcredit-fine{font-size:11.5px;color:#bbb;}
+.form-sec{font-family:var(--font-head);font-weight:700;color:var(--brass-light);font-size:var(--fs-md);margin:18px 0 8px;padding-top:12px;border-top:1px solid var(--wood-light);}
+.loan-mode{display:flex;gap:6px;margin-bottom:10px;}
+.loan-mode button{flex:1;background:var(--oil);border:1px solid var(--wood-light);color:var(--paper-dim);border-radius:var(--r-md);padding:8px 6px;font-family:inherit;font-size:var(--fs-sm);cursor:pointer;}
+.loan-mode button.on{background:var(--wood-light);color:var(--paper);border-color:var(--brass);}
+.loan-calc{margin-top:10px;font-size:var(--fs-sm);color:var(--brass-light);min-height:1.4em;}
 .loan-box{margin-top:16px;padding:12px;border:1px dashed var(--wood-light);border-radius:var(--r-md);}
 .loan-h{font-family:var(--font-head);font-weight:700;color:var(--brass-light);font-size:var(--fs-md);margin-bottom:10px;}
 @media (prefers-reduced-motion: reduce){.g-spark .ic{animation:none;opacity:.9;}}
@@ -1004,13 +1083,15 @@ function cleanDb(src){
     var g={};for(k in g0){if(Object.prototype.hasOwnProperty.call(g0,k))g[k]=g0[k];}
     if(typeof g.id!=='string'||!/^[\w-]{1,40}$/.test(g.id)||ids[g.id]){g.id=uid();fixed++;}ids[g.id]=1;
     if(typeof g.name!=='string'||!g.name.trim()){g.name='名称未設定';fixed++;}else g.name=g.name.slice(0,40);
-    ['model','gauge','brand','strType'].forEach(function(f){if(g[f]!=null&&typeof g[f]!=='string'){delete g[f];fixed++;}});
+    ['model','gauge','brand','strType','maker','color','serial','shop','memo','body','neck','pickup','bridge'].forEach(function(f){if(g[f]!=null&&typeof g[f]!=='string'){delete g[f];fixed++;}});if(g.memo)g.memo=g.memo.slice(0,300);
+    if(g.buy!=null&&!(typeof g.buy==='string'&&MONTH_RE.test(g.buy))){delete g.buy;fixed++;}
+    if(g.wanted!=null&&g.wanted!==true){delete g.wanted;fixed++;}
     if(g.photo!=null&&!(typeof g.photo==='string'&&PHOTO_RE.test(g.photo))){g.photo=null;fixed++;}
-    [['ar',0.05,5],['ox',-100,100],['oy',-100,100],['sc',0.2,5],['rot',-180,180],['year',1800,2200],['strLife',1,3650]].forEach(function(r){if(g[r[0]]!=null&&!num(g[r[0]],r[1],r[2])){delete g[r[0]];fixed++;}});
+    [['ar',0.05,5],['ox',-100,100],['oy',-100,100],['sc',0.2,5],['rot',-180,180],['year',1800,2200],['strLife',1,3650],['weight',0.1,30],['listPrice',0,1e9],['price',0,1e9],['budget',0,1e9]].forEach(function(r){if(g[r[0]]!=null&&!num(g[r[0]],r[1],r[2])){delete g[r[0]];fixed++;}});
     var m=map(g.maint);g.maint={};for(k in m){if(typeof m[k]==='string'&&DATE_RE.test(m[k]))g.maint[k]=m[k];else fixed++;}
     g.stringHistory=list(g.stringHistory);g.repairs=list(g.repairs);
     if(g.added!=null&&!(typeof g.added==='string'&&DATE_RE.test(g.added))){delete g.added;fixed++;}
-    if(g.loan!=null){var L=g.loan;if(!(isObj(L)&&num(L.total,1,1e9)&&num(L.monthly,1,1e9)&&typeof L.start==='string'&&MONTH_RE.test(L.start))){delete g.loan;fixed++;}}
+    if(g.loan!=null){var L=g.loan;if(!(isObj(L)&&num(L.total,1,1e9)&&num(L.monthly,1,1e9)&&typeof L.start==='string'&&MONTH_RE.test(L.start))){delete g.loan;fixed++;}else{if(L.first!=null&&!num(L.first,1,1e9)){delete L.first;fixed++;}if(L.count!=null&&!num(L.count,1,600)){delete L.count;fixed++;}if(L.end!=null&&!(typeof L.end==='string'&&MONTH_RE.test(L.end))){delete L.end;fixed++;}if(L.mode!=null&&L.mode!=='monthly'&&L.mode!=='end'){delete L.mode;fixed++;}}}
     return g;
   });
   return {db:out,fixed:fixed};
@@ -1035,12 +1116,23 @@ function isFresh(g){ /* 弦を替えた日・壁に掛けた日から3日間 */
   var a=daysSince(g.maint&&g.maint.strings),b=daysSince(addedDate(g));
   return (a!==null&&a>=0&&a<=2)||(b!==null&&b>=0&&b<=2);
 }
+function ymAdd(ym,k){var p=ym.split('-'),m=parseInt(p[0],10)*12+parseInt(p[1],10)-1+k;return Math.floor(m/12)+'-'+String(m%12+1).padStart(2,'0');}
+function ymDiff(a,b){var p=a.split('-'),q=b.split('-');return (parseInt(q[0],10)*12+parseInt(q[1],10))-(parseInt(p[0],10)*12+parseInt(p[1],10));}
+function fmtYm(ym){var p=ym.split('-');return p[0]+'年'+parseInt(p[1],10)+'月';}
+function loanPlan(total,start,opt){ /* opt.monthly か opt.end から回数・初回額を出す */
+  if(!(total>0)||!start)return null;
+  if(opt.end){var n=ymDiff(start,opt.end)+1;if(n<1)return null;var m=Math.floor(total/n);if(m<1)return null;return {count:n,monthly:m,first:total-m*(n-1),end:opt.end};}
+  if(opt.monthly>0){var c=Math.ceil(total/opt.monthly);return {count:c,monthly:opt.monthly,first:opt.monthly,end:ymAdd(start,c-1)};}
+  return null;
+}
 function loanInfo(g){
   var L=g.loan;if(!L||!(L.total>0)||!(L.monthly>0)||!L.start)return null;
-  var p=L.start.split('-'),n=new Date();
-  var months=(n.getFullYear()*12+n.getMonth())-(parseInt(p[0],10)*12+parseInt(p[1],10)-1)+1;
-  var paid=Math.min(L.total,Math.max(0,months)*L.monthly),left=L.total-paid;
-  return {left:left,done:left<=0,count:Math.ceil(left/L.monthly),pct:Math.round(paid/L.total*100)};
+  var first=L.first>0?L.first:L.monthly;
+  var n=L.count>0?L.count:Math.max(1,Math.ceil((L.total-first)/L.monthly)+1);
+  var now=new Date(),cur=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  var k=Math.max(0,Math.min(n,ymDiff(L.start,cur)+1));
+  var paid=k<=0?0:Math.min(L.total,first+(k-1)*L.monthly),left=Math.max(0,L.total-paid);
+  return {left:left,done:left<=0,count:n-k,total:n,monthly:L.monthly,end:ymAdd(L.start,n-1),pct:Math.round(paid/L.total*100)};
 }
 function yen(n){return '¥'+Math.round(n).toLocaleString('ja-JP');}
 var DUST_TILE=(function(){var s='<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46">',r=7;
@@ -1466,9 +1558,9 @@ function openPartModal(id){
   });
 }
 function benchTodoHtml(){
-  if(db.guitars.length===0)return '<p style="text-align:center">まだ愛器がありません。先に愛器の壁で愛器を掛けてください。</p>';
+  if(!db.guitars.some(function(g){return !g.wanted;}))return '<p style="text-align:center">まだ愛器がありません。先に愛器の壁で愛器を掛けてください。</p>';
   var items=[];
-  db.guitars.forEach(function(g){MAINT.forEach(function(m){var s=maintStatus(g,m);if(s.state==='bad'||s.state==='warn')items.push({g:g,m:m,s:s});});});
+  db.guitars.forEach(function(g){if(g.wanted)return;MAINT.forEach(function(m){var s=maintStatus(g,m);if(s.state==='bad'||s.state==='warn')items.push({g:g,m:m,s:s});});});
   items.sort(function(a,b){return a.s.remain-b.s.remain;});
   if(items.length===0)return '<p style="text-align:center">作業台は片付いています。<br>急ぎの手入れはありません。</p>';
   var rows=items.map(function(it){var bad=it.s.state==='bad';var d=bad?('<b style="color:var(--red)">'+Math.abs(it.s.remain)+'日超過</b>'):('<b style="color:var(--amber)">あと'+it.s.remain+'日</b>');return '<div class="bench-row" data-id="'+it.g.id+'"><span class="br-ic">'+it.m.ic+'</span><span class="br-body"><b>'+esc(it.g.name)+'</b><span class="br-sub">'+it.m.name+' ／ 最終 '+fmtDate(it.s.last)+'</span></span><span class="br-days">'+d+'</span></div>';}).join('');
@@ -2017,7 +2109,9 @@ function renderWall(){
   var html='';
   for(var slot=0;slot<5;slot++){
     var idx=startI+slot;var g=db.guitars[idx];var x=HOOK_X[slot];
-    if(g){
+    if(g&&g.wanted){
+      html+='<div class="hung want" data-id="'+g.id+'" data-hookx="'+x+'" style="left:'+x+'%;top:'+HANG_Y+'%;width:7%;transform:translate(-50%,0)"><div class="g-wrap"><span class="want-string"></span><div class="want-tag"><div class="wa">WANTED</div><div class="wm">'+esc(g.model||g.name)+'</div>'+(g.budget?'<div class="wp">'+yen(g.budget)+'</div>':'')+'</div></div></div>';
+    }else if(g){
       var w=worstStatus(g);var dcls=w==='bad'?'s-bad':(w==='warn'?'s-warn':'s-ok');
       var arr=g.ar||0.345;
       var wpct=Math.max(4.8,Math.min(14.4,21.3*arr));
@@ -2050,10 +2144,10 @@ function renderWall(){
       h.addEventListener('pointermove',function(e){if(lp&&Math.hypot(e.clientX-sx,e.clientY-sy)>10){clearTimeout(lp);lp=null;}});
       ['pointerup','pointercancel'].forEach(function(ev){h.addEventListener(ev,function(){clearTimeout(lp);lp=null;});});
       h.addEventListener('contextmenu',function(e){e.preventDefault();});
-      h.addEventListener('click',function(){if(held){held=false;return;}if(!adjustId)openDetail(h.dataset.id);});
+      h.addEventListener('click',function(){if(held){held=false;return;}if(adjustId)return;if(h.classList.contains('want'))openWanted(h.dataset.id);else openDetail(h.dataset.id);});
     }
   });
-  layer.querySelectorAll('.empty-hook').forEach(function(e){e.addEventListener('click',function(){if(!adjustId)openForm(null);});});
+  layer.querySelectorAll('.empty-hook').forEach(function(e){e.addEventListener('click',function(){if(!adjustId)openHookChoice();});});
   /* pager */
   var pager=document.getElementById('wallPager');
   if(pages<=1){pager.innerHTML='<span class="wall-label">壁 1</span>';}
@@ -2119,26 +2213,56 @@ mbg.addEventListener('click',function(e){if(e.target===mbg)closeModal();});
 var pendingPhoto=null,pendingAr=null;
 
 /* ===== add / edit form ===== */
-function openForm(g){
-  var isEdit=!!g;g=g||{};pendingPhoto=g.photo||null;pendingAr=g.ar||null;
+function loanEndOf(g){if(!g.loan)return '';if(g.loan.end)return g.loan.end;var li=loanInfo(g);return li?li.end:'';}
+function readGuitarExtra(){
+  function v(id){return document.getElementById(id).value.trim();}
+  function n(id){var x=parseFloat(document.getElementById(id).value);return isFinite(x)&&x>0?x:null;}
+  var w=n('fWeight');
+  return {maker:v('fMaker'),color:v('fColor'),serial:v('fSerial'),weight:w?Math.round(w*100)/100:null,body:v('fBody'),neck:v('fNeck'),pickup:v('fPickup'),bridge:v('fBridge'),
+    buy:v('fBuy'),shop:v('fShop'),listPrice:n('fList')?Math.round(n('fList')):null,price:n('fPrice')?Math.round(n('fPrice')):null,memo:v('fMemo')};
+}
+function applyExtra(t,x){for(var k in x){if(x[k]===null||x[k]==='')delete t[k];else t[k]=x[k];}}
+function openForm(g,seed){
+  var isEdit=!!g;g=g||(seed?{maker:seed.maker||'',model:seed.model||''}:{});pendingPhoto=g.photo||null;pendingAr=g.ar||null;
   openModal(
-    '<div class="modal-head"><div class="modal-title">'+(isEdit?'愛器を編集':'新しい愛器を掛ける')+'</div></div>'+
+    '<div class="modal-head"><div class="modal-title">'+(isEdit?'愛器を編集':(seed?'自分のギターにする':'新しい愛器を掛ける'))+'</div></div>'+
     '<div class="modal-body">'+
       '<div class="field"><label>写真（くり抜き推奨）</label><div class="photo-drop'+(pendingPhoto?' has':'')+'" id="photoDrop"'+(pendingPhoto?' style="background-image:url('+cssUrl(pendingPhoto)+')"':'')+'>'+
         (pendingPhoto?'<button class="pd-clear" id="pdClear">×</button>':'<span class="pd-ic"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></span><span>タップして写真を選ぶ</span>')+
       '</div><input type="file" id="photoInput" accept="image/*" class="hidden-input"><div class="hint">iPhoneなら写真アプリでギターを長押し→被写体をコピーして、くり抜いた画像を選ぶと壁に綺麗に掛かります。</div></div>'+
       '<div class="field"><label>呼び名 ＊</label><input id="fName" maxlength="40" placeholder="例：相棒のストラト" value="'+attr(g.name||'')+'"></div>'+
-      '<div class="btn-row"><div class="field" style="flex:2;margin:0"><label>機種名</label><input id="fModel" maxlength="60" placeholder="例：Fender Player Stratocaster" value="'+attr(g.model||'')+'"></div>'+
+      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>メーカー</label><input id="fMaker" maxlength="30" placeholder="例：Fender" value="'+attr(g.maker||'')+'"></div>'+
+      '<div class="field" style="flex:1.6;margin:0"><label>機種名</label><input id="fModel" maxlength="60" placeholder="例：Player Stratocaster" value="'+attr(g.model||'')+'"></div></div>'+
+      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1.6;margin:0"><label>色</label><input id="fColor" maxlength="40" placeholder="例：3-Color Sunburst" value="'+attr(g.color||'')+'"></div>'+
       '<div class="field" style="flex:1;margin:0"><label>製造年</label><input id="fYear" type="number" min="1900" max="2100" inputmode="numeric" placeholder="例：1998" value="'+(g.year||'')+'"></div></div>'+
+      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1.6;margin:0"><label>シリアル番号</label><input id="fSerial" maxlength="40" placeholder="例：MX98123456" value="'+attr(g.serial||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>重さ（kg）</label><input id="fWeight" type="number" min="0" max="30" step="0.01" inputmode="decimal" placeholder="3.6" value="'+(g.weight||'')+'"></div></div>'+
+      '<div class="field" style="margin:8px 0 0"><div class="hint">空欄の項目は値札に出ません。</div></div>'+
+      '<div class="form-sec">仕様</div>'+
+      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>ボディ材</label><input id="fBody" maxlength="40" placeholder="例：アルダー" value="'+attr(g.body||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>ネック</label><input id="fNeck" maxlength="40" placeholder="例：メイプル／Cシェイプ" value="'+attr(g.neck||'')+'"></div></div>'+
+      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1;margin:0"><label>ピックアップ</label><input id="fPickup" maxlength="40" placeholder="例：SSS" value="'+attr(g.pickup||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>ブリッジ</label><input id="fBridge" maxlength="40" placeholder="例：シンクロナイズド" value="'+attr(g.bridge||'')+'"></div></div>'+
+      '<div class="form-sec">購入</div>'+
+      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>購入した月</label><input id="fBuy" type="month" value="'+attr(g.buy||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>お店</label><input id="fShop" maxlength="40" placeholder="例：○○楽器" value="'+attr(g.shop||'')+'"></div></div>'+
+      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1;margin:0"><label>定価（円）</label><input id="fList" type="number" min="0" inputmode="numeric" placeholder="138000" value="'+(g.listPrice||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>購入価格（円）</label><input id="fPrice" type="number" min="0" inputmode="numeric" placeholder="118000" value="'+(g.price||'')+'"></div></div>'+
+      '<div class="field" style="margin-top:12px"><label>メモ</label><textarea id="fMemo" maxlength="300" placeholder="例：初めてのレッスン代を貯めて買った一本">'+esc(g.memo||'')+'</textarea></div>'+
+      '<div class="form-sec">弦</div>'+
       '<div class="field"><label>弦交換日</label><input id="fStr" type="date" value="'+((g.maint&&g.maint.strings)||'')+'"><div class="hint">この日付から弦の寿命を計算します。</div></div>'+
       '<div class="field"><label>弦のタイプ（寿命の目安）</label><select id="fStrType">'+STR_TYPES.map(function(t){return '<option value="'+t.id+'"'+((g.strType||'normal')===t.id?' selected':'')+'>'+t.name+(t.days?'（約'+t.days+'日）':'')+'</option>';}).join('')+'</select></div>'+
       '<div class="field"><label>寿命の目安（日）</label><input id="fStrLife" type="number" min="1" max="3650" inputmode="numeric" value="'+(g.strLife||30)+'"><div class="hint">タイプを選ぶと自動で入ります。「自分で決める」なら直接入力できます。</div></div>'+
       '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>ゲージ</label><input id="fGauge" maxlength="20" placeholder="09-42" value="'+attr(g.gauge||'')+'"></div>'+
       '<div class="field" style="flex:1;margin:0"><label>弦の銘柄</label><input id="fBrand" maxlength="30" placeholder="Elixir 等" value="'+attr(g.brand||'')+'"></div></div>'+
       '<div class="loan-box"><div class="loan-h">ローン（なければ空欄のまま）</div>'+
-      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>総額（円）</label><input id="fLoanTotal" type="number" min="0" inputmode="numeric" placeholder="130000" value="'+((g.loan&&g.loan.total)||'')+'"></div>'+
-      '<div class="field" style="flex:1;margin:0"><label>月々の額（円）</label><input id="fLoanMonthly" type="number" min="0" inputmode="numeric" placeholder="5000" value="'+((g.loan&&g.loan.monthly)||'')+'"></div></div>'+
-      '<div class="field" style="margin:10px 0 0"><label>最初に支払う月</label><input id="fLoanStart" type="month" value="'+((g.loan&&g.loan.start)||'')+'"><div class="hint">残りの額は毎月自動で計算します。壁のギターに指を合わせる（スマホは長押し）と値札が出ます。</div></div></div>'+
+      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>総額（円）</label><input id="fLoanTotal" type="number" min="0" inputmode="numeric" placeholder="120000" value="'+((g.loan&&g.loan.total)||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>最初に支払う月</label><input id="fLoanStart" type="month" value="'+((g.loan&&g.loan.start)||'')+'"></div></div>'+
+      '<div class="field" style="margin:12px 0 0"><label>決め方</label><div class="loan-mode" id="fLoanMode"><button type="button" data-m="monthly">月々の額で決める</button><button type="button" data-m="end">終わる月で決める</button></div></div>'+
+      '<div class="field" id="fLoanMonthlyF" style="margin:0"><label>月々の額（円）</label><input id="fLoanMonthly" type="number" min="0" inputmode="numeric" placeholder="5000" value="'+((g.loan&&g.loan.monthly)||'')+'"></div>'+
+      '<div class="field" id="fLoanEndF" style="margin:0"><label>最後に支払う月</label><input id="fLoanEnd" type="month" value="'+attr(loanEndOf(g))+'"><div class="hint">割り切れない分は初回にまとめます。</div></div>'+
+      '<div class="loan-calc" id="fLoanCalc"></div>'+
+      '<div class="field" style="margin:8px 0 0"><div class="hint">手数料がある場合は、手数料込みの総額を入れてください。壁のギターに指を合わせる（スマホは長押し）と値札が出ます。</div></div></div>'+
     '</div>'+
     '<div class="modal-foot"><button class="btn btn-ghost" id="fCancel" style="flex:0 0 auto">やめる</button><button class="btn btn-brass" id="fSave" style="flex:1">'+(isEdit?'保存する':'壁に掛ける')+'</button></div>'
   );
@@ -2146,6 +2270,24 @@ function openForm(g){
   document.getElementById('photoInput').addEventListener('change',function(e){handlePhotoPick(e,function(d,ar){pendingPhoto=d;pendingAr=ar;refreshDrop();});});
   var pc=document.getElementById('pdClear');if(pc)pc.addEventListener('click',function(){pendingPhoto=null;refreshDrop();});
   document.getElementById('fCancel').addEventListener('click',closeModal);
+  var loanMode=(g.loan&&g.loan.mode)||'monthly';
+  function loanRead(){var T=parseInt(document.getElementById('fLoanTotal').value,10)||0,S=document.getElementById('fLoanStart').value,M=parseInt(document.getElementById('fLoanMonthly').value,10)||0,E=document.getElementById('fLoanEnd').value;
+    return {T:T,S:S,M:M,E:E,plan:loanPlan(T,S,loanMode==='end'?{end:E}:{monthly:M})};}
+  function loanPaint(){
+    document.querySelectorAll('#fLoanMode button').forEach(function(b){b.classList.toggle('on',b.dataset.m===loanMode);});
+    document.getElementById('fLoanMonthlyF').style.display=loanMode==='monthly'?'':'none';
+    document.getElementById('fLoanEndF').style.display=loanMode==='end'?'':'none';
+    var r=loanRead(),c=document.getElementById('fLoanCalc'),p=r.plan;
+    if(!p){c.textContent=(r.T&&r.S&&loanMode==='end'&&r.E&&ymDiff(r.S,r.E)<0)?'最後に支払う月は、最初に支払う月より後にしてください':'';return;}
+    c.textContent=p.count+'回払い ・ 月々 '+yen(p.monthly)+(p.first!==p.monthly&&loanMode==='end'?'（初回 '+yen(p.first)+'）':'')+' ・ 完済予定 '+fmtYm(p.end);
+  }
+  document.querySelectorAll('#fLoanMode button').forEach(function(b){b.addEventListener('click',function(){
+    var r=loanRead();
+    if(b.dataset.m==='end'&&r.plan&&!r.E)document.getElementById('fLoanEnd').value=r.plan.end;
+    if(b.dataset.m==='monthly'&&r.plan&&!r.M)document.getElementById('fLoanMonthly').value=r.plan.monthly;
+    loanMode=b.dataset.m;loanPaint();});});
+  ['fLoanTotal','fLoanStart','fLoanMonthly','fLoanEnd'].forEach(function(id){document.getElementById(id).addEventListener('input',loanPaint);});
+  loanPaint();
   document.getElementById('fStrType').addEventListener('change',function(){var t=strTypeOf(this.value);var lf=document.getElementById('fStrLife');if(this.value==='custom'){lf.focus();}else{lf.value=t.days;}});
   document.getElementById('fSave').addEventListener('click',function(){
     var name=document.getElementById('fName').value.trim();
@@ -2154,20 +2296,24 @@ function openForm(g){
     var stType=document.getElementById('fStrType').value;var stPreset=strTypeOf(stType);
     var stLife=(stType==='custom')?(parseInt(document.getElementById('fStrLife').value,10)||30):stPreset.days;
     if(stLife<1)stLife=30;
-    var lT=parseInt(document.getElementById('fLoanTotal').value,10)||0,lM=parseInt(document.getElementById('fLoanMonthly').value,10)||0,lS=document.getElementById('fLoanStart').value;
-    var loan=null;
-    if(lT||lM||lS){if(!(lT>0&&lM>0&&lS)){toast('ローンは総額・月々の額・最初に支払う月をすべて入れてください');return;}loan={total:lT,monthly:lM,start:lS};}
+    var lr=loanRead(),loan=null;
+    if(lr.T||lr.S||(loanMode==='monthly'?lr.M:lr.E)){
+      if(!lr.plan){toast(loanMode==='end'?'ローンは総額・最初に支払う月・最後に支払う月を入れてください':'ローンは総額・最初に支払う月・月々の額を入れてください');return;}
+      loan={total:lr.T,start:lr.S,monthly:lr.plan.monthly,first:lr.plan.first,count:lr.plan.count,mode:loanMode};if(loanMode==='end')loan.end=lr.plan.end;}
+    var extra=readGuitarExtra();
     if(isEdit){
       var t=db.guitars.find(function(x){return x.id===g.id;});
-      t.name=name;t.model=document.getElementById('fModel').value.trim();t.year=parseInt(document.getElementById('fYear').value,10)||null;t.gauge=document.getElementById('fGauge').value.trim();t.brand=document.getElementById('fBrand').value.trim();t.photo=pendingPhoto;t.ar=pendingAr;t.strType=stType;t.strLife=stLife;if(loan)t.loan=loan;else delete t.loan;
+      t.name=name;t.model=document.getElementById('fModel').value.trim();t.year=parseInt(document.getElementById('fYear').value,10)||null;t.gauge=document.getElementById('fGauge').value.trim();t.brand=document.getElementById('fBrand').value.trim();t.photo=pendingPhoto;t.ar=pendingAr;t.strType=stType;t.strLife=stLife;if(loan)t.loan=loan;else delete t.loan;applyExtra(t,extra);
       if(!t.maint)t.maint={};
       if(newStr&&newStr!==t.maint.strings){if(!t.stringHistory)t.stringHistory=[];t.stringHistory.push({date:newStr,brand:t.brand,gauge:t.gauge,note:''});}
       if(newStr)t.maint.strings=newStr;
       save();closeModal();openDetail(t.id);toast('保存しました');
     }else{
-      var ng={id:uid(),name:name,model:document.getElementById('fModel').value.trim(),year:parseInt(document.getElementById('fYear').value,10)||null,gauge:document.getElementById('fGauge').value.trim(),brand:document.getElementById('fBrand').value.trim(),photo:pendingPhoto,ar:pendingAr,maint:{},stringHistory:[],repairs:[],strType:stType,strLife:stLife,added:today()};if(loan)ng.loan=loan;
+      var ng={id:uid(),name:name,model:document.getElementById('fModel').value.trim(),year:parseInt(document.getElementById('fYear').value,10)||null,gauge:document.getElementById('fGauge').value.trim(),brand:document.getElementById('fBrand').value.trim(),photo:pendingPhoto,ar:pendingAr,maint:{},stringHistory:[],repairs:[],strType:stType,strLife:stLife,added:today()};if(loan)ng.loan=loan;applyExtra(ng,extra);
       if(newStr){ng.maint.strings=newStr;ng.stringHistory.push({date:newStr,brand:ng.brand,gauge:ng.gauge,note:''});}
-      db.guitars.push(ng);save();wallPage=Math.floor((db.guitars.length-1)/5);closeModal();enterAdjust(ng.id);toast('壁に掛けました。位置を整えてください');
+      var si=seed?db.guitars.findIndex(function(x){return x.id===seed.id;}):-1;
+      if(si>=0){db.guitars[si]=ng;wallPage=Math.floor(si/5);}else{db.guitars.push(ng);wallPage=Math.floor((db.guitars.length-1)/5);}
+      save();closeModal();enterAdjust(ng.id);toast('壁に掛けました。位置を整えてください');
     }
   });
 }
@@ -2178,8 +2324,88 @@ var detailOv=document.getElementById('detailOverlay');
 function countUp(el){var to=parseInt(el.dataset.to,10);if(isNaN(to)){return;}var pre=el.dataset.pre||'',suf=el.dataset.suf||'',dur=620,start=null;function tick(now){if(start===null)start=now;var p=Math.min((now-start)/dur,1);var v=Math.round(to*(1-Math.pow(1-p,3)));el.textContent=pre+v+suf;if(p<1)requestAnimationFrame(tick);}requestAnimationFrame(tick);}
 function runCountUps(scope){(scope||document).querySelectorAll('.count-up').forEach(countUp);}
 function moveGuitar(id,dir){var i=db.guitars.findIndex(function(x){return x.id===id;});var j=i+dir;if(i<0||j<0||j>=db.guitars.length)return;var t=db.guitars[i];db.guitars[i]=db.guitars[j];db.guitars[j]=t;save();wallPage=Math.floor(j/5);openDetail(id);toast('並び順を変えました');}
+function priceTagHtml(g,ss){
+  var yr2=g.year?String(g.year).slice(-2):'';
+  var sub=[g.color?esc(g.color):'',g.year?g.year:''].filter(Boolean).join('　');
+  var hd='<div class="ptag-hd">'+(g.maker?'<div class="ptag-mk">'+esc(g.maker)+'</div>':'')+'<div class="ptag-sel"><small>MY GUITAR</small><b>'+esc(g.name)+'</b></div></div>';
+  var main=(yr2||g.model||sub)?'<div class="ptag-main">'+(yr2?'<div class="ptag-yr">'+yr2+'</div>':'')+'<div>'+(g.model?'<div class="ptag-mdl">'+esc(g.model)+'</div>':'')+(sub?'<div class="ptag-sub">'+sub+'</div>':'')+'</div></div>':'';
+  var sn=(g.serial||g.weight)?'<div class="ptag-sn"><span>'+(g.serial?'s/n '+esc(g.serial):'')+'</span><span>'+(g.weight?g.weight+'kg':'')+'</span></div>':'';
+  var memo=g.memo?'<div class="ptag-memo">'+esc(g.memo)+'</div>':'';
+  var sp=[['Body',g.body],['Neck',g.neck],['Pickup',g.pickup],['Bridge',g.bridge]].filter(function(r){return r[1];});
+  var spec=sp.length?'<div class="ptag-spec"'+(memo?'':' style="padding-top:8px"')+'>'+sp.map(function(r){return '<span>'+r[0]+'</span><span>'+esc(r[1])+'</span>';}).join('')+'</div>':'';
+  var price='';
+  if(g.price||g.listPrice){
+    var big=g.price||g.listPrice;
+    price='<div class="ptag-price">'+(g.price&&g.listPrice&&g.listPrice!==g.price?'<div class="ptag-reg">定価 ¥<s>'+Math.round(g.listPrice).toLocaleString('ja-JP')+'</s></div>':'')+'<div><span class="ptag-big">'+yen(big)+'</span><span class="ptag-tax">税込</span></div></div>';
+  }
+  var buy=(g.buy||g.shop)?'<div class="ptag-buy">'+(g.buy?g.buy.replace('-','.'):'')+(g.shop?'　'+esc(g.shop)+'にて購入':(g.buy?' 購入':''))+'</div>':'<div class="ptag-edge"></div>';
+  var stamp='';
+  if(ss.state!=='none'){var sc=ss.state==='bad'?'#d8453a':(ss.state==='warn'?'#c08018':'#1f7a3a');var st=ss.state==='bad'?'交換<br>どき':(ss.state==='warn'?'そろ<br>そろ':'良好');stamp='<span class="ptag-stamp" style="color:'+sc+'">弦<br>'+st+'</span>';}
+  var li=loanInfo(g),credit='';
+  if(li){
+    credit='<div class="pcredit"><div class="pcredit-top"><span class="pcredit-lim'+(li.done?' done':'')+'">'+(li.done?'完済':'支払い中')+'</span><span class="pcredit-t">ショッピングクレジット</span></div>'+
+      (li.done?'<div class="pcredit-mid"><span class="pcredit-n">'+li.total+'回</span><span>すべて支払い済み</span></div>'
+        :'<div class="pcredit-mid"><span class="pcredit-n">'+li.total+'回</span><span>のうち 残り <b style="font-size:19px;color:#f3d9a0">'+li.count+'回</b></span></div>')+
+      '<div class="pcredit-bar"><i style="width:'+li.pct+'%"></i></div>'+
+      '<div class="pcredit-fine">'+(li.done?'完済 '+fmtYm(li.end):'残り '+yen(li.left)+' ・ 月々 '+yen(li.monthly)+' ・ 完済予定 '+fmtYm(li.end))+'</div></div>';
+  }
+  return '<div class="ptag-wrap"><div class="ptag swing">'+stamp+hd+main+sn+memo+spec+price+buy+'</div>'+credit+'</div>';
+}
+function shopUrl(kw){return 'https://www.soundhouse.co.jp/search/index/?search_all='+encodeURIComponent(kw)+'&i_type=a';}
+function digiUrl(kw){return 'https://www.digimart.net/search?keywordAnd='+encodeURIComponent(kw);}
+function restockHtml(g,ss){
+  var kw=[g.brand,g.gauge].filter(Boolean).join(' ');
+  var due=ss.state==='warn'||ss.state==='bad';
+  var alert=ss.state==='bad'?'弦の交換どきです':'弦がそろそろ交換どきです';
+  return '<div class="restock'+(due?' due':'')+'"><span class="restock-peg"></span><a class="restock-card" href="'+attr(shopUrl(kw||'ギター弦'))+'" target="_blank" rel="noopener">'+
+    '<div class="restock-alert">'+alert+'</div>'+
+    '<div class="restock-t">'+(due?'補充してください':'弦の補充')+'</div>'+
+    '<div class="restock-s">'+(kw?esc(kw):'銘柄を記録すると、その弦を探せます')+'</div>'+
+    '<span class="restock-go"><svg class="ic" aria-hidden="true"><use href="#i-shopping-cart"/></svg>サウンドハウスで探す</span></a></div>';
+}
+/* ===== 空きフック：自分のギター／欲しいギター ===== */
+function openHookChoice(){
+  openModal('<div class="modal-head"><div class="modal-title">このフックに掛けるのは</div></div><div class="modal-body">'+
+    '<button class="hook-ch" id="hcOwn"><b>自分のギター</b><span>写真や記録を入れて壁に掛けます</span></button>'+
+    '<button class="hook-ch" id="hcWant"><b>これから欲しいギター</b><span>探すための札を掛けます</span></button></div>'+
+    '<div class="modal-foot"><button class="btn btn-ghost btn-block" id="hcCancel">やめる</button></div>');
+  document.getElementById('hcOwn').addEventListener('click',function(){openForm(null);});
+  document.getElementById('hcWant').addEventListener('click',function(){openWantForm(null);});
+  document.getElementById('hcCancel').addEventListener('click',closeModal);
+}
+function openWantForm(w){
+  var isEdit=!!w;w=w||{};
+  openModal('<div class="modal-head"><div class="modal-title">'+(isEdit?'欲しいギターを編集':'欲しいギターの札を掛ける')+'</div></div><div class="modal-body">'+
+    '<div class="field"><label>メーカー</label><input id="wMaker" maxlength="30" placeholder="例：Fender" value="'+attr(w.maker||'')+'"></div>'+
+    '<div class="field"><label>機種名 ＊</label><input id="wModel" maxlength="60" placeholder="例：Player Stratocaster" value="'+attr(w.model||'')+'"><div class="hint">この名前でデジマートを検索します。</div></div>'+
+    '<div class="field"><label>予算（円）</label><input id="wBudget" type="number" min="0" inputmode="numeric" placeholder="150000" value="'+(w.budget||'')+'"></div></div>'+
+    '<div class="modal-foot"><button class="btn btn-ghost" id="wCancel" style="flex:0 0 auto">やめる</button><button class="btn btn-brass" id="wSave" style="flex:1">'+(isEdit?'保存する':'札を掛ける')+'</button></div>');
+  document.getElementById('wCancel').addEventListener('click',function(){if(isEdit)openWanted(w.id);else closeModal();});
+  document.getElementById('wSave').addEventListener('click',function(){
+    var model=document.getElementById('wModel').value.trim();if(!model){toast('機種名を入れてください');return;}
+    var maker=document.getElementById('wMaker').value.trim(),b=parseInt(document.getElementById('wBudget').value,10)||0;
+    var t=isEdit?db.guitars.find(function(x){return x.id===w.id;}):{id:uid(),wanted:true,maint:{},stringHistory:[],repairs:[],added:today()};
+    t.name=model;t.model=model;if(maker)t.maker=maker;else delete t.maker;if(b>0)t.budget=b;else delete t.budget;
+    if(!isEdit){db.guitars.push(t);wallPage=Math.floor((db.guitars.length-1)/5);}
+    save();closeModal();renderWall();toast(isEdit?'保存しました':'欲しいギターの札を掛けました');
+  });
+}
+function openWanted(id){
+  var w=db.guitars.find(function(x){return x.id===id;});if(!w)return;
+  var kw=[w.maker,w.model].filter(Boolean).join(' ');
+  openModal('<div class="modal-head"><div class="modal-title">欲しいギター</div></div><div class="modal-body">'+
+    '<div class="want-big"><div class="wa">WANTED</div>'+(w.maker?'<div class="wk">'+esc(w.maker)+'</div>':'')+'<div class="wm">'+esc(w.model||w.name)+'</div>'+(w.budget?'<div class="wp"><small>予算</small>'+yen(w.budget)+'</div>':'')+'</div>'+
+    '<a class="btn btn-brass btn-block" href="'+attr(digiUrl(kw))+'" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-guitar"/></svg>デジマートで探す</a>'+
+    '<button class="btn btn-ghost btn-block" id="wOwn" style="margin-top:10px">手に入れた：自分のギターにする</button>'+
+    '<div class="btn-row" style="margin-top:10px"><button class="btn btn-ghost" style="flex:1" id="wEdit">編集</button><button class="btn btn-danger" style="flex:0 0 auto" id="wDel">札を外す</button></div></div>'+
+    '<div class="modal-foot"><button class="btn btn-ghost btn-block" id="wClose">閉じる</button></div>');
+  document.getElementById('wOwn').addEventListener('click',function(){openForm(null,w);});
+  document.getElementById('wEdit').addEventListener('click',function(){openWantForm(w);});
+  document.getElementById('wClose').addEventListener('click',closeModal);
+  document.getElementById('wDel').addEventListener('click',function(){db.guitars=db.guitars.filter(function(x){return x.id!==w.id;});save();closeModal();renderWall();toast('札を外しました');});
+}
 function openDetail(id){
-  var g=db.guitars.find(function(x){return x.id===id;});if(!g)return;
+  var g=db.guitars.find(function(x){return x.id===id;});if(!g)return;if(g.wanted){openWanted(id);return;}
   var gIdx=db.guitars.findIndex(function(x){return x.id===id;}),gTotal=db.guitars.length;
   var ss=stringStatus(g);var pct,ring,statusTxt,subTxt;
   if(ss.state==='none'){pct=0;ring='var(--steel)';statusTxt='未記録';subTxt='弦交換日を記録すると寿命を計算します';}
@@ -2192,17 +2418,17 @@ function openDetail(id){
   var rep=(g.repairs||[]).slice().reverse();
   var repRows=rep.length?rep.map(function(r){return '<div class="log-row"><span class="log-date">'+r.date+'</span><div class="log-note">'+esc(r.note)+(r.cost?' ／ ¥'+esc(r.cost):'')+'</div></div>';}).join(''):'<div class="log-empty">リペアや調整の記録はまだありません。</div>';
   var specRows=[
-    ['製造年', g.year?g.year+'年製':'—'],
     ['弦のタイプ', (g.strType?strTypeOf(g.strType).name:'通常弦（アンコート）')],
     ['交換の目安', strCycle(g)+'日'],
     ['ゲージ', g.gauge?esc(g.gauge):'—'],
-    ['弦の銘柄', g.brand?esc(g.brand):'—']
-  ].concat((function(){var li=loanInfo(g);return li?[['ローン',li.done?'完済':'残り'+yen(li.left)+'（あと'+li.count+'回）']]:[];})()).map(function(r){return '<div class="spec-row"><span class="spec-k">'+r[0]+'</span><span class="spec-v">'+r[1]+'</span></div>';}).join('');
+    ['銘柄', g.brand?esc(g.brand):'—']
+  ].map(function(r){return '<div class="spec-row"><span class="spec-k">'+r[0]+'</span><span class="spec-v">'+r[1]+'</span></div>';}).join('');
+  var tagHtml=priceTagHtml(g,ss);
   document.getElementById('detailInner').innerHTML=
     '<button class="back-link" id="dBack">‹ 壁にもどる</button>'+photo+
-    '<div class="detail-name">'+esc(g.name)+'</div><div class="detail-model">'+(esc(g.model)||'機種未設定')+(g.year?'　・　'+g.year+'年製':'')+'</div>'+
+    tagHtml+
     '<div class="gauge-panel"><div class="gauge-ring"><div class="dial'+(ss.state==='bad'?' alert':'')+'"><svg width="96" height="96"><circle cx="48" cy="48" r="42" stroke="var(--oil)" stroke-width="9" fill="none"/><circle cx="48" cy="48" r="42" stroke="'+ring+'" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="'+dash+' '+circ+'"/></svg><div class="dial-center"><span class="dial-num'+(ss.days!==null?' count-up':'')+'"'+(ss.days!==null?' data-to="'+ss.days+'"':'')+'>'+(ss.days===null?'—':'0')+'</span><span class="dial-lbl">DAYS</span></div></div><div class="gauge-info"><h3>弦のコンディション</h3><div class="gauge-status" style="color:'+ring+'">'+statusTxt+'</div><div class="gauge-sub">'+subTxt+'</div></div></div></div>'+
-    '<div class="panel"><div class="panel-title">スペック — SPEC</div>'+specRows+'</div>'+
+    '<div class="panel"><div class="panel-title">弦 — STRINGS</div>'+specRows+'</div>'+restockHtml(g,ss)+
     '<div class="panel"><div class="panel-title">手入れ記録 — MAINTENANCE</div>'+maintRows+'</div>'+
     '<div class="fold" id="foldStr"><button class="fold-head"><svg class="ic" aria-hidden="true"><use href="#i-strings"/></svg> 弦交換の履歴 <span class="arr">›</span></button><div class="fold-body">'+histRows+'</div></div>'+
     '<div class="fold" id="foldRep"><button class="fold-head"><svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg> リペア・調整ログ <span class="arr">›</span></button><div class="fold-body">'+repRows+'<div style="padding:12px 14px"><button class="btn btn-ghost btn-block" id="addRepair">＋ リペア記録を追加</button></div></div></div>'+
