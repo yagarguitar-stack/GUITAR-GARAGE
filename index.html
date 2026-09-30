@@ -1478,7 +1478,7 @@ function drawCards(id){
     g.items.forEach(function(it){
       var tool=findTool(it[0]),panel=it[3],soon=!tool&&!panel;
       var b=document.createElement('button');b.className='tag zc'+(soon?' soon':'');
-      b.style.left=pct(it[1],1536);b.style.top=pct(it[2],1024);
+      b.style.left=pct(it[1],1536);b.style.top=pct(it[2],1024);b.dataset.x=it[1];b.dataset.y=it[2];
       b.innerHTML='<b>'+esc(it[0])+'</b><small>'+esc(tool?(tool.note||''):(NOTE_EXTRA[it[0]]||''))+'</small>';
       b.addEventListener('click',function(e){e.stopPropagation();
         if(panel){openPanel(panel);return;}
@@ -1488,7 +1488,22 @@ function drawCards(id){
       cardBox.appendChild(b);
     });
   });
+  unstackTags();setTimeout(unstackTags,1300);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(unstackTags);
 }
+/* 同じ列の札が重なるときは、下の札を重ならない所まで下げる（長い名前や説明で札が縦に伸びた場合） */
+function unstackTags(){
+  var tags=[].slice.call(cardBox.querySelectorAll('.tag.zc'));if(!tags.length)return;
+  tags.forEach(function(b){b.style.top=pct(+b.dataset.y,1024);});
+  if(getComputedStyle(tags[0]).position!=='absolute')return; /* 狭い画面では札を下に並べるので不要 */
+  var cols={};tags.forEach(function(b){(cols[b.dataset.x]=cols[b.dataset.x]||[]).push(b);});
+  Object.keys(cols).forEach(function(x){
+    var list=cols[x].sort(function(a,b){return a.dataset.y-b.dataset.y;}),prevBottom=-Infinity;
+    list.forEach(function(b){var r=b.getBoundingClientRect(),push=prevBottom+6-r.top;
+      if(push>0){b.style.top='calc('+pct(+b.dataset.y,1024)+' + '+push.toFixed(1)+'px)';r=b.getBoundingClientRect();}
+      prevBottom=r.bottom;});
+  });
+}
+addEventListener('resize',function(){if(cardBox.childElementCount)requestAnimationFrame(unstackTags);});
 /* 枠を押すと「こんなことができます」 */
 function explain(k){
   var g=GROUPS[k];closePanel();
