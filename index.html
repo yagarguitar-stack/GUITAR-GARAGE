@@ -3071,6 +3071,8 @@ var ENTR_TEXT={
   var doorSnd=new Audio('audio/door-open.mp3');doorSnd.preload='auto';
   function doorSound(){try{if(localStorage.getItem('gg_se_off')==='1')return;}catch(e){}
     try{doorSnd.currentTime=0;var pr=doorSnd.play();if(pr&&pr.catch)pr.catch(function(){});}catch(e){}}
+  function bgmFadeSlow(to,ms){var st=performance.now();clearInterval(bgmFadeT);
+    bgmFadeT=setInterval(function(){var x=Math.min(1,(performance.now()-st)/ms);bgmAudio.volume=Math.max(0,Math.min(1,to*x*x));if(x>=1)clearInterval(bgmFadeT);},40);}
   function enter(){
     if(state==='opening'||state==='in')return;state='opening';doorSound();
     env.hidden=true;hint.style.opacity='0';
@@ -3084,16 +3086,20 @@ var ENTR_TEXT={
     var fxw=document.getElementById('entrFx');if(fxw)fxw.style.opacity='0';
     document.getElementById('entrOpen').style.opacity='1';
     var d1=reduce?50:550,d2=reduce?100:1600;
-    setTimeout(function(){black.style.opacity='1';},d1);
+    setTimeout(function(){black.style.opacity='1';
+      if(quiet){ /* 暗転に入るのに合わせて、ゆっくり大きくなる（初めはごく小さく、だんだん普段の音量へ） */
+        var FADE=3.5;
+        if(gn){var t0=ac.currentTime,N=64,curve=new Float32Array(N);for(var i=0;i<N;i++){var x=i/(N-1);curve[i]=x*x;}
+          gn.gain.cancelScheduledValues(t0);gn.gain.setValueAtTime(0,t0);gn.gain.setValueCurveAtTime(curve,t0,FADE);bgmFade(bgmVol(),40);}
+        else bgmFadeSlow(bgmVol(),FADE*1000);
+      }
+    },d1);
     setTimeout(function(){
       el.style.background='transparent';scene.style.visibility='hidden';
       if(dest&&typeof goZone==='function'&&ZONES[dest])goZone(dest);
       black.style.transition='opacity .7s ease';black.style.opacity='0';
       GGA.room(true,900);
-      if(quiet){ /* 暗転が明けるのに合わせて聞こえ始める */
-        if(gn){var t0=ac.currentTime;gn.gain.cancelScheduledValues(t0);gn.gain.setValueAtTime(0,t0);gn.gain.linearRampToValueAtTime(1,t0+.9);}
-        bgmFade(bgmVol(),900);
-      }
+
       setTimeout(function(){state='in';el.classList.add('gone');if(!dest)hintOnce(document.getElementById('scene'));},reduce?50:750);
     },d2);
   }
