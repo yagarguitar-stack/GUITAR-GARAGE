@@ -2861,7 +2861,7 @@ load();renderWall();applyLighting();setInterval(applyLighting,60000);
 /* ===== 工房の音響：BGM とボタンの音に「吹き抜けの下」の響きをかける ＋ ボタンの音 =====
    扉の外（入口）では響きをかけず、中に入ってから響く。ボタンの音は 押す＝アンプのスイッチ／開く＝ハーモニクス／閉じる＝木箱のふた */
 var GGA=(function(){
-  var ac=null,master,conv,wetBgm,dryBgm,seBus,seDry,seWet,lp=null,gn=null,routed=false,roomOn=false;
+  var ac=null,master,conv,wetBgm,dryBgm,seBus,seDry,seWet,lp=null,gn=null,routed=false,roomOn=false,distLp=null,distGn=null,dist={v:1,w:1,hi:20000};
   var REV={len:2.2,early:[.018,.031,.047,.068,.09],wet:.3,damp:.35};
   function makeIR(){var sr=ac.sampleRate,n=Math.floor(sr*REV.len),buf=ac.createBuffer(2,n,sr);
     for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch),f=0;
@@ -2878,17 +2878,35 @@ var GGA=(function(){
     document.addEventListener('visibilitychange',function(){if(!document.hidden&&ac.state==='suspended')ac.resume();});
     if(roomOn)room(true,0);
     return true;}
+  /* ジュークボックスの音色：古いスピーカーの帯域・箱鳴り・軽いひずみ・広がりを寄せる */
+  function jukeboxTone(){
+    var inp=ac.createGain(),cur=inp;function add(n){cur.connect(n);cur=n;return n;}
+    var hp=add(ac.createBiquadFilter());hp.type='highpass';hp.frequency.value=140;hp.Q.value=.7;
+    var ls=add(ac.createBiquadFilter());ls.type='lowshelf';ls.frequency.value=250;ls.gain.value=2.5;
+    var pk=add(ac.createBiquadFilter());pk.type='peaking';pk.frequency.value=1700;pk.Q.value=.9;pk.gain.value=3.5;
+    var ws=add(ac.createWaveShaper());var n=2048,c=new Float32Array(n),k=.32*6;for(var i=0;i<n;i++){var x=i*2/n-1;c[i]=(1+k)*x/(1+k*Math.abs(x));}ws.curve=c;ws.oversample='2x';
+    var l1=add(ac.createBiquadFilter());l1.type='lowpass';l1.frequency.value=5800;l1.Q.value=.6;
+    var l2=add(ac.createBiquadFilter());l2.type='lowpass';l2.frequency.value=7540;l2.Q.value=.5;
+    var sp=ac.createChannelSplitter(2),mg=ac.createChannelMerger(2),w=.45,a=(1+w)/2,b=(1-w)/2;cur.connect(sp);
+    [[0,0,a],[1,0,b],[1,1,a],[0,1,b]].forEach(function(r){var g=ac.createGain();g.gain.value=r[2];sp.connect(g,r[0]);g.connect(mg,0,r[1]);});
+    var out=ac.createGain();out.gain.value=.74;mg.connect(out);
+    return {inp:inp,out:out};}
   /* BGM を音の通り道に入れる（公開した https のページでだけ働く） */
   function routeBgm(){
     if(routed)return true;if(!init()||location.protocol!=='https:')return false;
     try{var src=ac.createMediaElementSource(bgmAudio);lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=20000;lp.Q.value=.4;gn=ac.createGain();
-      dryBgm=ac.createGain();wetBgm=ac.createGain();wetBgm.gain.value=0;src.connect(lp);lp.connect(gn);gn.connect(dryBgm);gn.connect(wetBgm);dryBgm.connect(master);wetBgm.connect(conv);}
+      dryBgm=ac.createGain();wetBgm=ac.createGain();wetBgm.gain.value=0;var jb=jukeboxTone();src.connect(jb.inp);jb.out.connect(lp);lp.connect(gn);distLp=ac.createBiquadFilter();distLp.type='lowpass';distLp.frequency.value=dist.hi;distLp.Q.value=.5;distGn=ac.createGain();distGn.gain.value=dist.v;gn.connect(distLp);distLp.connect(distGn);distGn.connect(dryBgm);distGn.connect(wetBgm);dryBgm.connect(master);wetBgm.connect(conv);}
     catch(e){return false;}
     routed=true;if(roomOn)room(true,0);return true;}
   /* 響きの入り切り（扉の外＝なし、中＝あり） */
   function room(on,ms){roomOn=on;if(!ac)return;var t=ac.currentTime,tc=Math.max(.01,(ms===undefined?800:ms)/3000);
     seWet.gain.setTargetAtTime(on?REV.wet*1.2:0,t,tc);
-    if(routed){wetBgm.gain.setTargetAtTime(on?REV.wet:0,t,tc);dryBgm.gain.setTargetAtTime(on?1-REV.wet*.4:1,t,tc);}}
+    if(routed){wetBgm.gain.setTargetAtTime(on?REV.wet*dist.w:0,t,tc);dryBgm.gain.setTargetAtTime(on?Math.max(.5,1-REV.wet*.4*dist.w):1,t,tc);}}
+  /* ジュークボックスからの距離：場所ごとに 音量・響きの量・高い音の丸さ を変える（約1秒かけて滑らかに） */
+  var DIST={jukebox:{v:1.15,w:.55,hi:20000},guide:{v:1.1,w:.65,hi:20000},home:{v:1,w:1,hi:20000},
+    shelf:{v:.92,w:1.1,hi:10000},bench:{v:.86,w:1.2,hi:8000},tools:{v:.84,w:1.25,hi:7500},books:{v:.78,w:1.35,hi:6000},practice:{v:.76,w:1.4,hi:5500}};
+  function distance(zone){dist=DIST[zone]||DIST.home;if(!routed||!ac)return;var t=ac.currentTime;
+    distGn.gain.setTargetAtTime(dist.v,t,.33);distLp.frequency.setTargetAtTime(dist.hi,t,.33);if(roomOn)room(true,1000);}
   /* ---- ボタンの音 ---- */
   function seOff(){try{return localStorage.getItem('gg_se_off')==='1';}catch(e){return false;}}
   function noise(dur){var n=Math.floor(ac.sampleRate*dur),b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=Math.random()*2-1;return b;}
@@ -2903,7 +2921,7 @@ var GGA=(function(){
   };
   var lastAt=0,claimed=0;
   function se(kind){if(seOff()||!init())return;var now=performance.now();if(now-lastAt<70)return;lastAt=now;if(kind!=='tap')claimed=now;SE[kind](ac.currentTime+.005);}
-  return {init:init,routeBgm:routeBgm,room:room,se:se,claimed:function(){return claimed;},ctx:function(){return ac;},lp:function(){return lp;},gn:function(){return gn;}};
+  return {init:init,routeBgm:routeBgm,room:room,se:se,distance:distance,claimed:function(){return claimed;},ctx:function(){return ac;},lp:function(){return lp;},gn:function(){return gn;}};
 })();
 /* 押したとき：開く・閉じるの音が同時に鳴らなかった場合だけ「押す」の音 */
 (function(){
@@ -3077,30 +3095,23 @@ var ENTR_TEXT={
     if(state==='opening'||state==='in')return;state='opening';doorSound();
     env.hidden=true;hint.style.opacity='0';
     var quiet=bgmAudio.paused; /* 手紙を読んでいない＝まだ鳴っていない */
-    if(quiet){
-      /* 再生の許可は押した瞬間にしか得られないため、ここで無音のまま鳴らし始める */
-      if(route()){gn.gain.cancelScheduledValues(ac.currentTime);gn.gain.setValueAtTime(0,ac.currentTime);}
-      bgmOn();bgmFade(0,40);
-    }else clear();
+    if(quiet){ /* 扉の向こうから聞こえるような、こもった音で流し始める（フェードインなし） */
+      var ok=route();
+      if(ok){var tq=ac.currentTime;lp.frequency.cancelScheduledValues(tq);lp.frequency.setValueAtTime(420,tq);gn.gain.cancelScheduledValues(tq);gn.gain.setValueAtTime(1,tq);}
+      bgmOn();bgmFade(ok?bgmVol():bgmVol()*.35,40);
+    }
     st.day=today();st.lastVisit=today();keep();
     var fxw=document.getElementById('entrFx');if(fxw)fxw.style.opacity='0';
     document.getElementById('entrOpen').style.opacity='1';
-    var d1=reduce?50:550,d2=reduce?100:1600;
-    setTimeout(function(){black.style.opacity='1';
-      if(quiet){ /* 暗転に入るのに合わせて、ゆっくり大きくなる（初めはごく小さく、だんだん普段の音量へ） */
-        var FADE=3.5;
-        if(gn){var t0=ac.currentTime,N=64,curve=new Float32Array(N);for(var i=0;i<N;i++){var x=i/(N-1);curve[i]=x*x;}
-          gn.gain.cancelScheduledValues(t0);gn.gain.setValueAtTime(0,t0);gn.gain.setValueCurveAtTime(curve,t0,FADE);bgmFade(bgmVol(),40);}
-        else bgmFadeSlow(bgmVol(),FADE*1000);
-      }
-    },d1);
+    var d1=reduce?50:550,d2=reduce?100:2200;
+    setTimeout(function(){black.style.opacity='1';},d1);
     setTimeout(function(){
       el.style.background='transparent';scene.style.visibility='hidden';
       if(dest&&typeof goZone==='function'&&ZONES[dest])goZone(dest);
-      black.style.transition='opacity .7s ease';black.style.opacity='0';
-      GGA.room(true,900);
+      black.style.transition='opacity .9s ease';black.style.opacity='0';
+      clear();GGA.room(true,900); /* 暗転が明けるのに合わせて、こもりが取れて工房の響きに */
 
-      setTimeout(function(){state='in';el.classList.add('gone');if(!dest)hintOnce(document.getElementById('scene'));},reduce?50:750);
+      setTimeout(function(){state='in';el.classList.add('gone');if(!dest)hintOnce(document.getElementById('scene'));},reduce?50:950);
     },d2);
   }
   /* 起動 */
@@ -3153,6 +3164,14 @@ var ENTR_TEXT={
     if(atDoor){lampTick(glows.entrLamps);if(dust.entrDust)dustTick(dust.entrDust);}
     else if(inside){lampTick(glows.ovLamps);if(dust.ovDust)dustTick(dust.ovDust);}}
   requestAnimationFrame(loop);
+})();
+</script>
+<script>
+/* 場所を移ると、ジュークボックスからの距離に合わせて聞こえ方が変わる */
+(function(){
+  if(typeof goZone==='function'){var gz=goZone;goZone=function(id){GGA.distance(id);return gz.apply(this,arguments);};}
+  if(typeof goHome==='function'){var gh=goHome;goHome=function(){GGA.distance('home');return gh.apply(this,arguments);};}
+  var bb=document.getElementById('backBtn');if(bb)bb.addEventListener('click',function(){GGA.distance('home');});
 })();
 </script>
 <script>
