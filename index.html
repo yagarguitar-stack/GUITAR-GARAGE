@@ -1502,6 +1502,12 @@ function unstackTags(){
       if(push>0){b.style.top='calc('+pct(+b.dataset.y,1024)+' + '+push.toFixed(1)+'px)';r=b.getBoundingClientRect();}
       prevBottom=r.bottom;});
   });
+  /* 枠の名札（「練習開始」など）にかぶる札は、名札の上まで持ち上げる */
+  var lbls=[].slice.call(document.querySelectorAll('.czone .m-lbl')).map(function(l){return l.getBoundingClientRect();}).filter(function(r){return r.width>0;});
+  tags.forEach(function(b){var r=b.getBoundingClientRect();
+    lbls.forEach(function(l){if(r.left<l.right&&r.right>l.left&&r.top<l.bottom&&r.bottom>l.top){
+      var lift=r.bottom-l.top+6,curTop=b.style.top;
+      b.style.top='calc('+(curTop.indexOf('calc(')===0?curTop.slice(5,-1):curTop)+' - '+lift.toFixed(1)+'px)';r=b.getBoundingClientRect();}});});
 }
 addEventListener('resize',function(){if(cardBox.childElementCount)requestAnimationFrame(unstackTags);});
 /* 枠を押すと「こんなことができます」 */
