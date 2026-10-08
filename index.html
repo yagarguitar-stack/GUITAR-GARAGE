@@ -2868,7 +2868,7 @@ load();renderWall();applyLighting();setInterval(applyLighting,60000);
    扉の外（入口）では響きをかけず、中に入ってから響く。ボタンの音は 押す＝アンプのスイッチ／開く＝ハーモニクス／閉じる＝木箱のふた */
 var GGA=(function(){
   var ac=null,master,conv,wetBgm,dryBgm,seBus,seDry,seWet,lp=null,gn=null,routed=false,roomOn=false,distLp=null,distGn=null,dist={v:1,w:1,hi:20000};
-  var REV={len:2.2,early:[.018,.031,.047,.068,.09],wet:.3,damp:.35};
+  var REV={len:2.2,early:[.018,.031,.047,.068,.09],wet:.22,damp:.35};
   function makeIR(){var sr=ac.sampleRate,n=Math.floor(sr*REV.len),buf=ac.createBuffer(2,n,sr);
     for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch),f=0;
       for(var i=0;i<n;i++){var t=i/n,env=Math.pow(1-t,2.6)*Math.exp(-t*3),a=REV.damp+(1-REV.damp)*(1-t)*.9;f=a*f+(1-a)*(Math.random()*2-1);d[i]=f*env*.9;}
@@ -2877,7 +2877,7 @@ var GGA=(function(){
   function init(){
     if(ac){if(ac.state==='suspended')ac.resume();return true;}
     try{var C=window.AudioContext||window.webkitAudioContext;ac=new C();}catch(e){ac=null;return false;}
-    master=ac.createGain();master.connect(ac.destination);
+    master=ac.createGain();var lim=ac.createDynamicsCompressor();lim.threshold.value=-2;lim.knee.value=2;lim.ratio.value=20;lim.attack.value=.003;lim.release.value=.25;master.connect(lim);lim.connect(ac.destination); /* 上限を超えそうな時だけ軽く抑える */
     conv=ac.createConvolver();conv.buffer=makeIR();conv.connect(master);
     seBus=ac.createGain();seBus.gain.value=.55;seDry=ac.createGain();seWet=ac.createGain();seWet.gain.value=0;
     seBus.connect(seDry);seBus.connect(seWet);seDry.connect(master);seWet.connect(conv);
@@ -2890,12 +2890,12 @@ var GGA=(function(){
     var hp=add(ac.createBiquadFilter());hp.type='highpass';hp.frequency.value=140;hp.Q.value=.7;
     var ls=add(ac.createBiquadFilter());ls.type='lowshelf';ls.frequency.value=250;ls.gain.value=2.5;
     var pk=add(ac.createBiquadFilter());pk.type='peaking';pk.frequency.value=1700;pk.Q.value=.9;pk.gain.value=3.5;
-    var ws=add(ac.createWaveShaper());var n=2048,c=new Float32Array(n),k=.32*6;for(var i=0;i<n;i++){var x=i*2/n-1;c[i]=(1+k)*x/(1+k*Math.abs(x));}ws.curve=c;ws.oversample='2x';
+    var ws=add(ac.createWaveShaper());var n=2048,c=new Float32Array(n),k=.06*6;for(var i=0;i<n;i++){var x=i*2/n-1;c[i]=(1+k)*x/(1+k*Math.abs(x));}ws.curve=c;ws.oversample='2x';
     var l1=add(ac.createBiquadFilter());l1.type='lowpass';l1.frequency.value=5800;l1.Q.value=.6;
     var l2=add(ac.createBiquadFilter());l2.type='lowpass';l2.frequency.value=7540;l2.Q.value=.5;
     var sp=ac.createChannelSplitter(2),mg=ac.createChannelMerger(2),w=.45,a=(1+w)/2,b=(1-w)/2;cur.connect(sp);
     [[0,0,a],[1,0,b],[1,1,a],[0,1,b]].forEach(function(r){var g=ac.createGain();g.gain.value=r[2];sp.connect(g,r[0]);g.connect(mg,0,r[1]);});
-    var out=ac.createGain();out.gain.value=.74;mg.connect(out);
+    var out=ac.createGain();out.gain.value=.85;mg.connect(out);
     return {inp:inp,out:out};}
   /* BGM を音の通り道に入れる（公開した https のページでだけ働く） */
   function routeBgm(){
