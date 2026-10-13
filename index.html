@@ -1169,7 +1169,7 @@ function cleanDb(src){
   out.guitars=list(src.guitars).map(function(g0){
     var g={};for(k in g0){if(Object.prototype.hasOwnProperty.call(g0,k))g[k]=g0[k];}
     if(typeof g.id!=='string'||!/^[\w-]{1,40}$/.test(g.id)||ids[g.id]){g.id=uid();fixed++;}ids[g.id]=1;
-    if(typeof g.name!=='string'||!g.name.trim()){g.name='名称未設定';fixed++;}else g.name=g.name.slice(0,40);
+    if(g.name!=null&&typeof g.name!=='string'){delete g.name;fixed++;}if(g.name)g.name=g.name.trim().slice(0,40);if(!g.name&&!(typeof g.model==='string'&&g.model.trim())){g.name='名称未設定';fixed++;}
     ['model','gauge','brand','strType','maker','color','serial','shop','memo','body','neck','pickup','bridge'].forEach(function(f){if(g[f]!=null&&typeof g[f]!=='string'){delete g[f];fixed++;}});if(g.memo)g.memo=g.memo.slice(0,300);
     if(g.buy!=null&&!(typeof g.buy==='string'&&MONTH_RE.test(g.buy))){delete g.buy;fixed++;}
     if(g.wanted!=null&&g.wanted!==true){delete g.wanted;fixed++;}
@@ -1181,7 +1181,7 @@ function cleanDb(src){
     if(g.loan!=null){var L=g.loan;var fullL=isObj(L)&&num(L.total,1,1e9)&&num(L.monthly,1,1e9)&&typeof L.start==='string'&&MONTH_RE.test(L.start);
       var endL=isObj(L)&&typeof L.end==='string'&&MONTH_RE.test(L.end);
       if(endL&&!fullL){if(L.total!=null&&!num(L.total,1,1e9)){delete L.total;fixed++;}if(L.monthly!=null&&!num(L.monthly,1,1e9)){delete L.monthly;fixed++;}if(L.start!=null&&!(typeof L.start==='string'&&MONTH_RE.test(L.start))){delete L.start;fixed++;}}
-      if(!(fullL||endL)){delete g.loan;fixed++;}else{if(L.first!=null&&!num(L.first,1,1e9)){delete L.first;fixed++;}if(L.count!=null&&!num(L.count,1,600)){delete L.count;fixed++;}if(L.end!=null&&!(typeof L.end==='string'&&MONTH_RE.test(L.end))){delete L.end;fixed++;}if(L.mode!=null&&L.mode!=='monthly'&&L.mode!=='end'){delete L.mode;fixed++;}}}
+      if(!(fullL||endL)){delete g.loan;fixed++;}else{if(L.first!=null&&!num(L.first,1,1e9)){delete L.first;fixed++;}if(L.count!=null&&!num(L.count,1,600)){delete L.count;fixed++;}if(L.end!=null&&!(typeof L.end==='string'&&MONTH_RE.test(L.end))){delete L.end;fixed++;}if(L.mode!=null&&L.mode!=='monthly'&&L.mode!=='end'&&L.mode!=='count'){delete L.mode;fixed++;}}}
     return g;
   });
   return {db:out,fixed:fixed};
@@ -1231,6 +1231,7 @@ function loanInfo(g){
   var paid=k<=0?0:Math.min(L.total,first+(k-1)*L.monthly),left=Math.max(0,L.total-paid);
   return {left:left,done:left<=0,count:n-k,total:n,monthly:L.monthly,end:ymAdd(L.start,n-1),pct:Math.round(paid/L.total*100)};
 }
+function gName(g){return (g.name&&g.name.trim())||(g.model&&g.model.trim())||'名称未設定';}
 function yen(n){return '¥'+Math.round(n).toLocaleString('ja-JP');}
 var DUST_TILE=(function(){var s='<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46">',r=7;
   function rnd(){r=(r*9301+49297)%233280;return r/233280;}
@@ -1690,7 +1691,7 @@ function benchTodoHtml(){
   db.guitars.forEach(function(g){if(g.wanted)return;MAINT.forEach(function(m){var s=maintStatus(g,m);if(s.state==='bad'||s.state==='warn')items.push({g:g,m:m,s:s});});});
   items.sort(function(a,b){return a.s.remain-b.s.remain;});
   if(items.length===0)return '<p style="text-align:center">作業台は片付いています。<br>急ぎの手入れはありません。</p>';
-  var rows=items.map(function(it){var bad=it.s.state==='bad';var d=bad?('<b style="color:var(--red)">'+Math.abs(it.s.remain)+'日超過</b>'):('<b style="color:var(--amber)">あと'+it.s.remain+'日</b>');return '<div class="bench-row" data-id="'+it.g.id+'"><span class="br-ic">'+it.m.ic+'</span><span class="br-body"><b>'+esc(it.g.name)+'</b><span class="br-sub">'+it.m.name+' ／ 最終 '+fmtDate(it.s.last)+'</span></span><span class="br-days">'+d+'</span></div>';}).join('');
+  var rows=items.map(function(it){var bad=it.s.state==='bad';var d=bad?('<b style="color:var(--red)">'+Math.abs(it.s.remain)+'日超過</b>'):('<b style="color:var(--amber)">あと'+it.s.remain+'日</b>');return '<div class="bench-row" data-id="'+it.g.id+'"><span class="br-ic">'+it.m.ic+'</span><span class="br-body"><b>'+esc(gName(it.g))+'</b><span class="br-sub">'+it.m.name+' ／ 最終 '+fmtDate(it.s.last)+'</span></span><span class="br-days">'+d+'</span></div>';}).join('');
   return '<h3 style="margin-bottom:4px">やること '+items.length+'件</h3><div class="bench-list">'+rows+'</div><div class="bench-foot">項目をタップ → その愛器のカルテで記録</div>';
 }
 function benchHowtoHtml(){
@@ -2250,7 +2251,7 @@ function renderWall(){
       var fade=stringFade(g),dust=dustLevel(g),li=loanInfo(g);
       var fx=fade>0?' style="filter:brightness('+(1-0.55*fade).toFixed(3)+') saturate('+(1-0.25*fade).toFixed(3)+')"':'';
       var inner=g.photo?('<div class="g-photo"'+fx+'><img src="'+attr(g.photo)+'" alt=""></div>')
-        :('<div class="g-plate"'+fx+'>'+esc(g.name).slice(0,6)+'</div>');
+        :('<div class="g-plate"'+fx+'>'+esc(gName(g).slice(0,6))+'</div>');
       if(dust>0)inner+='<div class="g-dust" style="opacity:'+(0.25+0.75*dust).toFixed(2)+';background-image:'+DUST_TILE+(g.photo?';-webkit-mask-image:url('+cssUrl(g.photo)+');mask-image:url('+cssUrl(g.photo)+')':'')+'"></div>';
       if(isFresh(g))inner+='<div class="g-spark" aria-hidden="true"><svg class="ic"><use href="#i-sparkle"/></svg><svg class="ic"><use href="#i-sparkle"/></svg><svg class="ic"><use href="#i-sparkle"/></svg></div>';
       var price=li?('<div class="g-price'+(li.done?' paid':'')+'">'+(li.done?'完済':(li.left!=null?'残り'+yen(li.left):'あと'+li.count+'回'))+'</div>'):'';
@@ -2403,6 +2404,7 @@ mbg.addEventListener('click',function(e){if(e.target===mbg)closeModal();});
 var pendingPhoto=null,pendingAr=null;
 
 /* ===== add / edit form ===== */
+function loanCountOf(g){if(!g.loan)return '';if(g.loan.count>0)return g.loan.count;var li=loanInfo(g);return li&&li.total?li.total:'';}
 function loanEndOf(g){if(!g.loan)return '';if(g.loan.end)return g.loan.end;var li=loanInfo(g);return li?li.end:'';}
 function readGuitarExtra(){
   function v(id){return document.getElementById(id).value.trim();}
@@ -2420,9 +2422,9 @@ function openForm(g,seed){
       '<div class="field"><label>写真（くり抜き推奨）</label><div class="photo-drop'+(pendingPhoto?' has':'')+'" id="photoDrop"'+(pendingPhoto?' style="background-image:url('+cssUrl(pendingPhoto)+')"':'')+'>'+
         (pendingPhoto?'<button class="pd-clear" id="pdClear">×</button>':'<span class="pd-ic"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></span><span>タップして写真を選ぶ</span>')+
       '</div><input type="file" id="photoInput" accept="image/*" class="hidden-input"><div class="hint">iPhoneなら写真アプリでギターを長押し→被写体をコピーして、くり抜いた画像を選ぶと壁に綺麗に掛かります。</div></div>'+
-      '<div class="field"><label>呼び名 ＊</label><input id="fName" maxlength="40" placeholder="例：相棒のストラト" value="'+attr(g.name||'')+'"></div>'+
       '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>メーカー</label><input id="fMaker" maxlength="30" placeholder="例：Fender" value="'+attr(g.maker||'')+'"></div>'+
-      '<div class="field" style="flex:1.6;margin:0"><label>機種名</label><input id="fModel" maxlength="60" placeholder="例：Player Stratocaster" value="'+attr(g.model||'')+'"></div></div>'+
+      '<div class="field" style="flex:1.6;margin:0"><label>機種名 ＊</label><input id="fModel" maxlength="60" placeholder="例：Player Stratocaster" value="'+attr(g.model||'')+'"></div></div>'+
+      '<div class="field" style="margin-top:12px"><label>呼び名</label><input id="fName" maxlength="40" placeholder="例：相棒のストラト" value="'+attr(g.name||'')+'"><div class="hint">入れると、機種名の代わりにこの名前で表示します。</div></div>'+
       '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1.6;margin:0"><label>色</label><input id="fColor" maxlength="40" placeholder="例：3-Color Sunburst" value="'+attr(g.color||'')+'"></div>'+
       '<div class="field" style="flex:1;margin:0"><label>製造年</label><input id="fYear" type="number" min="1900" max="2100" inputmode="numeric" placeholder="例：1998" value="'+(g.year||'')+'"></div></div>'+
       '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1.6;margin:0"><label>シリアル番号</label><input id="fSerial" maxlength="40" placeholder="例：MX98123456" value="'+attr(g.serial||'')+'"></div>'+
@@ -2448,9 +2450,9 @@ function openForm(g,seed){
       '<div class="loan-box"><div class="loan-h">ローン（なければ空欄のまま）</div>'+
       '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>総額（円）</label><input id="fLoanTotal" type="number" min="0" inputmode="numeric" placeholder="120000" value="'+((g.loan&&g.loan.total)||'')+'"></div>'+
       '<div class="field" style="flex:1;margin:0"><label>最初に支払う月</label><input id="fLoanStart" type="month" value="'+((g.loan&&g.loan.start)||'')+'"></div></div>'+
-      '<div class="field" style="margin:12px 0 0"><label>決め方</label><div class="loan-mode" id="fLoanMode"><button type="button" data-m="monthly">月々の額で決める</button><button type="button" data-m="end">終わる月で決める</button></div></div>'+
-      '<div class="field" id="fLoanEndF" style="margin:0 0 12px"><label>最後に支払う月</label><input id="fLoanEnd" type="month" value="'+attr(loanEndOf(g))+'"><div class="hint" id="fLoanEndHint">最後に支払う月だけでも、残りの回数を出せます。総額・最初の月・月々の額は、分かる分だけで大丈夫です。</div></div>'+
-      '<div class="field" id="fLoanMonthlyF" style="margin:0"><label>月々の額（円）</label><input id="fLoanMonthly" type="number" min="0" inputmode="numeric" placeholder="5000" value="'+((g.loan&&g.loan.monthly)||'')+'"></div>'+
+      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1;margin:0"><label>支払い回数</label><input id="fLoanCount" type="number" min="1" max="600" inputmode="numeric" placeholder="12" value="'+loanCountOf(g)+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>月々の額（円・任意）</label><input id="fLoanMonthly" type="number" min="0" inputmode="numeric" placeholder="わかれば" value="'+((g.loan&&g.loan.monthly)||'')+'"></div></div>'+
+      '<div class="field" style="margin:8px 0 0"><div class="hint">月々の額を入れると、初回の額は総額との差から出します。空欄なら総額を回数で割ります。</div></div>'+
       '<div class="loan-calc" id="fLoanCalc"></div>'+
       '<div class="field" style="margin:8px 0 0"><div class="hint">手数料がある場合は、手数料込みの総額を入れてください。壁のギターに指を合わせる（スマホは長押し）と値札が出ます。</div></div></div>'+
     '</div>'+
@@ -2460,47 +2462,38 @@ function openForm(g,seed){
   document.getElementById('photoInput').addEventListener('change',function(e){handlePhotoPick(e,function(d,ar){pendingPhoto=d;pendingAr=ar;refreshDrop();});});
   var pc=document.getElementById('pdClear');if(pc)pc.addEventListener('click',function(){pendingPhoto=null;refreshDrop();});
   document.getElementById('fCancel').addEventListener('click',closeModal);
-  var loanMode=(g.loan&&g.loan.mode)||'monthly';
-  function loanRead(){var T=parseInt(document.getElementById('fLoanTotal').value,10)||0,S=document.getElementById('fLoanStart').value,M=parseInt(document.getElementById('fLoanMonthly').value,10)||0,E=document.getElementById('fLoanEnd').value;
-    var r={T:T,S:S,M:M,E:E,plan:null,loan:null,err:''};
-    if(loanMode==='monthly'){r.plan=loanPlan(T,S,{monthly:M});if(r.plan)r.loan={total:T,start:S,monthly:r.plan.monthly,first:r.plan.first,count:r.plan.count,mode:'monthly'};else r.err='ローンは総額・最初に支払う月・月々の額を入れてください';return r;}
-    if(!E){r.err='最後に支払う月を入れてください';return r;}
-    if(S&&ymDiff(S,E)<0){r.err='最後に支払う月は、最初に支払う月より後にしてください';return r;}
-    var L={mode:'end',end:E};
-    if(T&&S){r.plan=loanPlan(T,S,{end:E});if(!r.plan){r.err='最後に支払う月を確かめてください';return r;}L.total=T;L.start=S;L.monthly=r.plan.monthly;L.first=r.plan.first;L.count=r.plan.count;}
-    else{if(T)L.total=T;if(S){L.start=S;L.count=ymDiff(S,E)+1;}if(M)L.monthly=M;}
-    r.loan=L;return r;}
+  function loanRead(){
+    function iv(id){return parseInt(document.getElementById(id).value,10)||0;}
+    var T=iv('fLoanTotal'),S=document.getElementById('fLoanStart').value,N=iv('fLoanCount'),M=iv('fLoanMonthly');
+    var r={T:T,S:S,N:N,M:M,loan:null,err:''};
+    if(!(T>0&&S&&N>0)){r.err='ローンは総額・最初に支払う月・支払い回数を入れてください';return r;}
+    if(N>600){r.err='支払い回数を確かめてください';return r;}
+    var mon,first;
+    if(M>0){mon=M;first=T-M*(N-1);if(N===1)first=T;if(first<=0){r.err='月々の額か回数を確かめてください';return r;}}
+    else{mon=Math.floor(T/N);if(mon<1){r.err='支払い回数を確かめてください';return r;}first=T-mon*(N-1);}
+    if(N===1)mon=first;
+    r.loan={total:T,start:S,count:N,monthly:mon,first:first,mode:'count'};return r;}
   function loanPaint(){
-    document.querySelectorAll('#fLoanMode button').forEach(function(b){b.classList.toggle('on',b.dataset.m===loanMode);});
-    document.getElementById('fLoanEndF').style.display=loanMode==='end'?'':'none';
-    document.getElementById('fLoanMonthly').placeholder=loanMode==='end'?'わかれば':'5000';
     var r=loanRead(),c=document.getElementById('fLoanCalc');
-    if(!r.loan){c.textContent=(r.T||r.S||r.M||r.E)&&r.err&&!(loanMode==='end'&&!r.E)?r.err:'';return;}
-    var li=loanInfo({loan:r.loan});if(!li){c.textContent='';return;}
-    var parts=[];if(li.total)parts.push(li.total+'回払い');
-    if(li.monthly)parts.push('月々 '+yen(li.monthly)+(r.loan.first&&r.loan.first!==li.monthly?'（初回 '+yen(r.loan.first)+'）':''));
-    if(li.done){parts.push(fmtYm(li.end)+'に完済');}
-    else{parts.push('あと'+li.count+'回');if(li.left!=null)parts.push('残り '+yen(li.left));parts.push('完済予定 '+fmtYm(li.end));}
-    c.textContent=parts.join(' ・ ');
+    if(!r.loan){c.textContent=(r.T||r.S||r.N||r.M)?r.err:'';return;}
+    var L=r.loan,li=loanInfo({loan:L});if(!li){c.textContent='';return;}
+    var parts=['全'+L.count+'回・'+fmtYm(li.end)+'に終わり'];
+    parts.push(L.count===1?'一括 '+yen(L.first):(L.first!==L.monthly?'初回 '+yen(L.first)+'・2回目から '+yen(L.monthly):'毎月 '+yen(L.monthly)));
+    parts.push(li.done?'支払い済み':'あと'+li.count+'回・残り '+yen(li.left));
+    c.textContent=parts.join(' ／ ');
   }
-  document.querySelectorAll('#fLoanMode button').forEach(function(b){b.addEventListener('click',function(){
-    var r=loanRead();
-    if(b.dataset.m==='end'&&r.plan&&!r.E)document.getElementById('fLoanEnd').value=r.plan.end;
-    if(b.dataset.m==='monthly'&&r.loan&&r.loan.monthly&&!r.M)document.getElementById('fLoanMonthly').value=r.loan.monthly;
-    if(b.dataset.m==='monthly'&&r.plan&&!r.M)document.getElementById('fLoanMonthly').value=r.plan.monthly;
-    loanMode=b.dataset.m;loanPaint();});});
-  ['fLoanTotal','fLoanStart','fLoanMonthly','fLoanEnd'].forEach(function(id){document.getElementById(id).addEventListener('input',loanPaint);});
+  ['fLoanTotal','fLoanStart','fLoanCount','fLoanMonthly'].forEach(function(id){document.getElementById(id).addEventListener('input',loanPaint);});
   loanPaint();
   document.getElementById('fStrType').addEventListener('change',function(){var t=strTypeOf(this.value);var lf=document.getElementById('fStrLife');if(this.value==='custom'){lf.focus();}else{lf.value=t.days;}});
   document.getElementById('fSave').addEventListener('click',function(){
     var name=document.getElementById('fName').value.trim();
-    if(!name){toast('呼び名を入れてください');return;}
+    if(!document.getElementById('fModel').value.trim()){toast('機種名を入れてください');return;}
     var newStr=document.getElementById('fStr').value;
     var stType=document.getElementById('fStrType').value;var stPreset=strTypeOf(stType);
     var stLife=(stType==='custom')?(parseInt(document.getElementById('fStrLife').value,10)||30):stPreset.days;
     if(stLife<1)stLife=30;
     var lr=loanRead(),loan=null;
-    if(lr.T||lr.S||lr.M||lr.E){
+    if(lr.T||lr.S||lr.N||lr.M){
       if(!lr.loan){toast(lr.err);return;}
       loan=lr.loan;}
     var extra=readGuitarExtra();
@@ -2530,8 +2523,9 @@ function moveGuitar(id,dir){var i=db.guitars.findIndex(function(x){return x.id==
 function priceTagHtml(g,ss){
   var yr2=g.year?String(g.year).slice(-2):'';
   var sub=[g.color?esc(g.color):'',g.year?g.year:''].filter(Boolean).join('　');
-  var hd='<div class="ptag-hd">'+(g.maker?'<div class="ptag-mk">'+esc(g.maker)+'</div>':'')+'<div class="ptag-sel"><small>MY GUITAR</small><b>'+esc(g.name)+'</b></div></div>';
-  var main=(yr2||g.model||sub)?'<div class="ptag-main">'+(yr2?'<div class="ptag-yr">'+yr2+'</div>':'')+'<div>'+(g.model?'<div class="ptag-mdl">'+esc(g.model)+'</div>':'')+(sub?'<div class="ptag-sub">'+sub+'</div>':'')+'</div></div>':'';
+  var hd='<div class="ptag-hd">'+(g.maker?'<div class="ptag-mk">'+esc(g.maker)+'</div>':'')+'<div class="ptag-sel"><small>MY GUITAR</small><b>'+esc(gName(g))+'</b></div></div>';
+  var mdl=(g.name&&g.name.trim())?g.model:'';
+  var main=(yr2||mdl||sub)?'<div class="ptag-main">'+(yr2?'<div class="ptag-yr">'+yr2+'</div>':'')+'<div>'+(mdl?'<div class="ptag-mdl">'+esc(mdl)+'</div>':'')+(sub?'<div class="ptag-sub">'+sub+'</div>':'')+'</div></div>':'';
   var sn=(g.serial||g.weight)?'<div class="ptag-sn"><span>'+(g.serial?'s/n '+esc(g.serial):'')+'</span><span>'+(g.weight?g.weight+'kg':'')+'</span></div>':'';
   var memo=g.memo?'<div class="ptag-memo">'+esc(g.memo)+'</div>':'';
   var sp=[['Body',g.body],['Neck',g.neck],['Pickup',g.pickup],['Bridge',g.bridge]].filter(function(r){return r[1];});
@@ -2676,7 +2670,7 @@ function openRepairForm(g){
 }
 function editPhoto(g){var inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.className='hidden-input';document.body.appendChild(inp);inp.addEventListener('change',function(e){handlePhotoPick(e,function(d,ar){var t=db.guitars.find(function(x){return x.id===g.id;});t.photo=d;t.ar=ar;save();openDetail(t.id);toast('写真を更新しました');document.body.removeChild(inp);});});inp.click();}
 function confirmDelete(g){
-  openModal('<div class="modal-head"><div class="modal-title">削除の確認</div></div><div class="modal-body"><p class="confirm-msg"><b>'+esc(g.name)+'</b> と、その記録をすべて削除します。<br><br>この操作は元に戻せません。よろしいですか。</p></div><div class="modal-foot"><button class="btn btn-ghost" id="cdCancel" style="flex:1">やめる</button><button class="btn btn-danger ds-hold" id="cdYes" style="flex:1">長押しで削除</button></div>');
+  openModal('<div class="modal-head"><div class="modal-title">削除の確認</div></div><div class="modal-body"><p class="confirm-msg"><b>'+esc(gName(g))+'</b> と、その記録をすべて削除します。<br><br>この操作は元に戻せません。よろしいですか。</p></div><div class="modal-foot"><button class="btn btn-ghost" id="cdCancel" style="flex:1">やめる</button><button class="btn btn-danger ds-hold" id="cdYes" style="flex:1">長押しで削除</button></div>');
   document.getElementById('cdCancel').addEventListener('click',closeModal);
   document.getElementById('cdYes').addEventListener('click',function(){db.guitars=db.guitars.filter(function(x){return x.id!==g.id;});save();closeModal();detailOv.classList.remove('show');if(wallPage>=wallCount())wallPage=wallCount()-1;renderWall();toast('削除しました');});
 }
@@ -3064,9 +3058,9 @@ var ENTR_TEXT={
     var td=today();if(st.day===td)return null;
     var away=st.lastVisit?(daysSince(st.lastVisit)>=7):false,items=[],ym=td.slice(0,7);
     (db.guitars||[]).forEach(function(g){if(g.wanted)return;
-      var s=stringStatus(g);if(s.state==='bad')items.push({t:fill(ENTR_TEXT.strBad,{name:g.name}),z:'bench'});else if(s.state==='warn')items.push({t:fill(ENTR_TEXT.strWarn,{name:g.name}),z:'bench'});
-      MAINT.slice(1).forEach(function(m){if(maintStatus(g,m).state==='bad'&&ENTR_TEXT.maintName[m.key])items.push({t:fill(ENTR_TEXT.maintBad,{name:g.name,what:ENTR_TEXT.maintName[m.key]}),z:'bench'});});
-      if(g.buy&&g.buy.slice(5,7)===ym.slice(5,7)&&g.buy<ym&&st.anniv!==ym){var n=+ym.slice(0,4)-+g.buy.slice(0,4);if(n>0)items.push({t:fill(ENTR_TEXT.anniv,{name:g.name,n:n}),z:'shelf',anniv:1});}
+      var s=stringStatus(g);if(s.state==='bad')items.push({t:fill(ENTR_TEXT.strBad,{name:gName(g)}),z:'bench'});else if(s.state==='warn')items.push({t:fill(ENTR_TEXT.strWarn,{name:gName(g)}),z:'bench'});
+      MAINT.slice(1).forEach(function(m){if(maintStatus(g,m).state==='bad'&&ENTR_TEXT.maintName[m.key])items.push({t:fill(ENTR_TEXT.maintBad,{name:gName(g),what:ENTR_TEXT.maintName[m.key]}),z:'bench'});});
+      if(g.buy&&g.buy.slice(5,7)===ym.slice(5,7)&&g.buy<ym&&st.anniv!==ym){var n=+ym.slice(0,4)-+g.buy.slice(0,4);if(n>0)items.push({t:fill(ENTR_TEXT.anniv,{name:gName(g),n:n}),z:'shelf',anniv:1});}
     });
     items=items.sort(function(){return Math.random()-.5;}).slice(0,2);
     var reason=items.length>0||away,recOnly=!reason&&(!st.lastLetter||daysSince(st.lastLetter)>=3);
