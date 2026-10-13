@@ -805,6 +805,11 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 .loan-mode{display:flex;gap:6px;margin-bottom:10px;}
 .loan-mode button{flex:1;background:var(--oil);border:1px solid var(--wood-light);color:var(--paper-dim);border-radius:var(--r-md);padding:8px 6px;font-family:inherit;font-size:var(--fs-sm);cursor:pointer;}
 .loan-mode button.on{background:var(--wood-light);color:var(--paper);border-color:var(--brass);}
+.loan-step{display:flex;gap:6px;align-items:stretch;}
+.loan-step button{flex:0 0 46px;background:var(--oil);border:1px solid var(--wood-light);color:var(--paper);border-radius:var(--r-md);font-family:inherit;font-size:var(--fs-lg);cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;}
+.loan-step button:disabled{opacity:.4;cursor:default;}
+.loan-step input{flex:1;text-align:center;min-width:0;}
+.loan-more{margin-top:10px;background:none;border:none;padding:4px 0;color:var(--paper-dim);font-family:inherit;font-size:var(--fs-sm);text-decoration:underline;cursor:pointer;}
 .loan-calc{margin-top:10px;font-size:var(--fs-sm);color:var(--brass-light);min-height:1.4em;}
 .loan-box{margin-top:16px;padding:12px;border:1px dashed var(--wood-light);border-radius:var(--r-md);}
 .loan-h{font-family:var(--font-head);font-weight:700;color:var(--brass-light);font-size:var(--fs-md);margin-bottom:10px;}
@@ -2404,6 +2409,8 @@ mbg.addEventListener('click',function(e){if(e.target===mbg)closeModal();});
 var pendingPhoto=null,pendingAr=null;
 
 /* ===== add / edit form ===== */
+function loanFull(g){var L=g.loan;return !!(L&&L.total>0&&L.monthly>0&&L.start);}
+function loanLeftOf(g){var li=g.loan?loanInfo(g):null;return li&&!li.done?li.count:'';}
 function loanCountOf(g){if(!g.loan)return '';if(g.loan.count>0)return g.loan.count;var li=loanInfo(g);return li&&li.total?li.total:'';}
 function loanEndOf(g){if(!g.loan)return '';if(g.loan.end)return g.loan.end;var li=loanInfo(g);return li?li.end:'';}
 function readGuitarExtra(){
@@ -2448,13 +2455,14 @@ function openForm(g,seed){
       '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>ゲージ</label><input id="fGauge" maxlength="20" placeholder="09-42" value="'+attr(g.gauge||'')+'"></div>'+
       '<div class="field" style="flex:1;margin:0"><label>弦の銘柄</label><input id="fBrand" maxlength="30" placeholder="Elixir 等" value="'+attr(g.brand||'')+'"></div></div>'+
       '<div class="loan-box"><div class="loan-h">ローン（なければ空欄のまま）</div>'+
+      '<div class="field" style="margin:0"><label>あと何回</label><div class="loan-step"><button type="button" id="fLeftDn" aria-label="1回へらす">−</button><input id="fLoanLeft" type="number" min="0" max="600" inputmode="numeric" placeholder="0" value="'+loanLeftOf(g)+'"><button type="button" id="fLeftUp" aria-label="1回ふやす">＋</button></div><div class="hint">今月分を払った後の残り。月が替わると自動で減ります。</div></div>'+
+      '<div class="field" style="margin:12px 0 0"><label>月々の額（円・任意）</label><input id="fLoanMonthly" type="number" min="0" inputmode="numeric" placeholder="わかれば" value="'+((g.loan&&g.loan.monthly)||'')+'"></div>'+
+      '<div class="loan-calc" id="fLoanCalc"></div>'+
+      '<button type="button" class="loan-more" id="fLoanMoreBtn">くわしく入れる（初回だけ高い場合など）</button>'+
+      '<div id="fLoanMore" hidden style="margin-top:8px">'+
       '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>総額（円）</label><input id="fLoanTotal" type="number" min="0" inputmode="numeric" placeholder="120000" value="'+((g.loan&&g.loan.total)||'')+'"></div>'+
       '<div class="field" style="flex:1;margin:0"><label>最初に支払う月</label><input id="fLoanStart" type="month" value="'+((g.loan&&g.loan.start)||'')+'"></div></div>'+
-      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1;margin:0"><label>支払い回数</label><input id="fLoanCount" type="number" min="1" max="600" inputmode="numeric" placeholder="12" value="'+loanCountOf(g)+'"></div>'+
-      '<div class="field" style="flex:1;margin:0"><label>最後に支払う月</label><input id="fLoanEnd" type="month" value="'+attr(loanEndOf(g))+'"></div></div>'+
-      '<div class="field" style="margin:12px 0 0"><label>月々の額（円・任意）</label><input id="fLoanMonthly" type="number" min="0" inputmode="numeric" placeholder="わかれば" value="'+((g.loan&&g.loan.monthly)||'')+'"></div>'+
-      '<div class="field" style="margin:8px 0 0"><div class="hint">回数か最後の月のどちらかを入れると、もう一方は自動で入ります。最後に支払う月だけでも、残りの回数を出せます。</div></div>'+
-      '<div class="loan-calc" id="fLoanCalc"></div>'+
+      '<div class="field" style="margin:12px 0 0"><label>支払い回数</label><input id="fLoanCount" type="number" min="1" max="600" inputmode="numeric" placeholder="12" value="'+(loanFull(g)?loanCountOf(g):'')+'"><div class="hint">すべて入れると初回の額まで計算し、「あと何回」も自動で入ります。</div></div></div>'+
       '<div class="field" style="margin:8px 0 0"><div class="hint">手数料がある場合は、手数料込みの総額を入れてください。壁のギターに指を合わせる（スマホは長押し）と値札が出ます。</div></div></div>'+
     '</div>'+
     '<div class="modal-foot"><button class="btn btn-ghost" id="fCancel" style="flex:0 0 auto">やめる</button><button class="btn btn-brass" id="fSave" style="flex:1">'+(isEdit?'保存する':'壁に掛ける')+'</button></div>'
@@ -2464,42 +2472,46 @@ function openForm(g,seed){
   var pc=document.getElementById('pdClear');if(pc)pc.addEventListener('click',function(){pendingPhoto=null;refreshDrop();});
   document.getElementById('fCancel').addEventListener('click',closeModal);
   function lv(id){return document.getElementById(id).value;}
+  var moreEl=document.getElementById('fLoanMore');
+  if(loanFull(g))moreEl.removeAttribute('hidden');
+  function curYm(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
   function loanRead(){
     function iv(id){return parseInt(lv(id),10)||0;}
-    var T=iv('fLoanTotal'),S=lv('fLoanStart'),N=iv('fLoanCount'),E=lv('fLoanEnd'),M=iv('fLoanMonthly');
-    var r={T:T,S:S,N:N,E:E,M:M,loan:null,err:''};
-    if(N>600){r.err='支払い回数を確かめてください';return r;}
-    if(S&&E&&ymDiff(S,E)<0){r.err='最後に支払う月は、最初に支払う月より後にしてください';return r;}
-    if(T>0&&S&&N>0){
+    var more=!moreEl.hasAttribute('hidden');
+    var T=more?iv('fLoanTotal'):0,S=more?lv('fLoanStart'):'',N=more?iv('fLoanCount'):0,M=iv('fLoanMonthly'),R=iv('fLoanLeft');
+    var r={T:T,S:S,N:N,M:M,R:R,full:false,loan:null,err:''};
+    if(T||S||N){
+      if(!(T>0&&S&&N>0)){r.err='くわしく入れる時は、総額・最初に支払う月・支払い回数をすべて入れてください';return r;}
+      if(N>600){r.err='支払い回数を確かめてください';return r;}
       var mon,first;
       if(M>0){mon=M;first=N===1?T:T-M*(N-1);if(first<=0){r.err='月々の額か回数を確かめてください';return r;}}
       else{mon=Math.floor(T/N);if(mon<1){r.err='支払い回数を確かめてください';return r;}first=T-mon*(N-1);}
       if(N===1)mon=first;
-      r.loan={total:T,start:S,count:N,monthly:mon,first:first,mode:'count'};return r;}
-    if(E){var L={mode:'end',end:E};if(T)L.total=T;if(S){L.start=S;L.count=ymDiff(S,E)+1;}if(M)L.monthly=M;r.loan=L;return r;}
-    r.err='最後に支払う月か、総額・最初に支払う月・支払い回数を入れてください';return r;}
-  function loanSync(src){ /* 回数と最後の月を、最初の月を基に揃える */
-    var S=lv('fLoanStart'),N=parseInt(lv('fLoanCount'),10)||0,E=lv('fLoanEnd'),cE=document.getElementById('fLoanEnd'),cN=document.getElementById('fLoanCount');
-    if(!S)return;
-    if(src==='count'){if(N>0&&N<=600)cE.value=ymAdd(S,N-1);}
-    else if(src==='end'){if(E&&ymDiff(S,E)>=0)cN.value=ymDiff(S,E)+1;}
-    else{if(N>0&&N<=600)cE.value=ymAdd(S,N-1);else if(E&&ymDiff(S,E)>=0)cN.value=ymDiff(S,E)+1;}
-  }
+      r.full=true;r.loan={total:T,start:S,count:N,monthly:mon,first:first,mode:'count'};return r;}
+    if(R>600){r.err='あと何回を確かめてください';return r;}
+    if(R>0){var L={mode:'end',end:ymAdd(curYm(),R)};if(M)L.monthly=M;r.loan=L;return r;}
+    if(M){r.err='あと何回を入れてください';}
+    return r;}
   function loanPaint(){
-    var r=loanRead(),c=document.getElementById('fLoanCalc');
-    if(!r.loan){c.textContent=(r.T||r.S||r.N||r.E||r.M)?r.err:'';return;}
+    var r=loanRead(),c=document.getElementById('fLoanCalc'),lf=document.getElementById('fLoanLeft');
+    lf.disabled=document.getElementById('fLeftDn').disabled=document.getElementById('fLeftUp').disabled=r.full;
+    if(!r.loan){c.textContent=r.err;return;}
     var L=r.loan,li=loanInfo({loan:L});if(!li){c.textContent='';return;}
+    if(r.full)lf.value=li.done?0:li.count;
     var parts=[];
-    parts.push((li.total?'全'+li.total+'回・':'')+fmtYm(li.end)+'に終わり');
-    if(L.mode==='count')parts.push(L.count===1?'一括 '+yen(L.first):(L.first!==L.monthly?'初回 '+yen(L.first)+'・2回目から '+yen(L.monthly):'毎月 '+yen(L.monthly)));
-    else if(L.monthly)parts.push('毎月 '+yen(L.monthly));
-    parts.push(li.done?'支払い済み':'あと'+li.count+'回'+(li.left!=null?'・残り '+yen(li.left):''));
+    if(li.done)parts.push(fmtYm(li.end)+'に支払い済み');
+    else parts.push('あと'+li.count+'回・'+fmtYm(li.end)+'に終わり'+(li.left!=null?'・残り '+yen(li.left):''));
+    if(r.full)parts.push('全'+L.count+'回 '+(L.count===1?'一括 '+yen(L.first):(L.first!==L.monthly?'初回 '+yen(L.first)+'・2回目から '+yen(L.monthly):'毎月 '+yen(L.monthly))));
     c.textContent=parts.join(' ／ ');
   }
-  document.getElementById('fLoanCount').addEventListener('input',function(){loanSync('count');loanPaint();});
-  document.getElementById('fLoanEnd').addEventListener('input',function(){loanSync('end');loanPaint();});
-  document.getElementById('fLoanStart').addEventListener('input',function(){loanSync('start');loanPaint();});
-  ['fLoanTotal','fLoanMonthly'].forEach(function(id){document.getElementById(id).addEventListener('input',loanPaint);});
+  function stepLeft(d){var lf=document.getElementById('fLoanLeft');if(lf.disabled)return;var v=Math.max(0,Math.min(600,(parseInt(lf.value,10)||0)+d));lf.value=v?v:'';loanPaint();}
+  [['fLeftDn',-1],['fLeftUp',1]].forEach(function(p){var btn=document.getElementById(p[0]),t1=null,t2=null;
+    function stop(){clearTimeout(t1);clearInterval(t2);t1=t2=null;}
+    btn.addEventListener('pointerdown',function(e){e.preventDefault();stop();stepLeft(p[1]);t1=setTimeout(function(){t2=setInterval(function(){stepLeft(p[1]);},90);},400);});
+    ['pointerup','pointerleave','pointercancel'].forEach(function(ev){btn.addEventListener(ev,stop);});
+    btn.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();stepLeft(p[1]);}});});
+  document.getElementById('fLoanMoreBtn').addEventListener('click',function(){if(moreEl.hasAttribute('hidden'))moreEl.removeAttribute('hidden');else moreEl.setAttribute('hidden','');loanPaint();});
+  ['fLoanLeft','fLoanMonthly','fLoanTotal','fLoanStart','fLoanCount'].forEach(function(id){var el=document.getElementById(id);el.addEventListener('input',loanPaint);el.addEventListener('change',loanPaint);});
   loanPaint();
   document.getElementById('fStrType').addEventListener('change',function(){var t=strTypeOf(this.value);var lf=document.getElementById('fStrLife');if(this.value==='custom'){lf.focus();}else{lf.value=t.days;}});
   document.getElementById('fSave').addEventListener('click',function(){
@@ -2510,7 +2522,7 @@ function openForm(g,seed){
     var stLife=(stType==='custom')?(parseInt(document.getElementById('fStrLife').value,10)||30):stPreset.days;
     if(stLife<1)stLife=30;
     var lr=loanRead(),loan=null;
-    if(lr.T||lr.S||lr.N||lr.E||lr.M){
+    if(lr.T||lr.S||lr.N||lr.M||lr.R){
       if(!lr.loan){toast(lr.err);return;}
       loan=lr.loan;}
     var extra=readGuitarExtra();
