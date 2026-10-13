@@ -623,6 +623,9 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .field label{display:block;font-size:var(--fs-xs);letter-spacing:1.5px;color:var(--brass);text-transform:uppercase;margin-bottom:var(--sp-2);font-family:var(--font-body);}
 .field input,.field select,.field textarea{width:100%;background:var(--oil);border:1px solid var(--wood-light);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-3);color:var(--paper);font-family:inherit;font-size:var(--fs-lg);}
 .pre-wrap{position:relative;}
+.ym-row{display:flex;gap:6px;}
+.ym-row>.pre-wrap{flex:1.4;min-width:0;}
+.ym-row>.pre-wrap+.pre-wrap{flex:1;}
 .pre-pop{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;background:var(--oil);border:1px solid var(--brass);border-radius:var(--r-md);box-shadow:0 8px 24px rgba(0,0,0,.5);max-height:240px;overflow-y:auto;padding:4px 0;}
 .pre-pop[hidden]{display:none!important;}
 .pre-pop button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--paper);font-family:inherit;font-size:var(--fs-md);padding:10px 12px;cursor:pointer;}
@@ -2449,12 +2452,15 @@ function loanFull(g){var L=g.loan;return !!(L&&L.total>0&&L.monthly>0&&L.start);
 function loanLeftOf(g){var li=g.loan?loanInfo(g):null;return li&&!li.done?li.count:'';}
 function loanCountOf(g){if(!g.loan)return '';if(g.loan.count>0)return g.loan.count;var li=loanInfo(g);return li&&li.total?li.total:'';}
 function loanEndOf(g){if(!g.loan)return '';if(g.loan.end)return g.loan.end;var li=loanInfo(g);return li?li.end:'';}
+function buyYm(){var y=parseInt(document.getElementById('fBuyY').value,10),m=parseInt(document.getElementById('fBuyM').value,10);
+  return (y>=1900&&y<=2100&&m>=1&&m<=12)?y+'-'+String(m).padStart(2,'0'):'';}
+function yearList(){var y=new Date().getFullYear(),a=[];for(var i=0;i<=30;i++)a.push(String(y-i));return a;}
 function readGuitarExtra(){
   function v(id){return document.getElementById(id).value.trim();}
   function n(id){var x=parseFloat(document.getElementById(id).value);return isFinite(x)&&x>0?x:null;}
   var w=n('fWeight');
   return {maker:v('fMaker'),color:v('fColor'),serial:v('fSerial'),weight:w?Math.round(w*100)/100:null,body:v('fBody'),neck:v('fNeck'),pickup:v('fPickup'),bridge:v('fBridge'),
-    buy:v('fBuy'),shop:v('fShop'),listPrice:n('fList')?Math.round(n('fList')):null,price:n('fPrice')?Math.round(n('fPrice')):null,memo:v('fMemo')};
+    buy:buyYm(),shop:v('fShop'),listPrice:n('fList')?Math.round(n('fList')):null,price:n('fPrice')?Math.round(n('fPrice')):null,memo:v('fMemo')};
 }
 function applyExtra(t,x){for(var k in x){if(x[k]===null||x[k]==='')delete t[k];else t[k]=x[k];}}
 function openForm(g,seed){
@@ -2479,7 +2485,7 @@ function openForm(g,seed){
       '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1;margin:0"><label>ピックアップ</label><input id="fPickup" maxlength="40" placeholder="例：SSS" value="'+attr(g.pickup||'')+'"></div>'+
       '<div class="field" style="flex:1;margin:0"><label>ブリッジ</label><input id="fBridge" maxlength="40" placeholder="例：シンクロナイズド" value="'+attr(g.bridge||'')+'"></div></div>'+
       '<div class="form-sec">購入</div>'+
-      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>購入した月</label><input id="fBuy" type="month" value="'+attr(g.buy||'')+'"></div>'+
+      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>購入した月</label><div class="ym-row"><input id="fBuyY" type="text" inputmode="numeric" maxlength="4" placeholder="年" value="'+(g.buy?g.buy.slice(0,4):'')+'"><input id="fBuyM" type="text" inputmode="numeric" maxlength="3" placeholder="月" value="'+(g.buy?parseInt(g.buy.slice(5,7),10)+'月':'')+'"></div></div>'+
       '<div class="field" style="flex:1;margin:0"><label>お店</label><input id="fShop" maxlength="40" placeholder="例：○○楽器" value="'+attr(g.shop||'')+'"></div></div>'+
       '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1;margin:0"><label>定価（円）</label><input id="fList" type="number" min="0" inputmode="numeric" placeholder="138000" value="'+(g.listPrice||'')+'"></div>'+
       '<div class="field" style="flex:1;margin:0"><label>購入価格（円）</label><input id="fPrice" type="number" min="0" inputmode="numeric" placeholder="118000" value="'+(g.price||'')+'"></div></div>'+
@@ -2509,6 +2515,8 @@ function openForm(g,seed){
   document.getElementById('fCancel').addEventListener('click',closeModal);
   function lv(id){return document.getElementById(id).value;}
   Object.keys(FORM_PRESETS).forEach(function(id){presetize(id,FORM_PRESETS[id]);});
+  presetize('fYear',yearList());presetize('fBuyY',yearList());
+  presetize('fBuyM',['1','2','3','4','5','6','7','8','9','10','11','12'].map(function(m){return m+'月';}));
   var moreEl=document.getElementById('fLoanMore');
   if(loanFull(g))moreEl.removeAttribute('hidden');
   function curYm(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
@@ -2554,6 +2562,7 @@ function openForm(g,seed){
   document.getElementById('fSave').addEventListener('click',function(){
     var name=document.getElementById('fName').value.trim();
     if(!document.getElementById('fModel').value.trim()){toast('機種名を入れてください');return;}
+    if((document.getElementById('fBuyY').value.trim()||document.getElementById('fBuyM').value.trim())&&!buyYm()){toast('購入した月は、年と月の両方を入れてください');return;}
     var newStr=document.getElementById('fStr').value;
     var stType=document.getElementById('fStrType').value;var stPreset=strTypeOf(stType);
     var stLife=(stType==='custom')?(parseInt(document.getElementById('fStrLife').value,10)||30):stPreset.days;
