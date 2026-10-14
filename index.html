@@ -940,6 +940,7 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 /* ジュークボックスの操作盤 */
 .jbplayer{position:absolute;left:50%;bottom:16px;translate:-50% 0;z-index:7;display:none;align-items:center;gap:14px;padding:12px 18px;border-radius:40px 40px 14px 14px;background:linear-gradient(180deg,#7a1410,#4a0906 60%,#2a0503);border:3px solid #d9d4c8;box-shadow:0 0 0 1px #000,inset 0 2px 0 rgba(255,255,255,.25),inset 0 -3px 6px rgba(0,0,0,.5),0 10px 26px rgba(0,0,0,.7),0 0 40px rgba(255,160,60,.28);}
 .viewport.jb-on .jbplayer{display:flex;}
+.pl-credit{position:absolute;left:0;right:0;top:calc(100% + 2px);text-align:center;font-size:10px;line-height:1.2;letter-spacing:.5px;color:rgba(243,230,196,.6);text-decoration:none;white-space:nowrap;text-shadow:0 1px 2px #000;}
 .pl-card{min-width:170px;padding:6px 14px 7px;text-align:center;border-radius:4px;background:linear-gradient(180deg,#fbf3dc,#efe0b8);border:2px solid #b3261e;box-shadow:0 0 0 2px #e8e2d4,inset 0 0 8px rgba(120,60,20,.25),0 0 14px rgba(255,200,120,.35);color:#3a1a0c;}
 .pl-no{font-family:var(--font-sign);font-size:11px;color:#b3261e;letter-spacing:1px;}
 .pl-t{font-family:"Zen Old Mincho",serif;font-weight:700;font-size:16px;line-height:1.3;border-top:1px solid #b3261e;border-bottom:1px solid #b3261e;margin:2px 0;padding:1px 0;}
@@ -1097,7 +1098,7 @@ svg.ggfx{width:100%;height:100%;}
 <div class="tophint" id="topHint"><svg class="ic" aria-hidden="true"><use href="#i-hand-tap"/></svg> <span id="topHintTx">場所を押して、工房の各所へ</span></div>
 <div class="viewport" id="viewport">
   <div class="scene" id="scene">
-    <img class="bg" src="img/overview.webp" alt="工房の全体図" alt="工房">
+    <img class="bg" src="img/overview.webp" alt="工房の全体図">
     <div class="lighting" id="lighting"></div>
     <div class="ggfx" id="ovLamps" hidden></div>
     <canvas class="ggfx" id="ovDust" hidden></canvas>
@@ -1121,6 +1122,7 @@ svg.ggfx{width:100%;height:100%;}
     <button class="pl-key" id="plPlay"><span class="pl-cap" id="plIc">▶</span><small id="plLbl">流す</small></button>
     <button class="pl-key" id="plNext"><span class="pl-cap">▶▶</span><small>次の曲</small></button>
     <div class="pl-vol"><div class="knob" id="plKnob" role="slider" tabindex="0" aria-label="音量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><span class="kn-dot"></span></div><small>音量</small></div>
+    <a class="pl-credit" href="https://bgmer.net" target="_blank" rel="noopener">音楽：BGMer https://bgmer.net</a>
   </div>
   <button class="backbtn" id="backBtn">‹ 工房全体へ</button>
   <div class="wallpager" id="wallPager"></div>
@@ -1163,8 +1165,57 @@ svg.ggfx{width:100%;height:100%;}
 var DB_KEY='aiki_carte_room_v1';
 var db={guitars:[],gear:[],songs:[],practice:{},notes:[],journal:{},parts:[],hooked:[]};
 function emptyDb(){return {guitars:[],gear:[],songs:[],practice:{},notes:[],journal:{},parts:[],hooked:[]};}
-function load(){try{var r=localStorage.getItem(DB_KEY);if(r)db=JSON.parse(r);}catch(e){db=emptyDb();}if(!db||typeof db!=='object')db=emptyDb();if(!db.guitars)db.guitars=[];if(!db.wallV2){db.guitars.forEach(function(g){if(g.ox)g.ox*=1.6;if(g.oy)g.oy*=1.6;});db.wallV2=1;}if(!db.gear)db.gear=[];if(!db.songs)db.songs=[];if(!db.practice)db.practice={};if(!db.notes)db.notes=[];if(!db.journal)db.journal={};if(!db.parts)db.parts=[];if(!db.hooked)db.hooked=[];}
-function save(){try{localStorage.setItem(DB_KEY,JSON.stringify(db));return true;}catch(e){toast('保存できませんでした。写真が多く、保存できる量がいっぱいの可能性があります');return false;}}
+function load(){try{var r=localStorage.getItem(DB_KEY);if(r)db=JSON.parse(r);}catch(e){db=emptyDb();}if(!db||typeof db!=='object')db=emptyDb();if(!db.guitars)db.guitars=[];db.guitars.forEach(function(g){if(g&&g.photo==='idb'){g.photo=null;g._php=true;}});if(!db.wallV2){db.guitars.forEach(function(g){if(g.ox)g.ox*=1.6;if(g.oy)g.oy*=1.6;});db.wallV2=1;}if(!db.gear)db.gear=[];if(!db.songs)db.songs=[];if(!db.practice)db.practice={};if(!db.notes)db.notes=[];if(!db.journal)db.journal={};if(!db.parts)db.parts=[];if(!db.hooked)db.hooked=[];}
+/* ===== 写真の置き場所：端末内のデータベース（IndexedDB）=====
+   写真以外は今まで通り localStorage。写真は guitar.id を鍵に別に保存し、localStorage 側には印 'idb' だけを残す。
+   読み込み・移し替えが済むまで（PH.ok=false）は、今まで通り写真も localStorage に書く。 */
+var PH={db:null,ok:false,cache:{},q:Promise.resolve()};
+function phSerialize(){
+  var out={},k;for(k in db){if(Object.prototype.hasOwnProperty.call(db,k))out[k]=db[k];}
+  out.guitars=(db.guitars||[]).map(function(g){var c={},j;for(j in g){if(j!=='_php'&&Object.prototype.hasOwnProperty.call(g,j))c[j]=g[j];}
+    if(PH.ok){if(c.photo)c.photo='idb';}else if(!c.photo&&g._php)c.photo='idb';
+    return c;});
+  return out;}
+function phReq(r){return new Promise(function(res,rej){r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});}
+function phTx(mode,fn){return new Promise(function(res,rej){var tx=PH.db.transaction('p',mode);fn(tx.objectStore('p'));tx.oncomplete=function(){res();};tx.onerror=tx.onabort=function(){rej(tx.error);};});}
+function phAll(){return new Promise(function(res,rej){var map={},tx=PH.db.transaction('p','readonly'),cr=tx.objectStore('p').openCursor();
+  cr.onsuccess=function(){var c=cr.result;if(c){map[c.key]=c.value;c.continue();}};tx.oncomplete=function(){res(map);};tx.onerror=tx.onabort=function(){rej(tx.error);};});}
+function phSync(){
+  PH.q=PH.q.then(function(){
+    if(!PH.ok)return;
+    var keep={},put=[],del=[];
+    db.guitars.forEach(function(g){if(g.photo){keep[g.id]=1;if(PH.cache[g.id]!==g.photo)put.push([g.id,g.photo]);}});
+    Object.keys(PH.cache).forEach(function(id){if(!keep[id])del.push(id);});
+    if(!put.length&&!del.length)return;
+    return phTx('readwrite',function(st){put.forEach(function(p){st.put(p[1],p[0]);});del.forEach(function(id){st.delete(id);});})
+      .then(function(){put.forEach(function(p){PH.cache[p[0]]=p[1];});del.forEach(function(id){delete PH.cache[id];});});
+  }).catch(function(){toast('写真を保存できませんでした。もう一度お試しください');});
+}
+function phClearAll(){if(!PH.db)return;PH.q=PH.q.then(function(){return phTx('readwrite',function(st){st.clear();}).then(function(){PH.cache={};});}).catch(function(){});}
+function phInit(){
+  if(!window.indexedDB){db.guitars.forEach(function(g){delete g._php;});return;}
+  new Promise(function(res,rej){var rq;try{rq=indexedDB.open('gg_photos',1);}catch(e){rej(e);return;}
+    rq.onupgradeneeded=function(){rq.result.createObjectStore('p');};rq.onsuccess=function(){res(rq.result);};rq.onerror=function(){rej(rq.error);};rq.onblocked=function(){rej(new Error('blocked'));};})
+  .then(function(d){PH.db=d;return phAll();})
+  .then(function(map){
+    var inline=[];
+    db.guitars.forEach(function(g){
+      if(g._php){if(map[g.id]){g.photo=map[g.id];PH.cache[g.id]=map[g.id];}delete g._php;}
+      else if(typeof g.photo==='string'&&g.photo.indexOf('data:')===0)inline.push(g);});
+    if(!inline.length)return;
+    /* 今まで localStorage にあった写真を移し、読み出して確かめてから印に替える */
+    return phTx('readwrite',function(st){inline.forEach(function(g){st.put(g.photo,g.id);});})
+      .then(phAll).then(function(m2){
+        if(!inline.every(function(g){return m2[g.id]===g.photo;}))throw new Error('verify');
+        inline.forEach(function(g){PH.cache[g.id]=g.photo;});});
+  })
+  .then(function(){PH.ok=true;save();if(typeof renderWall==='function')renderWall();})
+  .catch(function(){PH.ok=false;});
+}
+function save(){
+  try{localStorage.setItem(DB_KEY,JSON.stringify(phSerialize()));}
+  catch(e){toast('保存できませんでした。保存できる量がいっぱいの可能性があります');return false;}
+  if(PH.ok)phSync();return true;}
 function uid(){return 'g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 
 
@@ -1824,7 +1875,6 @@ function renderRep(){
   var seg='<div class="rep-seg"><button class="'+(repFilter==='all'?'on':'')+'" data-rf="all">すべて<span class="rf-n">'+db.songs.length+'</span></button>'+
     SONG_STATES.map(function(s){return '<button class="'+(repFilter===s.id?'on':'')+'" data-rf="'+s.id+'">'+s.ic+' '+s.name+'<span class="rf-n">'+counts[s.id]+'</span></button>';}).join('')+'</div>';
   el.innerHTML='<div class="glass rep-glass chalkboard"><div class="ck-title">曲の記録</div>'+hookedHtml()+'<div class="jb-sub">レパートリー</div>'+seg+repListHtml()+'<button class="btn btn-brass btn-block" id="songAdd" style="margin-top:10px">＋ 曲を書き足す</button><div class="ck-tray" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><b></b></div></div>';
-  renderBgm();
   var ha=document.getElementById('hookedAdd');if(ha)ha.addEventListener('click',function(){openHookedModal(null);});
   el.querySelectorAll('.hooked-row').forEach(function(r){r.addEventListener('click',function(){openHookedModal(r.dataset.id);});});
   el.querySelectorAll('.rep-seg button').forEach(function(b){b.addEventListener('click',function(){repFilter=b.dataset.rf;renderRep();});});
@@ -2777,10 +2827,10 @@ function handlePhotoPick(e,cb){var f=e.target.files&&e.target.files[0];if(!f)ret
 var setOv=document.getElementById('settingsOverlay');
 document.getElementById('menuBtn').addEventListener('click',function(){setOv.classList.add('show');setOv.scrollTop=0;});
 document.getElementById('setBack').addEventListener('click',function(){setOv.classList.remove('show');});
-document.getElementById('btnExport').addEventListener('click',function(){var data=JSON.stringify(db,null,2);var blob=new Blob([data],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='aiki_carte_backup_'+today()+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1000);toast('バックアップを書き出しました');});
+document.getElementById('btnExport').addEventListener('click',function(){var data=JSON.stringify(db,function(k,v){return k==='_php'?undefined:v;},2);var blob=new Blob([data],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='aiki_carte_backup_'+today()+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1000);toast('バックアップを書き出しました');});
 document.getElementById('btnImport').addEventListener('click',function(){document.getElementById('importFile').click();});
 document.getElementById('importFile').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){var parsed;try{parsed=JSON.parse(ev.target.result);}catch(err){toast('読み込めないファイルです');return;}if(!parsed||typeof parsed!=='object'||!Array.isArray(parsed.guitars)){toast('GUITAR GARAGE のファイルではありません');return;}var cl=cleanDb(parsed);parsed=cl.db;var n=parsed.guitars.length;var more='（曲 '+parsed.songs.length+'曲・メモ '+parsed.notes.length+'件・機材 '+parsed.gear.length+'件）';var warn=cl.fixed?'<br><br>読み込めない項目が <b>'+cl.fixed+'件</b> ありました。その部分を除いて読み込みます。':'';openModal('<div class="modal-head"><div class="modal-title">読み込みの確認</div></div><div class="modal-body"><p class="confirm-msg">このファイルには <b>'+n+'本</b> の愛器が入っています'+more+'。'+warn+'<br><br>現在のデータ（'+db.guitars.length+'本）は置き換わります。よろしいですか。</p></div><div class="modal-foot"><button class="btn btn-ghost" id="imCancel" style="flex:1">やめる</button><button class="btn btn-brass" id="imYes" style="flex:1">読み込む</button></div>');document.getElementById('imCancel').addEventListener('click',function(){closeModal();document.getElementById('importFile').value='';});document.getElementById('imYes').addEventListener('click',function(){try{localStorage.setItem(DB_KEY,JSON.stringify(parsed));}catch(err){closeModal();toast('容量が足りず読み込めませんでした。今のデータはそのままです');document.getElementById('importFile').value='';return;}db=parsed;closeModal();setOv.classList.remove('show');wallPage=0;renderWall();toast('読み込みました');document.getElementById('importFile').value='';});};r.readAsText(f);});
-document.getElementById('btnWipe').addEventListener('click',function(){openModal('<div class="modal-head"><div class="modal-title">全データ消去の確認</div></div><div class="modal-body"><p class="confirm-msg">登録された愛器と記録を<b>すべて</b>削除します。<br><br>この操作は戻せません。本当によろしいですか。</p></div><div class="modal-foot"><button class="btn btn-ghost" id="wpCancel" style="flex:1">やめる</button><button class="btn btn-danger ds-hold" id="wpYes" style="flex:1">長押しで全消去</button></div>');document.getElementById('wpCancel').addEventListener('click',closeModal);document.getElementById('wpYes').addEventListener('click',function(){db=emptyDb();save();closeModal();setOv.classList.remove('show');wallPage=0;renderWall();toast('消去しました');});});
+document.getElementById('btnWipe').addEventListener('click',function(){openModal('<div class="modal-head"><div class="modal-title">全データ消去の確認</div></div><div class="modal-body"><p class="confirm-msg">登録された愛器と記録を<b>すべて</b>削除します。<br><br>この操作は戻せません。本当によろしいですか。</p></div><div class="modal-foot"><button class="btn btn-ghost" id="wpCancel" style="flex:1">やめる</button><button class="btn btn-danger ds-hold" id="wpYes" style="flex:1">長押しで全消去</button></div>');document.getElementById('wpCancel').addEventListener('click',closeModal);document.getElementById('wpYes').addEventListener('click',function(){db=emptyDb();save();phClearAll();closeModal();setOv.classList.remove('show');wallPage=0;renderWall();toast('消去しました');});});
 
 /* ===== utils ===== */
 function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -2893,25 +2943,6 @@ function bgmSync(){
   if(typeof plSync==='function')plSync();
   var b=document.getElementById('bgmBtn');
   if(b){var on=bgmIdx>=0;b.classList.toggle('on',on);b.innerHTML=bgmAudio.paused?BGM_PLAY:BGM_PAUSE;b.setAttribute('aria-label',bgmAudio.paused?'BGMを流す':'BGMを一時停止');b.title=on?BGM[bgmIdx].title:'';}
-  renderBgm();
-}
-function renderBgm(){
-  var el=document.getElementById('bgmBox');if(!el)return;
-  var rows=BGM.map(function(s,i){
-    var cur=i===bgmIdx,pz=cur&&bgmAudio.paused;
-    var mark=cur?(pz?BGM_PAUSE:'<span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i></span>'):(i+1);
-    return '<button class="bgm-row'+(cur?' cur':'')+'" data-i="'+i+'"><span class="bgm-no">'+mark+'</span><span class="bgm-t">'+esc(s.title)+'</span><span class="bgm-len">'+s.len+'</span></button>';
-  }).join('');
-  var v=Math.round(bgmVol()*100);
-  el.innerHTML='<div class="bgm-head"><span class="bgm-lbl"><svg class="ic" aria-hidden="true"><use href="#i-music-notes"/></svg> BGM</span><button class="bgm-stop" id="bgmStop"'+(bgmIdx<0?' disabled':'')+'>止める</button></div>'+
-    '<div class="bgm-list">'+rows+'</div>'+
-    '<label class="bgm-vol">音量<input type="range" id="bgmVolIn" min="0" max="100" value="'+v+'"></label>'+
-    '<div class="bgm-note">曲を押すと流れ、終わると次の曲へ進みます。練習タイマーの間は止まります。<br>音楽：BGMer https://bgmer.net</div>';
-  el.querySelectorAll('.bgm-row').forEach(function(r){r.addEventListener('click',function(){
-    var i=+r.dataset.i;if(i===bgmIdx&&!bgmAudio.paused)bgmPause();else bgmPlay(i);
-  });});
-  var st=document.getElementById('bgmStop');if(st)st.addEventListener('click',bgmStop);
-  var vi=document.getElementById('bgmVolIn');if(vi)vi.addEventListener('input',function(){db.bgmVol=vi.value/100;clearInterval(bgmFadeT);if(!bgmAudio.paused)bgmAudio.volume=db.bgmVol;save();});
 }
 document.getElementById('bgmBtn').addEventListener('click',function(e){e.stopPropagation();if(bgmIdx<0)return;if(bgmAudio.paused)bgmResume();else bgmPause();});
 /* 開いたら1曲目から流す。ブラウザが音の自動再生を止めるため、止められたときは最初の操作で流し始める */
@@ -2929,7 +2960,7 @@ function lightingPhase(h){if(h>=6&&h<9)return 'morning';if(h>=9&&h<17)return 'da
 var lightingOverride=null;
 function applyLighting(){var sc=document.getElementById('viewport');if(!sc)return;var p=lightingOverride||lightingPhase(new Date().getHours());sc.classList.remove('lit-morning','lit-day','lit-evening','lit-night');sc.classList.add('lit-'+p);}
 function setLightingPreview(v){lightingOverride=(v==='auto')?null:v;applyLighting();var box=document.getElementById('litPreview');if(box){var cur=lightingOverride||'auto';box.querySelectorAll('button').forEach(function(b){b.classList.toggle('lit-active',b.getAttribute('data-lit')===cur);});}}
-load();renderWall();applyLighting();setInterval(applyLighting,60000);
+load();renderWall();phInit();applyLighting();setInterval(applyLighting,60000);
 (function(){var box=document.getElementById('litPreview');if(box){box.addEventListener('click',function(e){var b=e.target.closest('[data-lit]');if(b)setLightingPreview(b.getAttribute('data-lit'));});setLightingPreview('auto');}})();
 </script>
 <script>
