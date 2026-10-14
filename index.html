@@ -1164,7 +1164,7 @@ var DB_KEY='aiki_carte_room_v1';
 var db={guitars:[],gear:[],songs:[],practice:{},notes:[],journal:{},parts:[],hooked:[]};
 function emptyDb(){return {guitars:[],gear:[],songs:[],practice:{},notes:[],journal:{},parts:[],hooked:[]};}
 function load(){try{var r=localStorage.getItem(DB_KEY);if(r)db=JSON.parse(r);}catch(e){db=emptyDb();}if(!db||typeof db!=='object')db=emptyDb();if(!db.guitars)db.guitars=[];if(!db.wallV2){db.guitars.forEach(function(g){if(g.ox)g.ox*=1.6;if(g.oy)g.oy*=1.6;});db.wallV2=1;}if(!db.gear)db.gear=[];if(!db.songs)db.songs=[];if(!db.practice)db.practice={};if(!db.notes)db.notes=[];if(!db.journal)db.journal={};if(!db.parts)db.parts=[];if(!db.hooked)db.hooked=[];}
-function save(){try{localStorage.setItem(DB_KEY,JSON.stringify(db));}catch(e){toast('保存に失敗しました（容量超過の可能性）');}}
+function save(){try{localStorage.setItem(DB_KEY,JSON.stringify(db));return true;}catch(e){toast('保存できませんでした。写真が多く、保存できる量がいっぱいの可能性があります');return false;}}
 function uid(){return 'g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 
 
@@ -1253,7 +1253,7 @@ var DUST_TILE=(function(){var s='<svg xmlns="http://www.w3.org/2000/svg" width="
   return "url('data:image/svg+xml,"+encodeURIComponent(s+'</svg>')+"')";})();
 
 var MAINT=[{key:'strings',name:'弦交換',ic:'<svg class="ic" aria-hidden="true"><use href="#i-strings"/></svg>',cycle:30},{key:'oil',name:'指板オイル',ic:'<svg class="ic" aria-hidden="true"><use href="#i-drop"/></svg>',cycle:90},{key:'clean',name:'ボディ清掃',ic:'<svg class="ic" aria-hidden="true"><use href="#i-broom"/></svg>',cycle:14},{key:'polish',name:'金属磨き',ic:'<svg class="ic" aria-hidden="true"><use href="#i-sparkle"/></svg>',cycle:60}];
-var STR_TYPES=[{id:'normal',name:'通常弦（アンコート）',days:30},{id:'coated',name:'コーティング弦（Elixir等）',days:90},{id:'nylon',name:'クラシック／ナイロン弦',days:60},{id:'custom',name:'自分で日数を決める',days:0}];
+var STR_TYPES=[{id:'normal',name:'通常弦',days:30},{id:'coated',name:'コーティング弦（Elixir等）',days:90},{id:'nylon',name:'クラシック／ナイロン弦',days:60},{id:'custom',name:'自分で日数を決める',days:0}];
 function strTypeOf(id){for(var i=0;i<STR_TYPES.length;i++){if(STR_TYPES[i].id===id)return STR_TYPES[i];}return STR_TYPES[0];}
 function strCycle(g){return (g&&g.strLife&&g.strLife>0)?g.strLife:30;}
 var HOOK_X=[32.9,40.7,49.5,57.9,66.5];var HOOK_Y=27;var HANG_Y=23;
@@ -2471,40 +2471,40 @@ function openForm(g,seed){
       '<div class="field"><label>写真（くり抜き推奨）</label><div class="photo-drop'+(pendingPhoto?' has':'')+'" id="photoDrop"'+(pendingPhoto?' style="background-image:url('+cssUrl(pendingPhoto)+')"':'')+'>'+
         (pendingPhoto?'<button class="pd-clear" id="pdClear">×</button>':'<span class="pd-ic"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></span><span>タップして写真を選ぶ</span>')+
       '</div><input type="file" id="photoInput" accept="image/*" class="hidden-input"><div class="hint">iPhoneなら写真アプリでギターを長押し→被写体をコピーして、くり抜いた画像を選ぶと壁に綺麗に掛かります。</div></div>'+
-      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>メーカー</label><input id="fMaker" maxlength="30" placeholder="例：Fender" value="'+attr(g.maker||'')+'"></div>'+
-      '<div class="field" style="flex:1.6;margin:0"><label>機種名 ＊</label><input id="fModel" maxlength="60" placeholder="例：Player Stratocaster" value="'+attr(g.model||'')+'"></div></div>'+
-      '<div class="field" style="margin-top:12px"><label>呼び名</label><input id="fName" maxlength="40" placeholder="例：相棒のストラト" value="'+attr(g.name||'')+'"><div class="hint">入れると、機種名の代わりにこの名前で表示します。</div></div>'+
-      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1.6;margin:0"><label>色</label><input id="fColor" maxlength="40" placeholder="例：3-Color Sunburst" value="'+attr(g.color||'')+'"></div>'+
-      '<div class="field" style="flex:1;margin:0"><label>製造年</label><input id="fYear" type="number" min="1900" max="2100" inputmode="numeric" placeholder="例：1998" value="'+(g.year||'')+'"></div></div>'+
-      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1.6;margin:0"><label>シリアル番号</label><input id="fSerial" maxlength="40" placeholder="例：MX98123456" value="'+attr(g.serial||'')+'"></div>'+
-      '<div class="field" style="flex:1;margin:0"><label>重さ（kg）</label><input id="fWeight" type="number" min="0" max="30" step="0.01" inputmode="decimal" placeholder="3.6" value="'+(g.weight||'')+'"></div></div>'+
+      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>メーカー</label><input id="fMaker" maxlength="30" value="'+attr(g.maker||'')+'"></div>'+
+      '<div class="field" style="flex:1.6;margin:0"><label>機種名 ＊</label><input id="fModel" maxlength="60" value="'+attr(g.model||'')+'"></div></div>'+
+      '<div class="field" style="margin-top:12px"><label>呼び名</label><input id="fName" maxlength="40" value="'+attr(g.name||'')+'"><div class="hint">入れると、機種名の代わりにこの名前で表示します。</div></div>'+
+      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1.6;margin:0"><label>色</label><input id="fColor" maxlength="40" value="'+attr(g.color||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>製造年</label><input id="fYear" type="number" min="1900" max="2100" inputmode="numeric" value="'+(g.year||'')+'"></div></div>'+
+      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1.6;margin:0"><label>シリアル番号</label><input id="fSerial" maxlength="40" value="'+attr(g.serial||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>重さ（kg）</label><input id="fWeight" type="number" min="0" max="30" step="0.01" inputmode="decimal" value="'+(g.weight||'')+'"></div></div>'+
       '<div class="field" style="margin:8px 0 0"><div class="hint">空欄の項目は値札に出ません。</div></div>'+
       '<div class="form-sec">仕様</div>'+
-      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>ボディ材</label><input id="fBody" maxlength="40" placeholder="例：アルダー" value="'+attr(g.body||'')+'"></div>'+
-      '<div class="field" style="flex:1;margin:0"><label>ネック</label><input id="fNeck" maxlength="40" placeholder="例：メイプル／Cシェイプ" value="'+attr(g.neck||'')+'"></div></div>'+
-      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1;margin:0"><label>ピックアップ</label><input id="fPickup" maxlength="40" placeholder="例：SSS" value="'+attr(g.pickup||'')+'"></div>'+
-      '<div class="field" style="flex:1;margin:0"><label>ブリッジ</label><input id="fBridge" maxlength="40" placeholder="例：シンクロナイズド" value="'+attr(g.bridge||'')+'"></div></div>'+
+      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>ボディ材</label><input id="fBody" maxlength="40" value="'+attr(g.body||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>ネック</label><input id="fNeck" maxlength="40" value="'+attr(g.neck||'')+'"></div></div>'+
+      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1;margin:0"><label>ピックアップ</label><input id="fPickup" maxlength="40" value="'+attr(g.pickup||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>ブリッジ</label><input id="fBridge" maxlength="40" value="'+attr(g.bridge||'')+'"></div></div>'+
       '<div class="form-sec">購入</div>'+
       '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>購入した月</label><div class="ym-row"><input id="fBuyY" type="text" inputmode="numeric" maxlength="4" placeholder="年" value="'+(g.buy?g.buy.slice(0,4):'')+'"><input id="fBuyM" type="text" inputmode="numeric" maxlength="3" placeholder="月" value="'+(g.buy?parseInt(g.buy.slice(5,7),10)+'月':'')+'"></div></div>'+
-      '<div class="field" style="flex:1;margin:0"><label>お店</label><input id="fShop" maxlength="40" placeholder="例：○○楽器" value="'+attr(g.shop||'')+'"></div></div>'+
-      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1;margin:0"><label>定価（円）</label><input id="fList" type="number" min="0" inputmode="numeric" placeholder="138000" value="'+(g.listPrice||'')+'"></div>'+
-      '<div class="field" style="flex:1;margin:0"><label>購入価格（円）</label><input id="fPrice" type="number" min="0" inputmode="numeric" placeholder="118000" value="'+(g.price||'')+'"></div></div>'+
-      '<div class="field" style="margin-top:12px"><label>メモ</label><textarea id="fMemo" maxlength="300" placeholder="例：初めてのレッスン代を貯めて買った一本">'+esc(g.memo||'')+'</textarea></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>お店</label><input id="fShop" maxlength="40" value="'+attr(g.shop||'')+'"></div></div>'+
+      '<div class="btn-row" style="margin-top:12px"><div class="field" style="flex:1;margin:0"><label>定価（円）</label><input id="fList" type="number" min="0" inputmode="numeric" value="'+(g.listPrice||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>購入価格（円）</label><input id="fPrice" type="number" min="0" inputmode="numeric" value="'+(g.price||'')+'"></div></div>'+
+      '<div class="field" style="margin-top:12px"><label>メモ</label><textarea id="fMemo" maxlength="300">'+esc(g.memo||'')+'</textarea></div>'+
       '<div class="form-sec">弦</div>'+
       '<div class="field"><label>弦交換日</label><input id="fStr" type="date" value="'+((g.maint&&g.maint.strings)||'')+'"><div class="hint">この日付から弦の寿命を計算します。</div></div>'+
       '<div class="field"><label>弦のタイプ（寿命の目安）</label><select id="fStrType">'+STR_TYPES.map(function(t){return '<option value="'+t.id+'"'+((g.strType||'normal')===t.id?' selected':'')+'>'+t.name+(t.days?'（約'+t.days+'日）':'')+'</option>';}).join('')+'</select></div>'+
       '<div class="field"><label>寿命の目安（日）</label><input id="fStrLife" type="number" min="1" max="3650" inputmode="numeric" value="'+(g.strLife||30)+'"><div class="hint">タイプを選ぶと自動で入ります。「自分で決める」なら直接入力できます。</div></div>'+
-      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>ゲージ</label><input id="fGauge" maxlength="20" placeholder="09-42" value="'+attr(g.gauge||'')+'"></div>'+
-      '<div class="field" style="flex:1;margin:0"><label>弦の銘柄</label><input id="fBrand" maxlength="30" placeholder="Elixir 等" value="'+attr(g.brand||'')+'"></div></div>'+
+      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>ゲージ</label><input id="fGauge" maxlength="20" value="'+attr(g.gauge||'')+'"></div>'+
+      '<div class="field" style="flex:1;margin:0"><label>弦の銘柄</label><input id="fBrand" maxlength="30" value="'+attr(g.brand||'')+'"></div></div>'+
       '<div class="loan-box"><div class="loan-h">ローン（なければ空欄のまま）</div>'+
-      '<div class="field" style="margin:0"><label>あと何回</label><div class="loan-step"><button type="button" id="fLeftDn" aria-label="1回へらす">−</button><input id="fLoanLeft" type="number" min="0" max="600" inputmode="numeric" placeholder="0" value="'+loanLeftOf(g)+'"><button type="button" id="fLeftUp" aria-label="1回ふやす">＋</button></div><div class="hint">今月分を払った後の残り。月が替わると自動で減ります。</div></div>'+
-      '<div class="field" style="margin:12px 0 0"><label>月々の額（円・任意）</label><input id="fLoanMonthly" type="number" min="0" inputmode="numeric" placeholder="わかれば" value="'+((g.loan&&g.loan.monthly)||'')+'"></div>'+
+      '<div class="field" style="margin:0"><label>あと何回</label><div class="loan-step"><button type="button" id="fLeftDn" aria-label="1回へらす">−</button><input id="fLoanLeft" type="number" min="0" max="600" inputmode="numeric" value="'+loanLeftOf(g)+'"><button type="button" id="fLeftUp" aria-label="1回ふやす">＋</button></div><div class="hint">今月分を払った後の残り。月が替わると自動で減ります。</div></div>'+
+      '<div class="field" style="margin:12px 0 0"><label>月々の額（円・任意）</label><input id="fLoanMonthly" type="number" min="0" inputmode="numeric" value="'+((g.loan&&g.loan.monthly)||'')+'"></div>'+
       '<div class="loan-calc" id="fLoanCalc"></div>'+
       '<button type="button" class="loan-more" id="fLoanMoreBtn">くわしく入れる（初回だけ高い場合など）</button>'+
       '<div id="fLoanMore" hidden style="margin-top:8px">'+
-      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>総額（円）</label><input id="fLoanTotal" type="number" min="0" inputmode="numeric" placeholder="120000" value="'+((g.loan&&g.loan.total)||'')+'"></div>'+
+      '<div class="btn-row"><div class="field" style="flex:1;margin:0"><label>総額（円）</label><input id="fLoanTotal" type="number" min="0" inputmode="numeric" value="'+((g.loan&&g.loan.total)||'')+'"></div>'+
       '<div class="field" style="flex:1;margin:0"><label>最初に支払う月</label><input id="fLoanStart" type="month" value="'+((g.loan&&g.loan.start)||'')+'"></div></div>'+
-      '<div class="field" style="margin:12px 0 0"><label>支払い回数</label><input id="fLoanCount" type="number" min="1" max="600" inputmode="numeric" placeholder="12" value="'+(loanFull(g)?loanCountOf(g):'')+'"><div class="hint">すべて入れると初回の額まで計算し、「あと何回」も自動で入ります。</div></div></div>'+
+      '<div class="field" style="margin:12px 0 0"><label>支払い回数</label><input id="fLoanCount" type="number" min="1" max="600" inputmode="numeric" value="'+(loanFull(g)?loanCountOf(g):'')+'"><div class="hint">すべて入れると初回の額まで計算し、「あと何回」も自動で入ります。</div></div></div>'+
       '<div class="field" style="margin:8px 0 0"><div class="hint">手数料がある場合は、手数料込みの総額を入れてください。壁のギターに指を合わせる（スマホは長押し）と値札が出ます。</div></div></div>'+
     '</div>'+
     '<div class="modal-foot"><button class="btn btn-ghost" id="fCancel" style="flex:0 0 auto">やめる</button><button class="btn btn-brass" id="fSave" style="flex:1">'+(isEdit?'保存する':'壁に掛ける')+'</button></div>'
@@ -2578,13 +2578,13 @@ function openForm(g,seed){
       if(!t.maint)t.maint={};
       if(newStr&&newStr!==t.maint.strings){if(!t.stringHistory)t.stringHistory=[];t.stringHistory.push({date:newStr,brand:t.brand,gauge:t.gauge,note:''});}
       if(newStr)t.maint.strings=newStr;
-      save();closeModal();openDetail(t.id);toast('保存しました');
+      if(!save())return;closeModal();openDetail(t.id);toast('保存しました');
     }else{
       var ng={id:uid(),name:name,model:document.getElementById('fModel').value.trim(),year:parseInt(document.getElementById('fYear').value,10)||null,gauge:document.getElementById('fGauge').value.trim(),brand:document.getElementById('fBrand').value.trim(),photo:pendingPhoto,ar:pendingAr,maint:{},stringHistory:[],repairs:[],strType:stType,strLife:stLife,added:today()};if(loan)ng.loan=loan;applyExtra(ng,extra);
       if(newStr){ng.maint.strings=newStr;ng.stringHistory.push({date:newStr,brand:ng.brand,gauge:ng.gauge,note:''});}
       var si=seed?db.guitars.findIndex(function(x){return x.id===seed.id;}):-1;
       if(si>=0){db.guitars[si]=ng;wallPage=Math.floor(si/5);}else{db.guitars.push(ng);wallPage=Math.floor((db.guitars.length-1)/5);}
-      save();closeModal();enterAdjust(ng.id);toast('壁に掛けました。位置を整えてください');
+      if(!save()){if(si>=0)db.guitars[si]=seed;else db.guitars.pop();return;}closeModal();enterAdjust(ng.id);toast('壁に掛けました。位置を整えてください');
     }
   });
 }
@@ -2691,7 +2691,7 @@ function openDetail(id){
   var rep=(g.repairs||[]).slice().reverse();
   var repRows=rep.length?rep.map(function(r){return '<div class="log-row"><span class="log-date">'+r.date+'</span><div class="log-note">'+esc(r.note)+(r.cost?' ／ ¥'+esc(r.cost):'')+'</div></div>';}).join(''):'<div class="log-empty">リペアや調整の記録はまだありません。</div>';
   var specRows=[
-    ['弦のタイプ', (g.strType?strTypeOf(g.strType).name:'通常弦（アンコート）')],
+    ['弦のタイプ', (g.strType?strTypeOf(g.strType).name:'通常弦')],
     ['交換の目安', strCycle(g)+'日'],
     ['ゲージ', g.gauge?esc(g.gauge):'—'],
     ['銘柄', g.brand?esc(g.brand):'—']
