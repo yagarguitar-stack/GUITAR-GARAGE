@@ -22,6 +22,18 @@
   --font-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif; /* 本文・札 */
 
 }
+
+/* 縦向きの案内（指で操作する端末だけ） */
+.rotate-ask{display:none;}
+@media (orientation:portrait) and (hover:none) and (pointer:coarse){
+  .rotate-ask{display:flex;position:fixed;inset:0;z-index:2147483000;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center;
+    background:radial-gradient(ellipse at 50% 42%,rgba(200,150,46,.10),transparent 60%),var(--c-bg);color:var(--paper);touch-action:none;}
+  .rotate-ask .ra-ic{width:72px;height:72px;color:var(--brass-light);animation:raTurn 2.6s ease-in-out infinite;}
+  .rotate-ask p{margin:0;font-family:var(--font-head);font-size:20px;letter-spacing:.08em;line-height:1.6;}
+  body{overflow:hidden;}
+}
+@keyframes raTurn{0%,30%{transform:rotate(0);}60%,100%{transform:rotate(90deg);}}
+@media (prefers-reduced-motion:reduce){.rotate-ask .ra-ic{animation:none;}}
 </style>
 <style id="ds-colors">
 /* yagarguitar-stack 共通デザイン v1 — 色 */
@@ -201,7 +213,7 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .menu-btn{margin-left:auto;background:rgba(0,0,0,.4);border:1px solid var(--wood-light);color:var(--brass-light);width:38px;height:38px;border-radius:var(--r-md);font-size:var(--fs-xl);cursor:pointer;}
 /* viewport / scene */
 .viewport{position:relative;width:100%;max-width:1100px;margin:0 auto;aspect-ratio:3/2;overflow:hidden;background:var(--c-bg);}
-.scene{position:absolute;top:0;left:0;width:100%;aspect-ratio:3/2;transform-origin:0 0;transform:translate(-1%,-1%) scale(1.02);transition:transform 1.15s cubic-bezier(.42,.0,.12,1);will-change:transform;}
+.scene{position:absolute;top:0;left:0;width:100%;aspect-ratio:3/2;transform-origin:0 0;transform:translate(-1%,-1%) scale(1.02);transition:transform 1.15s cubic-bezier(.42,.0,.12,1);}
 /* ---- boot / intro ---- */
 #boot{position:fixed;inset:0;background:#0a0705;z-index:300;pointer-events:none;animation:bootFade .8s ease .55s forwards;}
 @keyframes bootFade{from{opacity:1;}to{opacity:0;visibility:hidden;}}
@@ -234,7 +246,18 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .viewport.lit-morning .lighting{opacity:.72;mix-blend-mode:soft-light;background:linear-gradient(150deg,rgba(255,206,128,1),rgba(255,176,110,.4) 50%,rgba(255,165,105,0) 82%);}
 .viewport.lit-day .lighting{opacity:.34;mix-blend-mode:soft-light;background:linear-gradient(180deg,rgba(238,246,255,.95),rgba(255,255,255,.15) 55%,rgba(210,225,245,.3));}
 .viewport.lit-evening .lighting{opacity:.78;mix-blend-mode:overlay;background:linear-gradient(150deg,rgba(255,132,40,1),rgba(210,84,36,.5) 50%,rgba(78,38,64,.55));}
-.viewport.lit-night .lighting{opacity:.8;mix-blend-mode:normal;background:radial-gradient(ellipse 78% 68% at 50% 55%,rgba(150,56,70,.02) 0%,rgba(80,22,40,.5) 50%,rgba(24,4,12,.98) 90%);}
+/* 夜：深い藍。中央はほぼそのままで、周りへ向かって青い夜に沈める（明るい所をくっきり残す） */
+.viewport.lit-night .lighting{opacity:1;mix-blend-mode:multiply;background:radial-gradient(ellipse 85% 75% at 50% 50%,rgb(240,244,255) 0%,rgb(205,214,246) 30%,rgb(95,110,170) 66%,rgb(14,18,42) 96%);}
+/* 灯りの光だまり：灯りの下だけ明るさを残して持ち上げ、他を少し沈める（昼はかけない） */
+.ovpool{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 2s ease;}
+#ovShade{mix-blend-mode:multiply;background:radial-gradient(ellipse 14.32% 29.30% at 19.53% 37.11%,#fff 0%,rgba(255,255,255,0) 100%),radial-gradient(ellipse 9.77% 13.67% at 41.02% 22.95%,#fff 0%,rgba(255,255,255,0) 100%),radial-gradient(ellipse 9.77% 13.67% at 66.41% 22.95%,#fff 0%,rgba(255,255,255,0) 100%),radial-gradient(ellipse 13.02% 14.65% at 39.71% 48.83%,#fff 0%,rgba(255,255,255,0) 100%),radial-gradient(ellipse 10.42% 13.67% at 60.55% 47.85%,#fff 0%,rgba(255,255,255,0) 100%),radial-gradient(ellipse 9.11% 8.79% at 79.43% 54.69%,#fff 0%,rgba(255,255,255,0) 100%),radial-gradient(ellipse 7.16% 8.79% at 80.73% 24.41%,#fff 0%,rgba(255,255,255,0) 100%),radial-gradient(ellipse 6.51% 7.81% at 87.24% 18.55%,#fff 0%,rgba(255,255,255,0) 100%),radial-gradient(ellipse 10.42% 16.60% at 96.35% 50.78%,#fff 0%,rgba(255,255,255,0) 100%),radial-gradient(ellipse 7.81% 7.81% at 31.25% 52.73%,#fff 0%,rgba(255,255,255,0) 100%),radial-gradient(ellipse 7.81% 12.21% at 38.41% 21.00%,#fff 0%,rgba(255,255,255,0) 100%),linear-gradient(rgb(170,176,205),rgb(170,176,205));}
+#ovPoolSoft{mix-blend-mode:soft-light;background:radial-gradient(ellipse 14.32% 29.30% at 19.53% 37.11%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%),radial-gradient(ellipse 9.77% 13.67% at 41.02% 22.95%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%),radial-gradient(ellipse 9.77% 13.67% at 66.41% 22.95%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%),radial-gradient(ellipse 13.02% 14.65% at 39.71% 48.83%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%),radial-gradient(ellipse 10.42% 13.67% at 60.55% 47.85%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%),radial-gradient(ellipse 9.11% 8.79% at 79.43% 54.69%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%),radial-gradient(ellipse 7.16% 8.79% at 80.73% 24.41%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%),radial-gradient(ellipse 6.51% 7.81% at 87.24% 18.55%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%),radial-gradient(ellipse 10.42% 16.60% at 96.35% 50.78%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%),radial-gradient(ellipse 7.81% 7.81% at 31.25% 52.73%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%),radial-gradient(ellipse 7.81% 12.21% at 38.41% 21.00%,rgba(255,214,160,1) 0%,rgba(255,200,140,0) 100%);}
+#ovPoolWarm{mix-blend-mode:screen;background:radial-gradient(ellipse 14.32% 29.30% at 19.53% 37.11%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%),radial-gradient(ellipse 9.77% 13.67% at 41.02% 22.95%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%),radial-gradient(ellipse 9.77% 13.67% at 66.41% 22.95%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%),radial-gradient(ellipse 13.02% 14.65% at 39.71% 48.83%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%),radial-gradient(ellipse 10.42% 13.67% at 60.55% 47.85%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%),radial-gradient(ellipse 9.11% 8.79% at 79.43% 54.69%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%),radial-gradient(ellipse 7.16% 8.79% at 80.73% 24.41%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%),radial-gradient(ellipse 6.51% 7.81% at 87.24% 18.55%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%),radial-gradient(ellipse 10.42% 16.60% at 96.35% 50.78%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%),radial-gradient(ellipse 7.81% 7.81% at 31.25% 52.73%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%),radial-gradient(ellipse 7.81% 12.21% at 38.41% 21.00%,rgba(255,190,120,.12) 0%,rgba(255,170,90,0) 100%);}
+.viewport.lit-morning .ovpool{opacity:.3;}
+.viewport.lit-evening .ovpool{opacity:.6;}
+.viewport.lit-night .ovpool{opacity:1;}
+.scene img.bg{transition:filter 2s ease;}
+.viewport.lit-night .scene img.bg{filter:contrast(1.16) saturate(1.06);}
 /* hooks / hung */
 .hook{position:absolute;transform:translate(-50%,0);z-index:4;cursor:pointer;}
 .hook .g-art{width:3.4%;}
@@ -1077,16 +1100,31 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 
 /* ===== 世界観の演出（開くたびにくじ引きで選ぶ：明かりの揺らぎ・光に舞う塵・濡れた地面の揺らぎ） ===== */
 .ggfx{position:absolute;inset:0;pointer-events:none;z-index:2;}
-.ggfx-glow{position:absolute;border-radius:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;background:radial-gradient(circle,rgba(255,196,110,.55) 0,rgba(255,160,70,.22) 35%,rgba(255,140,50,0) 70%);opacity:.8;will-change:opacity;}
+.ggfx-glow{position:absolute;border-radius:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;background:radial-gradient(circle,rgba(255,196,110,var(--gA,.7)) 0,rgba(255,160,70,var(--gB,.3)) 35%,rgba(255,140,50,0) 70%);opacity:.8;will-change:opacity;}
 .ggfx-glow.win{background:radial-gradient(ellipse,rgba(255,190,110,.3) 0,rgba(255,170,80,0) 70%);}
 canvas.ggfx{width:100%;height:100%;}
 .ggfx[hidden],svg.ggfx[hidden]{display:none!important;}
 svg.ggfx{width:100%;height:100%;}
 .entr-fxwrap{transition:opacity .25s;}
+/* いつも点いている灯り：ジュークボックスのネオン／扉の隙間から漏れる光 */
+svg.ggfx-on{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen;transition:opacity 2s ease;}
+.viewport.lit-morning #ovJuke{opacity:.45;}.viewport.lit-day #ovJuke{opacity:.3;}.viewport.lit-evening #ovJuke{opacity:.75;}.viewport.lit-night #ovJuke{opacity:1;}
+.jb-halo{animation:jbBreath 6s ease-in-out infinite;}
+.jb-tube{animation:jbTube 6s ease-in-out infinite;}
+.jb-hue{animation:jbHue 14s ease-in-out infinite;}
+@keyframes jbBreath{0%,100%{opacity:.55;}50%{opacity:.85;}}
+@keyframes jbTube{0%,100%{opacity:.55;}45%{opacity:.9;}52%{opacity:.7;}58%{opacity:.92;}}
+@keyframes jbHue{0%,100%{filter:hue-rotate(0deg);}50%{filter:hue-rotate(-22deg);}}
+.gap-a{animation:gapA 5.3s ease-in-out infinite;}
+.gap-b{animation:gapB 8.7s ease-in-out infinite;}
+@keyframes gapA{0%,100%{opacity:.75;}30%{opacity:.95;}62%{opacity:.68;}80%{opacity:.88;}}
+@keyframes gapB{0%,100%{opacity:.85;}50%{opacity:.6;}}
+@media (prefers-reduced-motion:reduce){.jb-halo,.jb-tube,.jb-hue,.gap-a,.gap-b{animation:none;}}
 </style>
 <script>window.GG_ENTRANCE=true;</script>
 </head>
 <body>
+<div class="rotate-ask" role="alert" aria-live="polite"><svg class="ra-ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M205.66,221.66l-24,24a8,8,0,0,1-11.32-11.32L180.69,224H80a24,24,0,0,1-24-24V104a8,8,0,0,1,16,0v96a8,8,0,0,0,8,8H180.69l-10.35-10.34a8,8,0,0,1,11.32-11.32l24,24A8,8,0,0,1,205.66,221.66ZM80,72a8,8,0,0,0,5.66-13.66L75.31,48H176a8,8,0,0,1,8,8v96a8,8,0,0,0,16,0V56a24,24,0,0,0-24-24H75.31L85.66,21.66A8,8,0,1,0,74.34,10.34l-24,24a8,8,0,0,0,0,11.32l24,24A8,8,0,0,0,80,72Z"/></svg><p>端末を横にしてお使いください</p></div>
 <div id="boot"></div>
 
 <div class="topbar">
@@ -1100,8 +1138,24 @@ svg.ggfx{width:100%;height:100%;}
   <div class="scene" id="scene">
     <img class="bg" src="img/overview.webp" alt="工房の全体図">
     <div class="lighting" id="lighting"></div>
+    <div class="ovpool" id="ovShade"></div><div class="ovpool" id="ovPoolSoft"></div><div class="ovpool" id="ovPoolWarm"></div>
     <div class="ggfx" id="ovLamps" hidden></div>
     <canvas class="ggfx" id="ovDust" hidden></canvas>
+    <svg class="ggfx-on" id="ovJuke" viewBox="0 0 1536 1024" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <radialGradient id="jbHaloG" cx="50%" cy="42%" r="50%"><stop offset="0" stop-color="#ffb060" stop-opacity=".55"/><stop offset=".45" stop-color="#ff6a3a" stop-opacity=".22"/><stop offset="1" stop-color="#ff4020" stop-opacity="0"/></radialGradient>
+        <radialGradient id="jbFloorG" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ff9a50" stop-opacity=".35"/><stop offset="1" stop-color="#ff7030" stop-opacity="0"/></radialGradient>
+        <filter id="jbBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter>
+      </defs>
+      <g class="jb-hue">
+        <ellipse class="jb-halo" cx="590" cy="212" rx="105" ry="118" fill="url(#jbHaloG)"/>
+        <ellipse class="jb-halo" cx="590" cy="300" rx="110" ry="22" fill="url(#jbFloorG)"/>
+        <g class="jb-tube" filter="url(#jbBlur)" fill="none" stroke-linecap="round">
+          <path d="M553,268 L553,200 A37,42 0 0 1 627,200 L627,268" stroke="#ffb15a" stroke-width="6" stroke-opacity=".55"/>
+          <path d="M561,268 L561,203 A29,34 0 0 1 619,203 L619,268" stroke="#ff5a3a" stroke-width="4" stroke-opacity=".45"/>
+        </g>
+      </g>
+    </svg>
     <!-- 場所の枠（パソコン：合わせると出る／スマホ：1回目で出て2回目で入る） -->
     <button class="zone" data-z="shelf" data-lbl="t" data-q="20,253 245,334 245,454 20,426" style="left:1.43%;top:25.59%;width:14.19%;height:17.87%" aria-label="愛器"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-guitar"/></svg> 愛器</span></button>
     <button class="zone" data-z="jukebox" data-lbl="t" style="left:35.48%;top:14.45%;width:5.99%;height:15.04%" aria-label="ジュークボックス"><span class="z-fr"></span><span class="m-lbl"><svg class="ic" aria-hidden="true"><use href="#i-vinyl-record"/></svg> ジュークボックス</span></button>
@@ -3065,6 +3119,21 @@ var GGA=(function(){
       </svg>
       <div class="ggfx" id="entrLamps" hidden></div>
       <canvas class="ggfx" id="entrDust" hidden></canvas>
+      <svg class="ggfx-on" id="entrGap" viewBox="0 0 1536 1024" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="gapSeamG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc070" stop-opacity=".05"/><stop offset=".12" stop-color="#ffc070" stop-opacity=".22"/><stop offset=".22" stop-color="#ffc070" stop-opacity=".08"/><stop offset=".38" stop-color="#ffc878" stop-opacity=".3"/><stop offset=".5" stop-color="#ffc878" stop-opacity=".12"/><stop offset=".6" stop-color="#ffc070" stop-opacity=".05"/><stop offset=".72" stop-color="#ffbc68" stop-opacity=".35"/><stop offset=".9" stop-color="#ffb860" stop-opacity=".5"/><stop offset="1" stop-color="#ffb060" stop-opacity=".65"/></linearGradient>
+          <radialGradient id="gapSpillG" cx="50%" cy="20%" r="60%"><stop offset="0" stop-color="#ffb868" stop-opacity=".45"/><stop offset=".5" stop-color="#ff9a48" stop-opacity=".16"/><stop offset="1" stop-color="#ff8030" stop-opacity="0"/></radialGradient>
+          <filter id="gapSoft" x="-50%" y="-5%" width="200%" height="110%"><feGaussianBlur stdDeviation="5"/></filter>
+          <filter id="gapFine" x="-50%" y="-5%" width="200%" height="110%"><feGaussianBlur stdDeviation="1"/></filter>
+        </defs>
+        <g class="gap-b"><ellipse cx="972" cy="858" rx="300" ry="34" fill="url(#gapSpillG)"/></g>
+        <g class="gap-a">
+          <line x1="971" y1="200" x2="972" y2="836" stroke="url(#gapSeamG)" stroke-width="16" filter="url(#gapSoft)" opacity=".8"/>
+          <line x1="971" y1="200" x2="972" y2="836" stroke="url(#gapSeamG)" stroke-width="1.4" filter="url(#gapFine)" opacity=".85"/>
+          <path d="M650,825 L1385,875" stroke="#ffb868" stroke-width="3" stroke-opacity=".55" filter="url(#gapFine)"/>
+          <path d="M650,825 L1385,875" stroke="#ffa858" stroke-width="12" stroke-opacity=".25" filter="url(#gapSoft)"/>
+        </g>
+      </svg>
     </div>
     <img id="entrOpen" src="img/entrance-open.webp" alt="">
     <div class="entr-plane" id="entrPlane">
@@ -3232,7 +3301,15 @@ var ENTR_TEXT={
    1 明かりの揺らぎ（入口・全体図） 2 光に舞う塵（入口・全体図） 3 濡れた地面の揺らぎ（入口） */
 (function(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  var pick=[];while(!pick.length){[1,2,3].forEach(function(n){if(Math.random()<.5)pick.push(n);});}
+  var SOFT=window.GG_FX_LEVEL==='soft';
+  var FXS=SOFT?{bA:.05,bB:.02,fl:.18,fMin:.45,win:.08,dustN:24,dustA:.8,dustR:1.4,rip:9,gA:.55,gB:.22}
+              :{bA:.10,bB:.04,fl:.26,fMin:.35,win:.14,dustN:36,dustA:1,dustR:1.7,rip:13,gA:.7,gB:.3};
+  document.documentElement.style.setProperty('--gA',FXS.gA);document.documentElement.style.setProperty('--gB',FXS.gB);
+  /* 時間帯ごとの強さ（全体図だけ）：g＝灯りの明るさ a＝揺らぎの幅 dn＝塵の量 da＝塵の明るさ */
+  var TOD={morning:{g:.6,a:.5,dn:1,da:1.3},day:{g:.35,a:.1,dn:.7,da:1},evening:{g:1,a:1.2,dn:.7,da:1},night:{g:1.1,a:1.2,dn:.45,da:.9}};
+  var NONE={g:1,a:1,dn:.7,da:1};
+  function todNow(){var c=vpEl?vpEl.className:'',m=/lit-(morning|day|evening|night)/.exec(c);return m?TOD[m[1]]:NONE;}
+  var pick=[];if(window.GG_FX_FORCE)pick=window.GG_FX_FORCE.slice();while(!pick.length){[1,2,3].forEach(function(n){if(Math.random()<.5)pick.push(n);});}
   window.GG_FX=pick;
   var on=function(n){return pick.indexOf(n)>=0;};
   var entr=document.getElementById('entr'),vpEl=document.getElementById('viewport');
@@ -3248,28 +3325,28 @@ var ENTR_TEXT={
       g.style.left=(L[0]/15.36)+'%';g.style.top=(L[1]/10.24)+'%';g.style.width=(L[2]/15.36)+'%';g.style.height=(L[2]/10.24)+'%';
       box.appendChild(g);glows[id].push({el:g,type:L[3],v:.78,t:Math.random()*100});});});
   if(on(2))Object.keys(CONES).forEach(function(id){var cv=document.getElementById(id);if(!cv)return;cv.hidden=false;var ps=[];
-    CONES[id].forEach(function(c){for(var i=0;i<24;i++)ps.push(newP(c,true));});dust[id]={cv:cv,ps:ps};});
-  if(on(3)){var r=document.getElementById('entrRip');if(r)r.removeAttribute('hidden');}
+    CONES[id].forEach(function(c){for(var i=0;i<Math.round(FXS.dustN*1.4);i++)ps.push(newP(c,true));});dust[id]={cv:cv,ps:ps};});
+  if(on(3)){var r=document.getElementById('entrRip');if(r){r.removeAttribute('hidden');var dm=r.querySelector('feDisplacementMap');if(dm)dm.setAttribute('scale',FXS.rip);}}
   function newP(c,init){var y=Math.random()*c[3],spread=c[2]*(.25+.75*y/c[3]);return {c:c,x:c[0]+(Math.random()-.5)*spread,y:c[1]+y,vx:(Math.random()-.5)*.12,vy:(Math.random()-.4)*.08,r:.7+Math.random()*1.4,life:init?Math.random()*600:0,max:400+Math.random()*500};}
   function sizeCv(){Object.keys(dust).forEach(function(id){var cv=dust[id].cv,w=cv.offsetWidth,h=cv.offsetHeight,dpr=Math.min(2,devicePixelRatio||1);if(w&&h){cv.width=w*dpr;cv.height=h*dpr;}});}
   addEventListener('resize',sizeCv);setTimeout(sizeCv,50);
-  function lampTick(list){list.forEach(function(o){o.t+=.016;var v;
-    if(o.type==='flame'){o.v+=(Math.random()-.5)*.18;o.v=Math.max(.45,Math.min(1,o.v+(.78-o.v)*.08));v=o.v;}
-    else if(o.type==='win'){v=.75+Math.sin(o.t*.35)*.08;}
-    else{v=.8+Math.sin(o.t*.9)*.05+Math.sin(o.t*2.3)*.02;}
-    o.el.style.opacity=v.toFixed(3);});}
-  function dustTick(d){var cv=d.cv,ctx=cv.getContext('2d'),k=cv.width/1536;if(!k)return;
+  function lampTick(list,T){T=T||NONE;list.forEach(function(o){o.t+=.016;var v,b;
+    if(o.type==='flame'){o.v+=(Math.random()-.5)*FXS.fl;o.v=Math.max(FXS.fMin,Math.min(1,o.v+(.78-o.v)*.08));v=o.v;b=.78;}
+    else if(o.type==='win'){v=.75+Math.sin(o.t*.35)*FXS.win;b=.75;}
+    else{v=.8+Math.sin(o.t*.9)*FXS.bA+Math.sin(o.t*2.3)*FXS.bB;b=.8;}
+    v=(b+(v-b)*T.a)*T.g;o.el.style.opacity=Math.max(0,Math.min(1,v)).toFixed(3);});}
+  function dustTick(d,T){T=T||NONE;var cv=d.cv,ctx=cv.getContext('2d'),k=cv.width/1536,lim=Math.round(d.ps.length*T.dn);if(!k)return;
     ctx.clearRect(0,0,cv.width,cv.height);ctx.globalCompositeOperation='lighter';
     d.ps.forEach(function(p,i){p.life++;p.x+=p.vx;p.y+=p.vy;p.vx+=(Math.random()-.5)*.01;p.vy+=(Math.random()-.5)*.01;
       var dy=p.y-p.c[1],inCone=dy>0&&dy<p.c[3]&&Math.abs(p.x-p.c[0])<p.c[2]*(.25+.75*dy/p.c[3])/2;
       var fade=Math.min(1,p.life/80,(p.max-p.life)/80),light=inCone?(1-dy/p.c[3])*.9+.1:0,a=Math.max(0,fade)*light*(.55+.45*Math.sin(p.life*.05+i));
       if(p.life>p.max||(!inCone&&p.life>60))d.ps[i]=newP(p.c,false);
-      if(a>.01){ctx.beginPath();ctx.fillStyle='rgba(255,214,150,'+(a*.8).toFixed(3)+')';ctx.arc(p.x*k,p.y*k,p.r*k*1.4,0,6.283);ctx.fill();}});}
+      if(i<lim&&a>.01){ctx.beginPath();ctx.fillStyle='rgba(255,214,150,'+Math.min(1,a*FXS.dustA*T.da).toFixed(3)+')';ctx.arc(p.x*k,p.y*k,p.r*k*FXS.dustR,0,6.283);ctx.fill();}});}
   var last=0;
   function loop(ts){requestAnimationFrame(loop);if(document.hidden||ts-last<30)return;last=ts;
     var atDoor=entrShown(),inside=!atDoor&&vpEl&&!vpEl.classList.contains('zoomed');
     if(atDoor){lampTick(glows.entrLamps);if(dust.entrDust)dustTick(dust.entrDust);}
-    else if(inside){lampTick(glows.ovLamps);if(dust.ovDust)dustTick(dust.ovDust);}}
+    else if(inside){var T=todNow();lampTick(glows.ovLamps,T);if(dust.ovDust)dustTick(dust.ovDust,T);}}
   requestAnimationFrame(loop);
 })();
 </script>
