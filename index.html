@@ -311,6 +311,10 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .adjustbar .adj-k{color:var(--paper-dim);font-size:var(--fs-xs);min-width:3.2em;text-align:right;}
 .adjustbar .adj-val{min-width:4.2em;text-align:center;color:var(--brass-light);font-variant-numeric:tabular-nums;background:rgba(20,12,6,.92);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-2);font-size:var(--fs-sm);}
 .adjustbar .fine{padding:var(--sp-2);min-width:3.4em;font-variant-numeric:tabular-nums;touch-action:none;}
+.adjustbar button:disabled{opacity:.35;cursor:default;}
+.adjustbar .adj-name{min-width:9em;max-width:16em;text-align:center;color:var(--paper);background:rgba(20,12,6,.92);border:1px solid var(--brass);border-radius:var(--r-md);padding:var(--sp-1) var(--sp-3);font-size:var(--fs-md);font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.adjustbar .adj-name small{display:block;font-size:var(--fs-xs);font-weight:500;color:var(--brass-light);font-variant-numeric:tabular-nums;}
+.wallpager .wl-list .ic{width:18px;height:18px;color:var(--brass-light);}
 .adjustbar .lbl{color:var(--brass-light);font-size:var(--fs-xs);letter-spacing:.5px;background:rgba(20,12,6,.92);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-md);}
 .wallpager button{background:rgba(20,12,6,.85);border:1px solid var(--wood-light);color:var(--brass-light);width:36px;height:36px;border-radius:50%;font-size:var(--fs-xl);cursor:pointer;font-family:inherit;}
 .wallpager button:disabled{opacity:.3;}
@@ -2459,7 +2463,7 @@ function renderWall(){
   layer.querySelectorAll('.empty-hook').forEach(function(e){e.addEventListener('click',function(){if(!adjustId)openHookChoice();});});
   /* pager */
   var pager=document.getElementById('wallPager');
-  var LB='<button class="wl-list" id="wList" aria-label="愛器の一覧を開く"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">'+LDG_IC.list+'</svg><span>一覧</span></button>';
+  var LB='<button class="wl-list" id="wList" aria-label="愛器の一覧を開く"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">'+LDG_IC.list+'</svg><span>一覧</span></button><button class="wl-list" id="wAdjust" aria-label="壁での位置・大きさ・角度を合わせる"><svg class="ic" aria-hidden="true"><use href="#i-arrows-out-cardinal"/></svg><span>位置合わせ</span></button>';
   if(pages<=1){pager.innerHTML=LB+'<span class="wall-label">壁 1</span>';}
   else{
     pager.innerHTML=LB+'<button id="wPrev">‹</button><span class="wall-label">壁 '+(wallPage+1)+' / '+pages+'</span><button id="wNext">›</button>';
@@ -2469,6 +2473,12 @@ function renderWall(){
     nx.addEventListener('click',function(){if(wallPage<pages-1){wallPage++;renderWall();}});
   }
   document.getElementById('wList').addEventListener('click',function(e){e.stopPropagation();if(!adjustId)openLedger();});
+  document.getElementById('wAdjust').addEventListener('click',function(e){e.stopPropagation();if(adjustId)return;
+    /* 今の壁の左端のギター（欲しいギターは飛ばす）。今の壁に無ければ最初のギター */
+    var gs=db.guitars,pick=null;for(var k=wallPage*5;k<Math.min(gs.length,wallPage*5+5);k++){if(!gs[k].wanted){pick=gs[k];break;}}
+    if(!pick)pick=gs.find(function(x){return !x.wanted;});
+    if(!pick){toast('位置を合わせられるギターがありません');return;}
+    enterAdjust(pick.id);});
 }
 /* ===== 愛器の一覧（楽器店の台帳） =====
    壁の順（db.guitars の並び）に全部を並べる。5本ごとに「壁 N」の区切り。
@@ -2591,12 +2601,23 @@ function enterAdjust(id){
   renderAdjustBar();
 }
 function exitAdjust(){adjustId=null;adjEl=null;dragging=false;vp.classList.remove('adjusting');save();renderWall();}
+/* 位置合わせのまま、前後のギターへ移る（欲しいギターは飛ばす）。今のギターの合わせは保存してから移る */
+function adjSwitch(dir){
+  var list=db.guitars.filter(function(x){return !x.wanted;}),i=list.findIndex(function(x){return x.id===adjustId;}),n=list[i+dir];if(!n)return;
+  save();
+  if(n.ox===undefined)n.ox=0;if(n.oy===undefined)n.oy=0;if(n.sc===undefined)n.sc=1;if(n.rot===undefined)n.rot=0;
+  adjustId=n.id;dragging=false;wallPage=Math.floor(db.guitars.indexOf(n)/5);renderWall();renderAdjustBar();
+}
 function renderAdjustBar(){
   var bar=document.getElementById('adjustBar');
-  bar.innerHTML='<span class="lbl">指でドラッグして位置・ボタンで大きさと角度</span>'+
+  var adjList=db.guitars.filter(function(x){return !x.wanted;}),adjI=adjList.findIndex(function(x){return x.id===adjustId;}),adjG=adjList[adjI];
+  bar.innerHTML='<span class="adj-row adj-who"><button id="aPrevG"'+(adjI<=0?' disabled':'')+'>‹ 前のギター</button><span class="adj-name">'+esc(adjG?gName(adjG):'')+'<small>'+(adjI+1)+' / '+adjList.length+'</small></span><button id="aNextG"'+(adjI>=adjList.length-1?' disabled':'')+'>次のギター ›</button></span>'+
+    '<span class="lbl">指でドラッグして位置・ボタンで大きさと角度</span>'+
     '<span class="adj-row"><span class="adj-k">大きさ</span><button id="aSmall">－ 小</button><button class="fine" data-hold="size:-1" aria-label="大きさを1%小さく">−1%</button><span class="adj-val" id="aSizeVal"></span><button class="fine" data-hold="size:1" aria-label="大きさを1%大きく">+1%</button><button id="aBig">大 ＋</button></span>'+
     '<span class="adj-row"><span class="adj-k">角度</span><button id="aRotL">◀ 左に</button><button class="fine" data-hold="rot:0.5" aria-label="胴を0.5度左に">◀ 0.5°</button><span class="adj-val" id="aRotVal"></span><button class="fine" data-hold="rot:-0.5" aria-label="胴を0.5度右に">0.5° ▶</button><button id="aRotR">右に ▶</button></span>'+
     '<span class="adj-row"><button id="aMatch">他のギターと大きさを揃える</button><button id="aReset">リセット</button><button class="done" id="aDone">完了</button></span>';
+  document.getElementById('aPrevG').addEventListener('click',function(){adjSwitch(-1);});
+  document.getElementById('aNextG').addEventListener('click',function(){adjSwitch(1);});
   document.getElementById('aSmall').addEventListener('click',function(){resizeAdj(1/1.1);});
   document.getElementById('aBig').addEventListener('click',function(){resizeAdj(1.1);});
   document.getElementById('aRotL').addEventListener('click',function(){rotateAdj(5);});
@@ -2973,12 +2994,10 @@ function openDetail(id){
     '<div class="panel"><div class="panel-title">弦 — STRINGS</div>'+specRows+'</div>'+restockHtml(g,ss)+
     '<div class="panel"><div class="panel-title">手入れ記録 — MAINTENANCE</div>'+maintRows+'</div>'+
     '<div class="fold" id="foldRep"><button class="fold-head"><svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg> リペア・調整ログ <span class="arr">›</span></button><div class="fold-body">'+repRows+'<div style="padding:12px 14px"><button class="btn btn-ghost btn-block" id="addRepair">＋ リペア記録を追加</button></div></div></div>'+
-    '<button class="btn btn-ghost btn-block" id="dAdjust" style="margin-top:18px"><svg class="ic" aria-hidden="true"><use href="#i-arrows-out-cardinal"/></svg> 壁での位置・大きさを調整</button>'+
-    '<div class="btn-row" style="margin-top:10px"><button class="btn btn-ghost" style="flex:1" id="dEdit"><svg class="ic" aria-hidden="true"><use href="#i-pencil-simple"/></svg> 情報を編集</button><button class="btn btn-danger" style="flex:0 0 auto" id="dDelete">削除</button></div>';
+    '<div class="btn-row" style="margin-top:18px"><button class="btn btn-ghost" style="flex:1" id="dEdit"><svg class="ic" aria-hidden="true"><use href="#i-pencil-simple"/></svg> 情報を編集</button><button class="btn btn-danger" style="flex:0 0 auto" id="dDelete">削除</button></div>';
   detailOv.classList.add('show');detailOv.scrollTop=0;runCountUps(document.getElementById('detailInner'));
   document.getElementById('dBack').addEventListener('click',function(){detailOv.classList.remove('show');renderWall();});
   document.getElementById('dEdit').addEventListener('click',function(){openForm(g);});
-  document.getElementById('dAdjust').addEventListener('click',function(){enterAdjust(g.id);});
   document.getElementById('dEditPhoto').addEventListener('click',function(){editPhoto(g);});
   document.getElementById('dDelete').addEventListener('click',function(){confirmDelete(g);});
   document.querySelectorAll('#detailInner .mrow-act').forEach(function(b){b.addEventListener('click',function(){recordMaint(g,b.dataset.mkey);});});
