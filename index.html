@@ -574,13 +574,6 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .spec-row:first-of-type{border-top:none;}
 .spec-k{color:var(--steel);}
 .spec-v{color:var(--paper);font-weight:600;text-align:right;}
-.order-panel{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-top:var(--sp-4);padding:var(--sp-3) var(--sp-3);background:linear-gradient(160deg,var(--c-panel-2),#221509);border:1px solid var(--oil);border-radius:var(--r-lg);}
-.order-lbl{font-size:var(--fs-sm);color:var(--steel);flex:0 0 auto;}
-.order-ctl{display:flex;align-items:center;gap:var(--sp-2);}
-.order-btn{background:var(--oil);border:1px solid var(--wood-light);color:var(--paper);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-3);font-family:inherit;font-size:var(--fs-sm);cursor:pointer;}
-.order-btn:active{background:var(--wood);}
-.order-btn:disabled{opacity:.3;cursor:default;}
-.order-pos{font-size:var(--fs-sm);color:var(--brass-light);min-width:64px;text-align:center;}
 .gauge-panel{background:linear-gradient(160deg,var(--c-panel-3),var(--c-panel));border:1px solid var(--oil);border-radius:var(--r-lg);padding:var(--sp-4);margin-bottom:var(--sp-4);}
 .gauge-ring{display:flex;align-items:center;gap:var(--sp-4);}
 .dial{position:relative;width:96px;height:96px;flex-shrink:0;}
@@ -603,6 +596,13 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .mrow-body{flex:1;min-width:0;}
 .mrow-name{font-size:var(--fs-md);font-weight:600;}
 .mrow-meta{font-size:var(--fs-xs);color:var(--steel);margin-top:2px;}
+.mrow.has-hist{cursor:pointer;}
+.mrow-hist{margin-left:var(--sp-2);font-size:var(--fs-xs);font-weight:500;color:var(--brass);letter-spacing:.5px;white-space:nowrap;}
+.mrow-hist .arr{display:inline-block;transition:transform .25s;}
+.mrow.open .mrow-hist .arr{transform:rotate(90deg);}
+.mrow.has-hist:focus-visible{outline:2px solid var(--brass-light);outline-offset:-2px;}
+.mhist{display:none;margin:0 var(--sp-3) var(--sp-3);background:#1c130a;border:1px solid var(--oil);border-radius:var(--r-md);padding:var(--sp-1) var(--sp-1) var(--sp-2);}
+.mrow.open+.mhist{display:block;}
 .mrow-act{background:var(--wood);border:1px solid var(--wood-light);color:var(--paper);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-3);font-size:var(--fs-sm);font-family:inherit;cursor:pointer;white-space:nowrap;}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:var(--sp-1);vertical-align:1px;}
 .fold{margin-bottom:var(--sp-4);}
@@ -2863,7 +2863,6 @@ function refreshDrop(){var d=document.getElementById('photoDrop');if(!d)return;i
 var detailOv=document.getElementById('detailOverlay');
 function countUp(el){var to=parseInt(el.dataset.to,10);if(isNaN(to)){return;}var pre=el.dataset.pre||'',suf=el.dataset.suf||'',dur=620,start=null;function tick(now){if(start===null)start=now;var p=Math.min((now-start)/dur,1);var v=Math.round(to*(1-Math.pow(1-p,3)));el.textContent=pre+v+suf;if(p<1)requestAnimationFrame(tick);}requestAnimationFrame(tick);}
 function runCountUps(scope){(scope||document).querySelectorAll('.count-up').forEach(countUp);}
-function moveGuitar(id,dir){var i=db.guitars.findIndex(function(x){return x.id===id;});var j=i+dir;if(i<0||j<0||j>=db.guitars.length)return;var t=db.guitars[i];db.guitars[i]=db.guitars[j];db.guitars[j]=t;save();wallPage=Math.floor(j/5);openDetail(id);toast('並び順を変えました');}
 function priceTagHtml(g,ss){
   var yr2=g.year?String(g.year).slice(-2):'';
   var sub=[g.color?esc(g.color):'',g.year?g.year:''].filter(Boolean).join('　');
@@ -2954,9 +2953,10 @@ function openDetail(id){
   else{var used=Math.min(ss.days/strCycle(g),1.3);pct=Math.max(0,Math.min(used,1));ring=ss.state==='bad'?'var(--red)':(ss.state==='warn'?'var(--amber)':'var(--green)');statusTxt=ss.state==='bad'?'交換どき':(ss.state==='warn'?'そろそろ':'良好');subTxt=(ss.remain<0?('推奨周期を '+Math.abs(ss.remain)+' 日超過'):('交換目安まで あと '+ss.remain+' 日'))+'（目安'+strCycle(g)+'日）';}
   var circ=2*Math.PI*42,dash=circ*Math.min(pct,1);
   var photo=g.photo?('<div class="detail-photo" style="background-image:url('+cssUrl(g.photo)+')"><button class="photo-edit" id="dEditPhoto"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg> 写真を変える</button></div>'):('<div class="detail-photo empty"><span class="ph-ic"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></span>写真がありません<button class="photo-edit" id="dEditPhoto">写真を登録</button></div>');
-  var maintRows=MAINT.map(function(m){var s=maintStatus(g,m);var meta=s.state==='none'?'まだ記録がありません':('最終 '+fmtDate(s.last)+' ／ '+s.days+'日前'+(s.remain<0?' ・'+Math.abs(s.remain)+'日超過':' ・あと'+s.remain+'日'));var dc=s.state==='bad'?'s-bad':(s.state==='warn'?'s-warn':(s.state==='ok'?'s-ok':''));return '<div class="mrow"><div class="mrow-ic">'+m.ic+'</div><div class="mrow-body"><div class="mrow-name">'+(dc?'<span class="dot '+dc+'"></span>':'')+m.name+'</div><div class="mrow-meta">'+meta+'</div></div><button class="mrow-act" data-mkey="'+m.key+'">記録</button></div>';}).join('');
+  var maintRows=MAINT.map(function(m){var s=maintStatus(g,m);var meta=s.state==='none'?'まだ記録がありません':('最終 '+fmtDate(s.last)+' ／ '+s.days+'日前'+(s.remain<0?' ・'+Math.abs(s.remain)+'日超過':' ・あと'+s.remain+'日'));var dc=s.state==='bad'?'s-bad':(s.state==='warn'?'s-warn':(s.state==='ok'?'s-ok':''));var hs=m.key==='strings';return '<div class="mrow'+(hs?' has-hist" role="button" tabindex="0" aria-expanded="false" id="mrowStr':'')+'"><div class="mrow-ic">'+m.ic+'</div><div class="mrow-body"><div class="mrow-name">'+(dc?'<span class="dot '+dc+'"></span>':'')+m.name+(hs?'<span class="mrow-hist">履歴 <span class="arr">›</span></span>':'')+'</div><div class="mrow-meta">'+meta+'</div></div><button class="mrow-act" data-mkey="'+m.key+'">記録</button></div>'+(hs?'<div class="mhist" id="mhistStr">__HIST__</div>':'');}).join('');
   var hist=(g.stringHistory||[]).slice().reverse();
   var histRows=hist.length?hist.map(function(h){var stars=h.rating?'<span class="log-stars">'+'★'.repeat(h.rating)+'<span class="dim">'+'★'.repeat(5-h.rating)+'</span></span>':'';return '<div class="log-row"><span class="log-date">'+h.date+'</span><div class="log-note">'+(esc(h.brand)||'銘柄未記入')+(h.gauge?' ／ '+esc(h.gauge):'')+stars+(h.note?'<br>'+esc(h.note):'')+'</div></div>';}).join(''):'<div class="log-empty">弦交換を記録すると履歴が積み上がります。</div>';
+  maintRows=maintRows.replace('__HIST__',function(){return histRows;});
   var rep=(g.repairs||[]).slice().reverse();
   var repRows=rep.length?rep.map(function(r){return '<div class="log-row"><span class="log-date">'+r.date+'</span><div class="log-note">'+esc(r.note)+(r.cost?' ／ ¥'+esc(r.cost):'')+'</div></div>';}).join(''):'<div class="log-empty">リペアや調整の記録はまだありません。</div>';
   var specRows=[
@@ -2972,20 +2972,19 @@ function openDetail(id){
     '<div class="gauge-panel"><div class="gauge-ring"><div class="dial'+(ss.state==='bad'?' alert':'')+'"><svg width="96" height="96"><circle cx="48" cy="48" r="42" stroke="var(--oil)" stroke-width="9" fill="none"/><circle cx="48" cy="48" r="42" stroke="'+ring+'" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="'+dash+' '+circ+'"/></svg><div class="dial-center"><span class="dial-num'+(ss.days!==null?' count-up':'')+'"'+(ss.days!==null?' data-to="'+ss.days+'"':'')+'>'+(ss.days===null?'—':'0')+'</span><span class="dial-lbl">DAYS</span></div></div><div class="gauge-info"><h3>弦のコンディション</h3><div class="gauge-status" style="color:'+ring+'">'+statusTxt+'</div><div class="gauge-sub">'+subTxt+'</div></div></div></div>'+
     '<div class="panel"><div class="panel-title">弦 — STRINGS</div>'+specRows+'</div>'+restockHtml(g,ss)+
     '<div class="panel"><div class="panel-title">手入れ記録 — MAINTENANCE</div>'+maintRows+'</div>'+
-    '<div class="fold" id="foldStr"><button class="fold-head"><svg class="ic" aria-hidden="true"><use href="#i-strings"/></svg> 弦交換の履歴 <span class="arr">›</span></button><div class="fold-body">'+histRows+'</div></div>'+
     '<div class="fold" id="foldRep"><button class="fold-head"><svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg> リペア・調整ログ <span class="arr">›</span></button><div class="fold-body">'+repRows+'<div style="padding:12px 14px"><button class="btn btn-ghost btn-block" id="addRepair">＋ リペア記録を追加</button></div></div></div>'+
-    (gTotal>1?'<div class="order-panel"><span class="order-lbl">壁での並び順</span><div class="order-ctl"><button class="order-btn" id="dOrderPrev"'+(gIdx===0?' disabled':'')+'>‹ 前へ</button><span class="order-pos">'+(gIdx+1)+' / '+gTotal+' 本目</span><button class="order-btn" id="dOrderNext"'+(gIdx===gTotal-1?' disabled':'')+'>次へ ›</button></div></div>':'')+
     '<button class="btn btn-ghost btn-block" id="dAdjust" style="margin-top:18px"><svg class="ic" aria-hidden="true"><use href="#i-arrows-out-cardinal"/></svg> 壁での位置・大きさを調整</button>'+
     '<div class="btn-row" style="margin-top:10px"><button class="btn btn-ghost" style="flex:1" id="dEdit"><svg class="ic" aria-hidden="true"><use href="#i-pencil-simple"/></svg> 情報を編集</button><button class="btn btn-danger" style="flex:0 0 auto" id="dDelete">削除</button></div>';
   detailOv.classList.add('show');detailOv.scrollTop=0;runCountUps(document.getElementById('detailInner'));
   document.getElementById('dBack').addEventListener('click',function(){detailOv.classList.remove('show');renderWall();});
   document.getElementById('dEdit').addEventListener('click',function(){openForm(g);});
   document.getElementById('dAdjust').addEventListener('click',function(){enterAdjust(g.id);});
-  var op=document.getElementById('dOrderPrev');if(op)op.addEventListener('click',function(){moveGuitar(g.id,-1);});
-  var on=document.getElementById('dOrderNext');if(on)on.addEventListener('click',function(){moveGuitar(g.id,1);});
   document.getElementById('dEditPhoto').addEventListener('click',function(){editPhoto(g);});
   document.getElementById('dDelete').addEventListener('click',function(){confirmDelete(g);});
   document.querySelectorAll('#detailInner .mrow-act').forEach(function(b){b.addEventListener('click',function(){recordMaint(g,b.dataset.mkey);});});
+  var ms=document.getElementById('mrowStr');if(ms){var tg=function(){var o=ms.classList.toggle('open');ms.setAttribute('aria-expanded',o?'true':'false');};
+    ms.addEventListener('click',function(e){if(e.target.closest('.mrow-act'))return;tg();});
+    ms.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target===ms){e.preventDefault();tg();}});}
   document.getElementById('addRepair').addEventListener('click',function(){openRepairForm(g);});
   document.querySelectorAll('#detailInner .fold-head').forEach(function(h){h.addEventListener('click',function(){h.parentElement.classList.toggle('open');});});
 }
