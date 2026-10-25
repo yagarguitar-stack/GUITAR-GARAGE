@@ -3174,7 +3174,23 @@ function bgmStop(){bgmDucked=false;bgmFade(0,500,function(){bgmAudio.pause();bgm
 /* 練習タイマーの間は止め、終わったら戻す */
 function bgmDuck(){if(bgmIdx>=0&&!bgmAudio.paused){bgmDucked=true;bgmPause();}}
 function bgmUnduck(){if(bgmDucked&&bgmIdx>=0){bgmResume();}}
-bgmAudio.addEventListener('ended',function(){bgmStart(bgmNextOf(bgmIdx));});
+/* 曲の終わり：iPad の Safari は読み込みの具合で、曲の途中でも「終わった」と知らせてくることがある。
+   本当に最後まで流れた時だけ次の曲へ。途中なら同じ所から続け、短い間に何度も続く時は止めて知らせる。 */
+var bgmBadEnds=[];
+bgmAudio.addEventListener('ended',function(){
+  var d=bgmAudio.duration,t=bgmAudio.currentTime,now=Date.now();
+  var real=isFinite(d)&&d>20&&t>=d-1.5;
+  if(real){bgmBadEnds=[];bgmStart(bgmNextOf(bgmIdx));return;}
+  bgmBadEnds=bgmBadEnds.filter(function(x){return now-x<30000;});bgmBadEnds.push(now);
+  if(bgmBadEnds.length>=3){bgmBadEnds=[];clearInterval(bgmFadeT);bgmAudio.pause();bgmSync();if(typeof toast==='function')toast('BGMをうまく流せないため止めました。再生ボタンでもう一度流せます');return;}
+  /* 途中で止まった：同じ曲の同じ所から続ける */
+  /* 途中で止まった：同じ曲を読み込み直し、同じ所から続ける（曲の長さも正しく読み直される） */
+  var idx=bgmIdx,vol=bgmAudio.volume;if(idx<0)return;
+  bgmAudio.addEventListener('loadedmetadata',function go(){bgmAudio.removeEventListener('loadedmetadata',go);
+    try{if(isFinite(t)&&t>0&&t<bgmAudio.duration)bgmAudio.currentTime=t;}catch(e){}});
+  bgmAudio.src=BGM[idx].src;bgmAudio.volume=vol;
+  var pr=bgmAudio.play();if(pr&&pr.catch)pr.catch(function(){bgmSync();});
+});
 bgmAudio.addEventListener('play',bgmSync);bgmAudio.addEventListener('pause',bgmSync);
 function bgmSync(){
   if(typeof plSync==='function')plSync();
@@ -3182,6 +3198,35 @@ function bgmSync(){
   if(b){var on=bgmIdx>=0;b.classList.toggle('on',on);b.innerHTML=bgmAudio.paused?BGM_PLAY:BGM_PAUSE;b.setAttribute('aria-label',bgmAudio.paused?'BGMを流す':'BGMを一時停止');b.title=on?BGM[bgmIdx].title:'';}
 }
 document.getElementById('bgmBtn').addEventListener('click',function(e){e.stopPropagation();if(bgmIdx<0)return;if(bgmAudio.paused)bgmResume();else bgmPause();});
+/* 画面の向きを変えた時の測り直し。iPhone・iPad は向きを変えた直後の大きさの知らせが遅れたり古かったりするため、
+   少し待ってからもう一度「大きさが変わった」ことにして、絵・札・扉・塵の大きさを全部合わせ直す。
+   読み込みの途中で向きを変えた時のために、読み込みが終わった後にも一度合わせ直す。 */
+(function(){
+  var t1=0,t2=0,again=false;
+  function settle(){clearTimeout(t1);clearTimeout(t2);
+    t1=setTimeout(function(){again=true;dispatchEvent(new Event('resize'));again=false;},250);
+    t2=setTimeout(function(){again=true;dispatchEvent(new Event('resize'));again=false;},700);}
+  addEventListener('resize',function(){if(!again)settle();});
+  addEventListener('orientationchange',settle);
+  if(window.visualViewport)visualViewport.addEventListener('resize',function(){if(!again)settle();});
+  if(screen.orientation&&screen.orientation.addEventListener)screen.orientation.addEventListener('change',settle);
+  addEventListener('load',settle);
+  addEventListener('pageshow',function(e){if(e.persisted)settle();});
+})();
+/* 別のページ・別のアプリへ移って画面が見えなくなったら止める。戻ったら、止める前に流れていた時だけ続きからフェードインで流す */
+(function(){
+  var away=false,backVol=0;
+  function inEntrance(){var e=document.getElementById('entr');return !!(window.GG_ENTRANCE&&e&&!e.classList.contains('gone'));}
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){
+      if(bgmIdx>=0&&!bgmAudio.paused){away=true;backVol=bgmAudio.volume;clearInterval(bgmFadeT);bgmAudio.pause();}
+    }else if(away){
+      away=false;if(bgmIdx<0||!bgmAudio.paused)return;
+      var to=inEntrance()?backVol:bgmVol(); /* 入口で手紙を読んでいる間は、こもった時の大きさへ戻す */
+      bgmGo();bgmFade(to,1500);bgmSync();
+    }
+  });
+})();
 /* 開いたら1曲目から流す。ブラウザが音の自動再生を止めるため、止められたときは最初の操作で流し始める */
 (function(){
   if(window.GG_ENTRANCE){bgmIdx=bgmFirst();bgmAudio.src=BGM[bgmIdx].src;return;} /* 入口で扉や手紙を押したときに流し始める */
@@ -3218,7 +3263,8 @@ var GGA=(function(){
     conv=ac.createConvolver();conv.buffer=makeIR();conv.connect(master);
     seBus=ac.createGain();seBus.gain.value=.55;seDry=ac.createGain();seWet=ac.createGain();seWet.gain.value=0;
     seBus.connect(seDry);seBus.connect(seWet);seDry.connect(master);seWet.connect(conv);
-    document.addEventListener('visibilitychange',function(){if(!document.hidden&&ac.state==='suspended')ac.resume();});
+    /* 画面が見えない間は音の通り道を眠らせて電池を節約し、戻ったら起こす */
+    document.addEventListener('visibilitychange',function(){if(document.hidden){if(ac.state==='running')ac.suspend().catch(function(){});}else if(ac.state==='suspended')ac.resume().catch(function(){});});
     if(roomOn)room(true,0);
     return true;}
   /* ジュークボックスの音色：古いスピーカーの帯域・箱鳴り・軽いひずみ・広がりを寄せる */
