@@ -889,6 +889,56 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 .ldg-ud button:focus-visible,.ldg-x:focus-visible,.ldg-row:focus-visible{outline:2px solid #8a2f22;outline-offset:2px;}
 @media (max-width:420px){.ldg-head{padding-left:54px;}.ldg-title{font-size:21px;}}
 @media (prefers-reduced-motion:reduce){.ldg{animation:none;}}
+
+/* ===== やりたいことから探す（楽器店の台帳の見た目）===== */
+.gw-find{position:absolute;z-index:6;left:50%;bottom:4%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:12px 22px 12px 17px;border-radius:999px;font-family:var(--font-body);font-size:var(--fs-md);font-weight:700;color:var(--paper);cursor:pointer;white-space:nowrap;
+  background:linear-gradient(180deg,rgba(40,26,14,.94),rgba(18,11,5,.94));border:1px solid var(--brass);box-shadow:0 0 0 1px #000,0 8px 22px rgba(0,0,0,.6),0 0 18px rgba(232,196,104,.18);transition:opacity .3s;}
+.gw-find .ic{width:22px;height:22px;color:var(--brass-light);}
+.gw-find:focus-visible{outline:2px solid var(--brass-light);outline-offset:3px;}
+.viewport.zoomed .gw-find,.viewport.adjusting .gw-find{opacity:0;pointer-events:none;}
+@media (max-width:700px){.gw-find{padding:9px 16px 9px 13px;font-size:var(--fs-sm);}.gw-find .ic{width:18px;height:18px;}}
+.gw-ov{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(5,3,2,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);padding:calc(env(safe-area-inset-top,0px) + 22px) 12px calc(env(safe-area-inset-bottom,0px) + 12px);box-sizing:border-box;}
+.gw-ov.show{display:flex;}
+.gw{position:relative;width:min(660px,100%);max-height:100%;display:flex;flex-direction:column;color:#2a1d10;font-family:var(--font-body);transform:rotate(-.4deg);animation:ldgIn .28s cubic-bezier(.2,.9,.3,1);
+  background:linear-gradient(90deg,transparent 39px,rgba(190,60,50,.45) 39px 40.5px,transparent 40.5px),var(--ldg-noise),linear-gradient(180deg,#f3ead3,#e9dcbb);border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.5),0 22px 50px rgba(0,0,0,.7),inset 0 0 60px rgba(120,80,30,.18);
+  --ldg-noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .12 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.gw::before{content:'';position:absolute;left:0;right:0;top:-14px;height:22px;background:linear-gradient(180deg,#4a3018,#2a1a0c);border-radius:4px 4px 0 0;box-shadow:inset 0 -2px 0 rgba(0,0,0,.4);}
+.gw svg{width:20px;height:20px;display:block;}
+.gw-head{position:relative;flex:0 0 auto;padding:20px 60px 12px 58px;border-bottom:2px double rgba(42,29,16,.55);}
+.gw-k{font-family:var(--font-head);font-weight:700;font-size:12px;letter-spacing:3px;color:#8a2f22;}
+.gw-t{font-family:var(--font-head);font-weight:700;font-size:26px;letter-spacing:2px;line-height:1.3;margin-top:2px;}
+.gw-s{font-size:13px;opacity:.75;margin-top:2px;}
+.gw-x{position:absolute;right:14px;top:14px;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid rgba(42,29,16,.35);color:#2a1d10;cursor:pointer;padding:0;}
+.gw-back{display:inline-flex;align-items:center;gap:4px;background:transparent;border:0;font-family:var(--font-body);font-size:14px;color:#8a2f22;cursor:pointer;padding:4px 6px 4px 0;}
+.gw-back svg{width:16px;height:16px;}
+.gw-body{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+.gw-list{padding:0 18px 0 46px;}
+.gw-row{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:transparent;border:0;border-bottom:1px solid rgba(70,110,150,.3);min-height:58px;padding:8px 6px;font-family:var(--font-body);color:inherit;cursor:pointer;}
+.gw-row:hover,.gw-row:focus-visible{background:rgba(255,255,255,.35);outline:none;}
+.gw-ci{width:38px;height:38px;flex:0 0 auto;border:1px solid rgba(42,29,16,.3);color:#5a3d22;border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.gw-ci .ic{width:22px;height:22px;}
+.gw-ct{flex:1;min-width:0;display:flex;align-items:baseline;gap:14px;}
+.gw-ct b{font-family:var(--font-head);font-weight:700;font-size:17px;min-width:9.5em;}
+.gw-ct small{font-size:12px;opacity:.75;}
+.gw-row.want .gw-ct b{font-size:16px;min-width:0;}
+.gw-ar{color:#8a2f22;flex:0 0 auto;}
+.gw-ar svg{width:16px;height:16px;}
+.gw-foot{padding:12px 26px 18px 58px;font-size:11px;opacity:.7;}
+.gw-tl{padding:4px 30px 24px 58px;}
+.gw-want{font-family:var(--font-head);font-weight:700;font-size:14px;color:#8a2f22;letter-spacing:1px;}
+.gw-tn{display:flex;align-items:center;gap:14px;margin:10px 0 14px;}
+.gw-tni{width:56px;height:56px;flex:0 0 auto;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(42,29,16,.3);color:#5a3d22;background:rgba(255,255,255,.3);}
+.gw-tni .ic{width:30px;height:30px;}
+.gw-tn b{display:block;font-family:var(--font-head);font-weight:700;font-size:28px;line-height:1.15;}
+.gw-tn small{font-size:12px;opacity:.75;}
+.gw-td{font-size:15px;line-height:1.8;margin:0 0 14px;}
+.gw-tip{font-size:13px;line-height:1.7;padding:12px 14px;border-radius:8px;margin-bottom:20px;background:rgba(255,255,255,.4);border:1px dashed rgba(42,29,16,.35);}
+.gw-tip b{display:block;font-size:11px;letter-spacing:2px;color:#8a2f22;margin-bottom:2px;}
+.gw-open{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-body);font-size:17px;font-weight:700;padding:15px;border-radius:4px;background:#2a1d10;color:#f3ead3;border:0;cursor:pointer;box-shadow:0 4px 10px rgba(40,20,5,.35);}
+.gw-open:focus-visible{outline:2px solid #8a2f22;outline-offset:3px;}
+.gw-note{text-align:center;font-size:11px;opacity:.65;margin-top:8px;}
+@media (max-width:480px){.gw-ct{flex-direction:column;gap:2px;align-items:flex-start;}.gw-ct b{min-width:0;}.gw-t{font-size:22px;}.gw-tl{padding-right:18px;}}
+@media (prefers-reduced-motion:reduce){.gw{animation:none;}}
 /* 壁の番号：下の案内と重ならないよう右上へ */
 .wallpager{bottom:auto;top:12px;left:auto;right:12px;justify-content:flex-end;}
 
@@ -1192,6 +1242,7 @@ svg.ggfx-on{position:absolute;inset:0;width:100%;height:100%;pointer-events:none
 
 <div class="tophint" id="topHint"><svg class="ic" aria-hidden="true"><use href="#i-hand-tap"/></svg> <span id="topHintTx">場所を押して、工房の各所へ</span></div>
 <div class="viewport" id="viewport">
+  <button class="gw-find" id="gwFind"><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg><span>やりたいことから探す</span></button>
   <div class="scene" id="scene">
     <img class="bg" src="img/overview.webp" alt="工房の全体図">
     <div class="lighting" id="lighting"></div>
@@ -1252,6 +1303,7 @@ svg.ggfx-on{position:absolute;inset:0;width:100%;height:100%;pointer-events:none
 </div>
 
 <!-- detail overlay -->
+<div class="gw-ov" id="gwOv"><div class="gw" role="dialog" aria-label="やりたいことから探す" id="gwBox"></div></div>
 <div class="ldg-ov" id="ldgOv"><div class="ldg" role="dialog" aria-label="愛器の一覧"><div class="ldg-head"><div class="ldg-title">愛器の一覧</div><div class="ldg-sub">長押しで動かせます</div><button class="ldg-x" id="ldgX" aria-label="閉じる">×</button></div><div class="ldg-body" id="ldgBody"></div></div></div>
 <div class="overlay" id="detailOverlay"><div class="ov-inner" id="detailInner"></div></div>
 <div class="overlay" id="guideOverlay"><div class="ov-inner" id="guideInner"></div></div>
@@ -1259,6 +1311,7 @@ svg.ggfx-on{position:absolute;inset:0;width:100%;height:100%;pointer-events:none
 <div class="overlay" id="settingsOverlay"><div class="ov-inner">
   <button class="back-link" id="setBack">‹ 工房へもどる</button>
   <div class="set-title">Tool Box — 道具箱</div>
+  <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg> やりたいことから探す</h4><p>やりたいことを選ぶと、合うツールやガレージの場所を案内します。</p><button class="btn btn-brass btn-block" id="setWant">案内を開く</button></div>
   <div class="set-row"><h4>ボタンの音</h4><p>枠やボタンを押したとき、画面を開け閉めしたときに小さな音を鳴らします。</p>
     <label class="switch"><input type="checkbox" id="setSe"><span class="sw-track"><span class="sw-thumb"></span></span><span class="sw-lbl">音を鳴らす</span></label></div>
   <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-export"/></svg> データを書き出す</h4><p>すべての愛器・記録を1つのファイルに保存します。機種変更やバックアップに。</p><button class="btn btn-brass btn-block" id="btnExport">バックアップを書き出す</button></div>
@@ -1808,8 +1861,8 @@ back.addEventListener('click',goHome);
 function tapCanClose(t){
   if(!vp.classList.contains('zoomed'))return false;
   if(vp.classList.contains('adjusting'))return false;
-  if(document.querySelector('.overlay.show,.modal-bg.show,.ldg-ov.show'))return false;
-  if(t&&t.closest('.ldg-ov,.xbox,.pclose,.jbplayer,.tag,.float,.topbar,.zone,.hung,.empty-hook,.backbtn,.wallpager,.adjustbar,.overlay,.modal-bg,.toast,button,a,input,textarea,select,label'))return false;
+  if(document.querySelector('.overlay.show,.modal-bg.show,.ldg-ov.show,.gw-ov.show'))return false;
+  if(t&&t.closest('.gw-ov,.gw-find,.ldg-ov,.xbox,.pclose,.jbplayer,.tag,.float,.topbar,.zone,.hung,.empty-hook,.backbtn,.wallpager,.adjustbar,.overlay,.modal-bg,.toast,button,a,input,textarea,select,label'))return false;
   return true;
 }
 document.addEventListener('click',function(e){if(!tapCanClose(e.target))return;if(xBox.classList.contains('on')){closeExplain();return;}if(vp.classList.contains('panel-on')){closePanel();return;}goHome();});
@@ -3063,6 +3116,69 @@ function handlePhotoPick(e,cb){var f=e.target.files&&e.target.files[0];if(!f)ret
 /* ===== settings ===== */
 var setOv=document.getElementById('settingsOverlay');
 document.getElementById('menuBtn').addEventListener('click',function(){setOv.classList.add('show');setOv.scrollTop=0;});
+/* ===== やりたいことから探す =====
+   分類 → やりたいこと → 紹介（何ができるか・はじめての方へ）→ ツールを開く／ガレージの場所へ行く。
+   初めて工房に入った時に一度だけ自動で開く（記録は localStorage gg_want_v1）。 */
+var GW=[["metronome", "練習したい", "チューニング・リズム・指板・耳コピ", [["チューニングを合わせたい", "t", "CanaryTune", "target", "ギターの音を聞き取って、弦を正しい高さに合わせます。", "6弦（いちばん太い弦）から順に、1本ずつ合わせてみてください。"], ["チョーキングの音の高さを確かめたい", "t", "CanaryTune", "target", "弦を押し上げた音が、狙った高さに届いているかを見られます。", "まずは2弦で「1音」上げる練習から始めてみてください。"], ["テンポに合わせて弾きたい", "t", "ことりノーム", "metronome", "メトロノームとドラムに合わせて弾けます。リズムの練習ゲームもあります。", "ゆっくりのテンポ（60くらい）から始めて、少しずつ上げてみてください。"], ["リズム感を鍛えたい", "t", "リズトレ", "hand-tap", "音符の長さを、聞いて・見て・叩いて覚えます。", "4分音符と8分音符から順に進めてみてください。"], ["指板の音の場所を覚えたい", "t", "フレットボードトレーナー", "guitar", "指板の上の音の場所や、スケール・コードの形を確かめられます。", "まずは6弦と5弦の音の名前から覚えるのがおすすめです。"], ["耳コピ・音感を鍛えたい", "t", "Mockingbird", "waves", "「2つの音のどちらが高いか」から始めて、音を聞き分ける力を段階的に育てます。", "最初の段から順番に進めてください。8割正解で次へ進めます。"], ["練習時間を測って目標を決めたい", "p", "練習", "timer", "練習した時間を測って記録し、1週間の目標を決められます。", "まずは1日10分を目標にしてみてください。", "練習の場所へ行く"]]], ["books", "学びたい", "理論・リズムの基礎・ギタリスト", [["音楽理論を学びたい", "t", "ハーモニーツリー", "books", "コードやキーの仕組みなど、ポップスで使う音楽理論を順に学べます。", "第1部から読み進めてください。各節の終わりに演習があります。"], ["リズムの基礎を学びたい", "t", "Woodpecker", "music-notes", "拍の取り方から音符の長さ、リズムの型まで、順に学べます。", "第1部「拍の土台」から読み進めてください。"], ["好きなギタリストを見つけたい", "t", "ギタリスト図鑑", "star", "有名なギタリストの特徴や代表曲、弾き方の特徴を調べられます。", "「出会い」でいくつかの質問に答えると、合いそうなギタリストを教えてくれます。"]]], ["music-notes", "譜面・曲を作りたい", "TAB譜・コード譜・作曲", [["TAB譜を書きたい", "t", "ScoreLineTab", "pencil-simple", "TAB譜を書いて、その場で音を鳴らして確かめられます。", "まずは知っている曲のフレーズを1小節書いて、鳴らしてみてください。"], ["コード譜を作りたい", "t", "ScoreLineLead", "note-pencil", "コード譜を作れます。コード進行の分析や、アドリブに使える音の案内もあります。", "よく使われるコード進行の一覧から選んで、鳴らしてみるのがおすすめです。"], ["曲を作りたい", "t", "ScoreLineCompass", "map-trifold", "メロディ・コード・歌詞を一つの譜面に書き、伴奏やドラムを付けて曲にできます。", "先にコードを並べて伴奏を鳴らし、そこにメロディを乗せてみてください。"], ["練習中の曲やレパートリーを記録したい", "p", "曲の記録", "vinyl-record", "いま練習している曲と、弾けるようになった曲を書き留められます。", "いま練習している曲を1曲登録してみてください。", "曲の記録へ行く"]]], ["wrench", "ギターの手入れ", "登録・弦交換・替えどき", [["持っているギターを登録したい", "p", "愛器", "guitar", "ギターを登録して、壁に飾れます。弦の交換や手入れの記録もつけられます。", "空いているフックを押すと登録できます。", "愛器の壁へ行く"], ["弦を交換したい（手順を見たい）", "p", "整備台", "strings", "弦の交換の手順を、一つずつ確かめながら進められます。", "張り替える前に、新しい弦を手元に用意してから始めてください。", "整備台へ行く"], ["弦の替えどきを知りたい", "p", "整備台", "wrench", "最後に弦を替えた日から、次の替えどきの目安を知らせます。", "弦を替えたら、その日に「記録」を押しておいてください。", "整備台へ行く"]]], ["pedal", "機材・音作り", "エフェクター・機材の登録", [["エフェクターの種類やつなぐ順番を知りたい", "t", "SOUND SHAPES", "pedal", "13台のエフェクターの音を試し弾きでき、つなぐ順番も入れ替えて聞けます。", "まずは歪み・ディレイ・リバーブの3台を聞き比べてみてください。"], ["持っている機材を登録したい", "p", "機材・エフェクター", "plug", "アンプやエフェクターなど、持っている機材を登録できます。", "まずはふだん使うアンプを1台登録してみてください。", "機材の場所へ行く"]]], ["sparkle", "そのほか", "メモ・BGM", [["思いついたことを書き留めたい", "p", "メモ", "note-pencil", "練習の気づきや、思いついたフレーズを書き留められます。", "練習が終わったら、うまくいったことを一行書いてみてください。", "メモへ行く"], ["BGM を流したい", "p", "ジュークボックス", "vinyl-record", "ガレージの BGM を選んで流せます。", "曲を押すと流れます。音量はつまみで変えられます。", "ジュークボックスへ行く"]]]];
+var GW_IC={"caret-left": "<path d=\"M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z\"/>", "caret-right": "<path d=\"M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z\"/>", "arrow-square-out": "<path d=\"M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z\"/>", "x": "<path d=\"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z\"/>"};
+var gwOv=null,gwBox=null,gwSt={c:null,w:null};
+function gwSvg(n){return '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">'+GW_IC[n]+'</svg>';}
+function gwUse(n){return '<svg class="ic" aria-hidden="true"><use href="#i-'+n+'"/></svg>';}
+function gwToolNote(name){var all=[].concat(TOOLS,BOOKS,PEDAL_TAGS);for(var i=0;i<all.length;i++){if(all[i].name===name)return all[i].note||'';}return name==='ことりノーム'?'メトロノーム':'';}
+function gwRender(focusSel){
+  var X='<button class="gw-x" id="gwX" aria-label="閉じる">'+gwSvg('x')+'</button>',h;
+  if(gwSt.c===null){
+    h='<div class="gw-head"><div class="gw-k">はじめての方へ</div><div class="gw-t">何をしたいですか？</div><div class="gw-s">近いものを選んでください</div>'+X+'</div><div class="gw-body"><div class="gw-list">'+
+      GW.map(function(c,i){return '<button class="gw-row" data-c="'+i+'"><span class="gw-ci">'+gwUse(c[0])+'</span><span class="gw-ct"><b>'+esc(c[1])+'</b><small>'+esc(c[2])+'</small></span><span class="gw-ar">'+gwSvg('caret-right')+'</span></button>';}).join('')+
+      '</div><div class="gw-foot">このご案内は、上のメニューと全体図の「やりたいことから探す」からいつでも開けます</div></div>';
+  }else if(gwSt.w===null){
+    var c=GW[gwSt.c];
+    h='<div class="gw-head"><button class="gw-back" id="gwBack">'+gwSvg('caret-left')+'<span>分類にもどる</span></button><div class="gw-t">'+esc(c[1])+'</div>'+X+'</div><div class="gw-body"><div class="gw-list">'+
+      c[3].map(function(w,j){return '<button class="gw-row want" data-w="'+j+'"><span class="gw-ci">'+gwUse(w[3])+'</span><span class="gw-ct"><b>'+esc(w[0])+'</b><small>'+esc(w[1]==='t'?w[2]:'ガレージの中')+'</small></span><span class="gw-ar">'+gwSvg('caret-right')+'</span></button>';}).join('')+'</div><div class="gw-foot"></div></div>';
+  }else{
+    var c2=GW[gwSt.c],w2=c2[3][gwSt.w],tool=w2[1]==='t';
+    var title=tool?w2[2]:(w2[2]==='機材・エフェクター'?'機材':w2[2]),sub=tool?gwToolNote(w2[2]):'ガレージの中';
+    h='<div class="gw-head" style="border-bottom:0;padding-bottom:4px"><button class="gw-back" id="gwBack">'+gwSvg('caret-left')+'<span>'+esc(c2[1])+'</span></button>'+X+'</div><div class="gw-body"><div class="gw-tl">'+
+      '<div class="gw-want">'+esc(w2[0])+'</div><div class="gw-tn"><span class="gw-tni">'+gwUse(w2[3])+'</span><span><b>'+esc(title)+'</b><small>'+esc(sub)+'</small></span></div>'+
+      '<p class="gw-td">'+esc(w2[4])+'</p><div class="gw-tip"><b>はじめての方へ</b>'+esc(w2[5])+'</div>'+
+      '<button class="gw-open" id="gwGo">'+(tool?esc(w2[2])+' を開く '+gwSvg('arrow-square-out'):esc(w2[6]))+'</button>'+(tool?'<div class="gw-note">別のタブで開きます</div>':'')+'</div></div>';
+  }
+  gwBox.innerHTML=h;
+  var f=focusSel&&gwBox.querySelector(focusSel);if(f)f.focus();
+}
+function openWant(){
+  if(!gwOv){gwOv=document.getElementById('gwOv');gwBox=document.getElementById('gwBox');gwSetup();}
+  if(adjustId)return;gwSt={c:null,w:null};gwRender();gwOv.classList.add('show');
+  try{localStorage.setItem('gg_want_v1','1');}catch(e){}
+}
+function closeWant(){if(gwOv)gwOv.classList.remove('show');}
+function gwSetup(){
+  gwOv.addEventListener('click',function(e){if(e.target===gwOv)closeWant();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&gwOv.classList.contains('show')){if(gwSt.c!==null){gwSt.w!==null?gwSt.w=null:gwSt.c=null;gwRender();}else closeWant();}});
+  gwBox.addEventListener('click',function(e){
+    if(e.target.closest('#gwX')){closeWant();return;}
+    if(e.target.closest('#gwBack')){var from=gwSt.w!==null?'[data-w="'+gwSt.w+'"]':'[data-c="'+gwSt.c+'"]';if(gwSt.w!==null)gwSt.w=null;else gwSt.c=null;gwRender(from);return;}
+    var r=e.target.closest('.gw-row');
+    if(r){if(r.dataset.c!==undefined){gwSt.c=+r.dataset.c;gwRender('.gw-row');}else{gwSt.w=+r.dataset.w;gwRender('#gwGo');}return;}
+    var g=e.target.closest('#gwGo');
+    if(g){var w=GW[gwSt.c][3][gwSt.w];
+      if(w[1]==='t'){var u=toolUrl(w[2]);if(u)DS.open(g,u);}
+      else{closeWant();goPlace(w[2]);}}
+  });
+}
+document.getElementById('gwFind').addEventListener('click',function(e){e.stopPropagation();openWant();});
+document.getElementById('setWant').addEventListener('click',function(){setOv.classList.remove('show');openWant();});
+/* 初めて工房に入った時に一度だけ開く（入口の仕組みが整ってから判断する） */
+document.addEventListener('DOMContentLoaded',function(){
+  var seen=false;try{seen=localStorage.getItem('gg_want_v1')==='1';}catch(e){}
+  if(seen)return;
+  function show(){setTimeout(function(){if(!document.querySelector('.overlay.show,.modal-bg.show')&&!adjustId)openWant();},900);}
+  var en=document.getElementById('entr');
+  if(window.GG_ENTRANCE&&en&&!en.classList.contains('gone')){
+    var mo=new MutationObserver(function(){if(en.classList.contains('gone')){mo.disconnect();show();}});mo.observe(en,{attributes:true,attributeFilter:['class']});
+  }else show();
+});
+
 document.getElementById('setBack').addEventListener('click',function(){setOv.classList.remove('show');});
 document.getElementById('btnExport').addEventListener('click',function(){var data=JSON.stringify(db,function(k,v){return k==='_php'?undefined:v;},2);var blob=new Blob([data],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='aiki_carte_backup_'+today()+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1000);toast('バックアップを書き出しました');});
 document.getElementById('btnImport').addEventListener('click',function(){document.getElementById('importFile').click();});
@@ -3327,7 +3443,7 @@ var GGA=(function(){
   document.addEventListener('DOMContentLoaded',start);if(document.readyState!=='loading')start();
   var started=false;
   function start(){if(started)return;started=true;
-    ['detailOverlay','guideOverlay','settingsOverlay','ldgOv'].forEach(function(id){watch(document.getElementById(id),'show');});
+    ['detailOverlay','guideOverlay','settingsOverlay','ldgOv','gwOv'].forEach(function(id){watch(document.getElementById(id),'show');});
     watch(document.querySelector('.modal-bg')||document.getElementById('mbg'),'show');
     watch(document.getElementById('viewport'),'panel-on');
     watch(document.getElementById('entrStage'),'show');}
