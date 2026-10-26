@@ -266,7 +266,7 @@ body{font-family:var(--font-body);letter-spacing:.02em;background:var(--c-bg);co
 .hung .g-photo{width:100%;}
 .hung .g-rot{width:100%;transform-origin:50% 4%;}
 .hung .g-photo img{width:100%;height:auto;display:block;}
-.hung .g-plate{width:100%;background:linear-gradient(160deg,var(--wood-light),var(--c-panel-3));border:1px solid #1a110a;border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-1);text-align:center;font-size:0.85vw;color:var(--paper);line-height:1.2;}
+.hung .g-plate{width:100%;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;background:linear-gradient(160deg,var(--wood-light),var(--c-panel-3));border:1px solid #1a110a;border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-1);text-align:center;font-size:0.85vw;color:var(--paper);line-height:1.2;}
 .hung .g-wrap img{width:100%;display:block;}
 .hung:nth-of-type(2) .g-wrap{animation-delay:-1.3s;}
 .hung:nth-of-type(3) .g-wrap{animation-delay:-2.6s;}
@@ -939,6 +939,17 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 .gw-note{text-align:center;font-size:11px;opacity:.65;margin-top:8px;}
 @media (max-width:480px){.gw-ct{flex-direction:column;gap:2px;align-items:flex-start;}.gw-ct b{min-width:0;}.gw-t{font-size:22px;}.gw-tl{padding-right:18px;}}
 @media (prefers-reduced-motion:reduce){.gw{animation:none;}}
+
+/* 背の低い画面（横長のスマホ・iPad の Safari・ノートパソコン）でも工房が画面に収まるよう、絵も札もボタンもまとめて縮める（JS が倍率を決める） */
+@media (min-width:701px){.viewport{transform-origin:50% 0;}}
+/* 背の低い画面では、上の帯と案内文を細くして絵を大きく残す */
+@media (min-width:701px) and (max-height:620px){
+  .topbar{padding:5px var(--sp-3);}
+  .plate{font-size:var(--fs-md);letter-spacing:2px;flex-direction:row;align-items:baseline;gap:10px;}
+  .plate small{margin-top:0;font-size:10px;letter-spacing:3px;}
+  .menu-btn,.bgm-btn{width:32px;height:32px;}
+  .tophint{padding:3px var(--sp-2);font-size:10px;}
+}
 /* 壁の番号：下の案内と重ならないよう右上へ */
 .wallpager{bottom:auto;top:12px;left:auto;right:12px;justify-content:flex-end;}
 
@@ -1318,7 +1329,7 @@ svg.ggfx-on{position:absolute;inset:0;width:100%;height:100%;pointer-events:none
   <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-download-simple"/></svg> データを読み込む</h4><p>書き出したファイルから復元します。現在のデータは置き換わります。</p><button class="btn btn-ghost btn-block" id="btnImport">ファイルを選んで読み込む</button><input type="file" id="importFile" accept="application/json,.json" class="hidden-input"></div>
   <div class="set-row"><h4><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> すべて消去</h4><p>登録した愛器と記録をすべて削除します。この操作は戻せません。</p><button class="btn btn-danger btn-block" id="btnWipe">全データを消去する</button></div>
   <div class="set-row"><h4>照明プレビュー</h4><p>今だけ時間帯を切り替えて確認できます（アプリを開き直すと自動に戻ります）</p><div class="btn-row" id="litPreview"><button class="btn btn-ghost" data-lit="morning">朝</button><button class="btn btn-ghost" data-lit="day">昼</button><button class="btn btn-ghost" data-lit="evening">夕</button><button class="btn btn-ghost" data-lit="night">夜</button><button class="btn btn-brass" data-lit="auto">自動</button></div></div>
-  <div class="set-ver">GUITAR GARAGE — THE GARAGE ／ バージョン 2026.9.3<br>（パネルの外をタップ・パネルを下へ払って工房全体へ戻れるように／本棚の見出し・愛器の並べ替え・連続日数の数え方 修正）</div>
+  <div class="set-ver">GUITAR GARAGE — THE GARAGE ／ バージョン 2026.10.26<br>（入口のBGM・愛器の一覧と並べ替え・やりたいことから探す・背の低い画面への対応 ほか）</div>
   <p style="text-align:center;color:var(--steel);font-size:var(--fs-xs);margin-top:20px;letter-spacing:1px;">GUITAR GARAGE — THE GARAGE · 愛器ゾーンver.</p>
 </div></div>
 
@@ -1729,7 +1740,7 @@ function unstackTags(){
   var cols={};tags.forEach(function(b){(cols[b.dataset.x]=cols[b.dataset.x]||[]).push(b);});
   Object.keys(cols).forEach(function(x){
     var list=cols[x].sort(function(a,b){return a.dataset.y-b.dataset.y;}),prevBottom=-Infinity;
-    list.forEach(function(b){var r=b.getBoundingClientRect(),push=prevBottom+6-r.top;
+    list.forEach(function(b){var r=b.getBoundingClientRect(),push=(prevBottom+6*(window.ggScale||1)-r.top)/(window.ggScale||1);
       if(push>0){b.style.top='calc('+pct(+b.dataset.y,1024)+' + '+push.toFixed(1)+'px)';r=b.getBoundingClientRect();}
       prevBottom=r.bottom;});
   });
@@ -1737,7 +1748,7 @@ function unstackTags(){
   var lbls=[].slice.call(document.querySelectorAll('.czone .m-lbl')).map(function(l){return l.getBoundingClientRect();}).filter(function(r){return r.width>0;});
   tags.forEach(function(b){var r=b.getBoundingClientRect();
     lbls.forEach(function(l){if(r.left<l.right&&r.right>l.left&&r.top<l.bottom&&r.bottom>l.top){
-      var lift=r.bottom-l.top+6,curTop=b.style.top;
+      var lift=(r.bottom-l.top+6*(window.ggScale||1))/(window.ggScale||1),curTop=b.style.top;
       b.style.top='calc('+(curTop.indexOf('calc(')===0?curTop.slice(5,-1):curTop)+' - '+lift.toFixed(1)+'px)';r=b.getBoundingClientRect();}});});
 }
 addEventListener('resize',function(){if(cardBox.childElementCount)requestAnimationFrame(unstackTags);});
@@ -2480,7 +2491,7 @@ function renderWall(){
       var fade=stringFade(g),dust=dustLevel(g),li=loanInfo(g);
       var fx=fade>0?' style="filter:brightness('+(1-0.55*fade).toFixed(3)+') saturate('+(1-0.25*fade).toFixed(3)+')"':'';
       var inner=g.photo?('<div class="g-photo"'+fx+'><img src="'+attr(g.photo)+'" alt=""></div>')
-        :('<div class="g-plate"'+fx+'>'+esc(gName(g).slice(0,6))+'</div>');
+        :('<div class="g-plate"'+fx+'>'+esc(gName(g))+'</div>');
       if(dust>0)inner+='<div class="g-dust" style="opacity:'+(0.25+0.75*dust).toFixed(2)+';background-image:'+DUST_TILE+(g.photo?';-webkit-mask-image:url('+cssUrl(g.photo)+');mask-image:url('+cssUrl(g.photo)+')':'')+'"></div>';
       if(isFresh(g))inner+='<div class="g-spark" aria-hidden="true"><svg class="ic"><use href="#i-sparkle"/></svg><svg class="ic"><use href="#i-sparkle"/></svg><svg class="ic"><use href="#i-sparkle"/></svg></div>';
       var price=li?('<div class="g-price'+(li.done?' paid':'')+'">'+(li.done?'完済':(li.left!=null?'残り'+yen(li.left):'あと'+li.count+'回'))+'</div>'):'';
@@ -3167,7 +3178,7 @@ function gwSetup(){
   });
 }
 document.getElementById('gwFind').addEventListener('click',function(e){e.stopPropagation();openWant();});
-document.getElementById('setWant').addEventListener('click',function(){setOv.classList.remove('show');openWant();});
+document.getElementById('setWant').addEventListener('click',function(){setOv.classList.remove('show');if(adjustId)exitAdjust();openWant();});
 /* 初めて工房に入った時に一度だけ開く（入口の仕組みが整ってから判断する） */
 document.addEventListener('DOMContentLoaded',function(){
   var seen=false;try{seen=localStorage.getItem('gg_want_v1')==='1';}catch(e){}
@@ -3314,6 +3325,26 @@ function bgmSync(){
   if(b){var on=bgmIdx>=0;b.classList.toggle('on',on);b.innerHTML=bgmAudio.paused?BGM_PLAY:BGM_PAUSE;b.setAttribute('aria-label',bgmAudio.paused?'BGMを流す':'BGMを一時停止');b.title=on?BGM[bgmIdx].title:'';}
 }
 document.getElementById('bgmBtn').addEventListener('click',function(e){e.stopPropagation();if(bgmIdx<0)return;if(bgmAudio.paused)bgmResume();else bgmPause();});
+/* 工房（絵・札・ボタン・中の画面）を、画面の高さに収まるまでまとめて縮める。
+   横幅が 700 より広い時だけ（狭い画面は中の画面を下に並べる別の作りのため）。window.ggScale＝今の倍率 */
+window.ggScale=1;
+(function(){
+  var vpEl=document.getElementById('viewport');
+  function measure(){
+    var k=1;
+    vpEl.style.transform='';vpEl.style.marginBottom='';
+    if(innerWidth>700){
+      var h=window.visualViewport?visualViewport.height:innerHeight;
+      var r=vpEl.getBoundingClientRect(),top=r.top+(window.scrollY||0),need=r.height;
+      var room=h-top-4;if(need>0&&room>0&&need>room)k=Math.max(.4,room/need);
+      if(k<1){vpEl.style.transform='scale('+k.toFixed(4)+')';vpEl.style.marginBottom=(-(need*(1-k))).toFixed(1)+'px';}
+    }
+    if(Math.abs(k-window.ggScale)>.0005){window.ggScale=k;if(typeof unstackTags==='function'&&cardBox&&cardBox.childElementCount)requestAnimationFrame(unstackTags);}
+  }
+  measure();addEventListener('resize',measure);if(window.visualViewport)visualViewport.addEventListener('resize',measure);
+  if(window.ResizeObserver){var ro=new ResizeObserver(function(){measure();});var tb=document.querySelector('.topbar'),th=document.getElementById('topHint');if(tb)ro.observe(tb);if(th)ro.observe(th);}
+  addEventListener('load',measure);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(measure);
+})();
 /* 画面の向きを変えた時の測り直し。iPhone・iPad は向きを変えた直後の大きさの知らせが遅れたり古かったりするため、
    少し待ってからもう一度「大きさが変わった」ことにして、絵・札・扉・塵の大きさを全部合わせ直す。
    読み込みの途中で向きを変えた時のために、読み込みが終わった後にも一度合わせ直す。 */
