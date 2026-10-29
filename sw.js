@@ -1,6 +1,6 @@
 /* GUITAR GARAGE：電波のない所でも開けるようにする仕組み
    ファイルを差し替えたら VERSION の数字を一つ上げる（上げると、次に開いたときに新しい中身へ入れ替わる） */
-const VERSION = 'gg-v44';
+const VERSION = 'gg-v45';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './img/entrance-closed.webp', './img/entrance-open.webp', './img/overview.webp', './img/guitars.webp', './img/workbench.webp', './img/tools.webp',
@@ -54,6 +54,18 @@ self.addEventListener('fetch', e => {
   if (req.mode === 'navigate') {
     e.respondWith(fetch(req).then(r => { const cp = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', cp)); return r; })
       .catch(() => caches.match('./index.html')));
+    return;
+  }
+
+  /* 曲：通信できる時はこの仕組みを通さず、ブラウザが直接読む（iPhone・iPad の Safari は、ここを通すと曲の途中で止まったり鳴らなかったりすることがあるため）。
+     通信できない時だけ、保存した曲から少しずつ渡す */
+  if (url.pathname.indexOf('/audio/') !== -1 && /\.mp3$/i.test(url.pathname)) {
+    if (self.navigator && self.navigator.onLine !== false) return;
+    e.respondWith((async () => {
+      const cached = await caches.match(req.url, { ignoreSearch: true });
+      if (cached) return req.headers.get('range') ? rangeResponse(req, cached) : cached;
+      return new Response('', { status: 504 });
+    })());
     return;
   }
 
