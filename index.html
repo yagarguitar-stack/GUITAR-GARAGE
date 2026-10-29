@@ -3404,14 +3404,18 @@ var GGA=(function(){
       REV.early.forEach(function(s,k){var j=Math.floor((s+(ch?.003:0))*sr);if(j<n)d[j]+=(.55-k*.08)*(k%2?-1:1);});}
     return buf;}
   function init(){
-    if(ac){if(ac.state==='suspended')ac.resume();return true;}
+    if(ac){if(ac.state!=='running'&&ac.state!=='closed')ac.resume().catch(function(){});return true;}
     try{var C=window.AudioContext||window.webkitAudioContext;ac=new C();}catch(e){ac=null;return false;}
     master=ac.createGain();var lim=ac.createDynamicsCompressor();lim.threshold.value=-2;lim.knee.value=2;lim.ratio.value=20;lim.attack.value=.003;lim.release.value=.25;master.connect(lim);lim.connect(ac.destination); /* 上限を超えそうな時だけ軽く抑える */
     conv=ac.createConvolver();conv.buffer=makeIR();conv.connect(master);
     seBus=ac.createGain();seBus.gain.value=.55;seDry=ac.createGain();seWet=ac.createGain();seWet.gain.value=0;
     seBus.connect(seDry);seBus.connect(seWet);seDry.connect(master);seWet.connect(conv);
     /* 画面が見えない間は音の通り道を眠らせて電池を節約し、戻ったら起こす */
-    document.addEventListener('visibilitychange',function(){if(document.hidden){if(ac.state==='running')ac.suspend().catch(function(){});}else if(ac.state==='suspended')ac.resume().catch(function(){});});
+    document.addEventListener('visibilitychange',function(){if(document.hidden){if(ac.state==='running')ac.suspend().catch(function(){});}else wake();});
+    /* iPhone・iPad は、戻った直後に音の通り道を起こせないことがある（止まったまま／「中断」のまま）。
+       その時は、次に画面に触れた瞬間に起こす。iPad では指を離した時・押した時でないと起こせないため、その合図で起こす */
+    function wake(){if(ac&&ac.state!=='running'&&ac.state!=='closed'){var pr=ac.resume();if(pr&&pr.catch)pr.catch(function(){});}}
+    ['pointerup','touchend','click','keydown'].forEach(function(ev){document.addEventListener(ev,wake,true);});
     if(roomOn)room(true,0);
     return true;}
   /* ジュークボックスの音色：古いスピーカーの帯域・箱鳴り・軽いひずみ・広がりを寄せる */
@@ -3608,9 +3612,9 @@ var ENTR_TEXT={
   function route(){
     if(ac)return true;if(!GGA.routeBgm())return false;
     ac=GGA.ctx();lp=GGA.lp();gn=GGA.gn();
-    document.addEventListener('pointerdown',function(){if(ac&&ac.state==='suspended')ac.resume();},true);
+    ['pointerdown','pointerup','touchend','click'].forEach(function(ev){document.addEventListener(ev,function(){if(ac&&ac.state!=='running'&&ac.state!=='closed')ac.resume().catch(function(){});},true);});
     return true;}
-  function bgmOn(){if(ac&&ac.state==='suspended')ac.resume();if(bgmAudio.paused){if(!bgmAudio.getAttribute('src')||bgmIdx<0)bgmStart(bgmFirst());else bgmResume();}}
+  function bgmOn(){if(ac&&ac.state!=='running'&&ac.state!=='closed')ac.resume().catch(function(){});if(bgmAudio.paused){if(!bgmAudio.getAttribute('src')||bgmIdx<0)bgmStart(bgmFirst());else bgmResume();}}
   function muffle(){var ok=route();if(bgmOffAtDoor())return;if(ok){lp.frequency.cancelScheduledValues(ac.currentTime);lp.frequency.setValueAtTime(420,ac.currentTime);}
     bgmOn();if(!ok)setTimeout(function(){bgmFade(bgmVol()*.35,300);},850);}
   function clear(){if(lp){var t=ac.currentTime;lp.frequency.cancelScheduledValues(t);lp.frequency.setValueAtTime(lp.frequency.value,t);lp.frequency.exponentialRampToValueAtTime(20000,t+.6);}
