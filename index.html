@@ -3301,6 +3301,20 @@ var BGM=[
 ];
 var BGM_PLAY='<svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/></svg>',BGM_PAUSE='<svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M216,48V208a16,16,0,0,1-16,16H160a16,16,0,0,1-16-16V48a16,16,0,0,1,16-16h40A16,16,0,0,1,216,48ZM96,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16H96a16,16,0,0,0,16-16V48A16,16,0,0,0,96,32Z"/></svg>';
 var bgmAudio=new Audio(),bgmIdx=-1,bgmFadeT=null,bgmDucked=false;
+/* iPhone・iPad の音の目覚まし。
+   ・端末の消音（マナーモード等）に関わらず、音楽アプリと同じ扱いで鳴らす（Safari 16.4 以降）
+   ・指を離した瞬間（扉の「押した」より先に届く合図）に音の仕組みを作って起こし、無音をほんの一瞬鳴らして鍵を開けておく。
+     こうしておかないと、最初のひと押しで作った音の仕組みが起きるのが間に合わず、BGM が無音になることがある */
+try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+(function(){
+  function unlock(){
+    if(!window.GGA||!GGA.init())return;var c=GGA.ctx();if(!c)return;
+    if(c.state!=='running'&&c.state!=='closed'){var pr=c.resume();if(pr&&pr.catch)pr.catch(function(){});}
+    try{var b=c.createBuffer(1,1,22050),n=c.createBufferSource();n.buffer=b;n.connect(c.destination);n.start(0);}catch(e){}
+    if(c.state==='running')['touchend','pointerup','mousedown','keydown'].forEach(function(ev){document.removeEventListener(ev,unlock,true);});
+  }
+  ['touchend','pointerup','mousedown','keydown'].forEach(function(ev){document.addEventListener(ev,unlock,true);});
+})();
 /* BGM の音量の窓口。iPhone・iPad は曲の本体の音量を変えられない決まりのため、音の通り道に入れた後は通り道の音量（bgmVolGn）で変える。
    bgmAudio.volume に入れる所はどこも今まで通りで、ここが振り分ける */
 var bgmVolGn=null;
