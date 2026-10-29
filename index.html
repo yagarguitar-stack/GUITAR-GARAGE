@@ -3650,8 +3650,13 @@ var ENTR_TEXT={
   function sndDraw(){var off=bgmOffAtDoor();snd.classList.toggle('off',off);sndBtn.querySelector('svg').innerHTML=off?SND_SL:SND_HI;
     var lb=off?'BGMを流す':'BGMを流さない';sndBtn.setAttribute('aria-label',lb);sndBtn.title=lb;
     var v=Math.round(bgmVol()*100);sndVol.value=v;sndVol.style.setProperty('--v',v+'%');}
-  sndBtn.addEventListener('click',function(e){e.stopPropagation();var off=!bgmOffAtDoor();try{localStorage.setItem(SND_KEY,off?'1':'0');}catch(er){}
-    if(state==='read'){if(off)bgmPause();else muffle();}sndDraw();});
+  /* しるしを押した時：流れていない時は、扉の向こうから聞こえるこもった音でその場で流し始める（「流す」にする）。
+     流れている時に押すと止めて「流さない」にする。押した結果がすぐ耳で分かるように */
+  sndBtn.addEventListener('click',function(e){e.stopPropagation();if(state==='opening'||state==='in')return;
+    var playing=!bgmAudio.paused;
+    if(playing&&!bgmOffAtDoor()){try{localStorage.setItem(SND_KEY,'1');}catch(er){}bgmPause();}
+    else{try{localStorage.setItem(SND_KEY,'0');}catch(er){}muffle();}
+    sndDraw();});
   sndVol.addEventListener('input',function(e){e.stopPropagation();var v=+sndVol.value;db.bgmVol=v/100;sndVol.style.setProperty('--v',v+'%');
     if(!bgmAudio.paused){clearInterval(bgmFadeT);bgmAudio.volume=ac?db.bgmVol:db.bgmVol*.35;}if(typeof plSync==='function')plSync();});
   sndVol.addEventListener('change',function(){save();});
