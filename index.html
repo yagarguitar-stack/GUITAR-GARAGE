@@ -3695,9 +3695,18 @@ var ENTR_TEXT={
   veil.addEventListener('click',function(){if(state!=='read')return;state='idle';closeLetter();letter=null;hint.textContent='扉を押すと中に入ります';hint.style.opacity='1';});
   document.getElementById('entrGo').addEventListener('click',function(){if(state!=='read')return;dest='';closeLetter();enter();});
   door.addEventListener('click',function(){if(state!=='idle')return;dest='';enter();});
-  var doorSnd=new Audio('audio/door-open.mp3');doorSnd.preload='auto';
+  /* 扉の音：iPhone・iPad では、BGM と別の音の部品を同時に鳴らし始めると、片方が止められてしまうことがある。
+     そこで扉の音は BGM と同じ音の仕組み（Web Audio）で鳴らす。読み込んでおいた中身を、押した時に音にする。
+     その仕組みが使えない時だけ、今まで通りの鳴らし方にする */
+  var doorBuf=null,doorRaw=null,doorSnd=null;
+  try{fetch('audio/door-open.mp3').then(function(r){return r.ok?r.arrayBuffer():null;}).then(function(b){doorRaw=b;}).catch(function(){});}catch(e){}
   function doorSound(){try{if(localStorage.getItem('gg_se_off')==='1')return;}catch(e){}
-    try{doorSnd.currentTime=0;var pr=doorSnd.play();if(pr&&pr.catch)pr.catch(function(){});}catch(e){}}
+    var c=(window.GGA&&GGA.init()&&GGA.ctx())||null;
+    function playBuf(){try{var n=c.createBufferSource();n.buffer=doorBuf;n.connect(c.destination);n.start(c.currentTime+.01);}catch(e){}}
+    if(c&&doorBuf){playBuf();return;}
+    if(c&&doorRaw){var raw=doorRaw.slice(0);doorRaw=null;
+      try{var pr0=c.decodeAudioData(raw,function(b){doorBuf=b;playBuf();},function(){});if(pr0&&pr0.catch)pr0.catch(function(){});}catch(e){}return;}
+    try{if(!doorSnd){doorSnd=new Audio('audio/door-open.mp3');}doorSnd.currentTime=0;var pr=doorSnd.play();if(pr&&pr.catch)pr.catch(function(){});}catch(e){}}
   function bgmFadeSlow(to,ms){var st=performance.now();clearInterval(bgmFadeT);
     bgmFadeT=setInterval(function(){var x=Math.min(1,(performance.now()-st)/ms);bgmAudio.volume=Math.max(0,Math.min(1,to*x*x));if(x>=1)clearInterval(bgmFadeT);},40);}
   function enter(){
