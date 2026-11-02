@@ -167,15 +167,27 @@ window.ic=function(n){return '<svg class="ic" aria-hidden="true"><use href="#i-'
     if(reduce||!el){res();return;}
     again(el,'ds-flip-go');setTimeout(function(){el.classList.remove('ds-flip-go');res();},400);
   });};
-  DS.open=function(el,url){DS.flip(el).then(function(){var w=window.open(url,'_blank');if(!w)location.href=url;});};
+  /* 札を押して別タブで開く：裏返る動き（約0.4秒）を見せてから開く。
+     Safari は押してから時間がたつと新しいタブを止めることがあるため、待ち合わせの中で直接開く。
+     それでも止められた時は同じタブでは開かず、札の上に知らせを出し、次のひと押しで即座に開く（ガレージは閉じない） */
+  var pend=null;
+  DS.open=function(el,url){
+    if(pend&&pend.url===url&&Date.now()-pend.at<15000){pend=null;window.open(url,'_blank');return;}
+    function go(){var w=null;try{w=window.open(url,'_blank');}catch(e){}
+      if(!w){pend={url:url,at:Date.now()};if(el)bubble(el,'もう一度押すと開きます',3600);}}
+    if(reduce||!el){go();return;}
+    again(el,'ds-flip-go');
+    setTimeout(function(){el.classList.remove('ds-flip-go');go();},400);
+  };
 
   /* 注意のボタン：長押しで確定 */
   var cur=null,timer=null;
   function stop(){if(cur)cur.classList.remove('ds-holding');cur=null;clearTimeout(timer);}
-  function bubble(b,msg){
+  function bubble(b,msg,ms){
     var r=b.getBoundingClientRect(),d=document.createElement('div');
     d.className='ds-bubble';d.textContent=msg;d.style.left=(r.left+r.width/2)+'px';d.style.top=(r.top-8)+'px';
-    document.body.appendChild(d);setTimeout(function(){d.remove();},1650);
+    if(ms)d.style.animationDuration=(ms/1000)+'s';
+    document.body.appendChild(d);setTimeout(function(){d.remove();},ms||1650);
   }
   document.addEventListener('pointerdown',function(e){
     var b=near(e,'.ds-hold');if(!b||b.disabled)return;
